@@ -18,7 +18,7 @@ from scipy import sparse
 import re
 import logging
 from os.path import dirname, join, realpath, isfile
-
+from flask import jsonify
 
 LOG = logging.getLogger(__name__)
 
@@ -55,13 +55,8 @@ def index():
         pears = ['0.0.0.0']
         #results, pods = score_pages.run(query, pears, 'Black writers')
         results, pods = score_pages.run(query, pears)
-        if not results:
-            pears = ['no pear found :(']
-            #score_pages.ddg_redirect(query)
-            results = [['','','No results found.','',None]]
-
-        return render_template(
-            'search/results.html', pears=pods, query=query, results=results)
+        print(results)
+        return jsonify(results)
 
 
 @search.route('/html_cache/<path:filename>')

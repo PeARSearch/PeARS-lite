@@ -104,27 +104,13 @@ def bestURLs(doc_scores):
     return best_urls
 
 
-def ddg_redirect(query):
-    print("No suitable pages found.")
-    duckquery = ""
-    for w in query.rstrip('\n').split():
-        duckquery = duckquery + w + "+"
-    webbrowser.open("https://duckduckgo.com/?q=" + duckquery.rstrip('+'))
-    return
-
-
 def output(best_urls):
-    results = []
+    results = {}
     pods = []
     if len(best_urls) > 0:
         for u in best_urls:
-            results.append([
-                u,
-                get_db_url_title(u),
-                get_db_url_snippet(u),
-                get_db_url_cc(u),
-                get_db_url_notes(u),
-            ])
+            url = db.session.query(Urls).filter_by(url=u).first().as_dict()
+            results[u] = url
             pod = get_db_url_pod(u)
             if pod not in pods:
                 pods.append(pod)

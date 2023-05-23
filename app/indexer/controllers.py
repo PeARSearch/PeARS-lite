@@ -154,12 +154,9 @@ def progress_file():
 def progress_docs():
     logging.debug("Running progress local file")
     def generate():
-        kwd = ''
-        lang='en'
+        kwd = 'home' #hard-coded - change if needed
+        lang='en' #hard-coded - change in multilingual version
         urls, titles, snippets = readDocs(join(dir_path, "docs_to_index.txt"))
-        f = open(join(dir_path, "keyword_lang.txt"), 'r')
-        for line in f:
-            kwd,lang = line.rstrip('\n').split('::')
         pod_name = kwd+'.npz'
         pod_dir = join(dir_path,'static','pods')
         if not isfile(join(pod_dir,pod_name)):
@@ -170,11 +167,11 @@ def progress_docs():
         c = 0
         for url, title, snippet in zip(urls, titles, snippets):
             print(url,title)
-            mk_page_vector.compute_vectors_local_docs(url, title, snippet, kwd)
-            pod_from_file(kwd, 'en')
+            success, podsum = mk_page_vector.compute_vectors_local_docs(url, title, snippet, kwd, lang)
+            pod_from_file(kwd, lang, podsum)
             c += 1
             print('###', str(ceil(c / len(urls) * 100)))
-            yield "data:" + str(ceil(c / len(urls) * 100)) + "\n\n"
+            yield "data processed:" + str(ceil(c / len(urls) * 100)) + "%\n"
 
     return Response(generate(), mimetype='text/event-stream')
 

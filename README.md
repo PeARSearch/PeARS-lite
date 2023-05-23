@@ -4,12 +4,12 @@ SPDX-FileCopyrightText: 2023 PeARS Project, <community@pearsproject.org>
 SPDX-License-Identifier: AGPL-3.0-only
 -->
 
-# PeARS Lite
+# PeARS Lite - OMD integration
 
 
 ## What and why
 
-*PeARS Lite* is a bare-bone version of PeARS which will allow you to index and search Web document in your language, locally and robustly.
+This version of *PeARS Lite* is the one integrated with the On My Disk framework.
 
 
 ## Installation and Setup

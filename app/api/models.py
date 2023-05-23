@@ -80,6 +80,9 @@ class Urls(Base):
             'notes': self.notes
         }
 
+    def as_dict(self):
+       return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}
+
 
 class Pods(Base):
     id = db.Column(db.Integer, primary_key=True)

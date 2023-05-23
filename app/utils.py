@@ -16,7 +16,7 @@ from scipy.spatial import distance
 def _extract_url_and_kwd(line):
     # The following regexp pattern matches lines in the form "url;keyword". This
     # accepts both http and https link as of now
-    pattern = "(https?://\S+);(.+);(.+)"
+    pattern = "(\S+);(.+);(.+)"
     return re.match(pattern, line)
 
 def readUrls(url_file):
@@ -24,6 +24,7 @@ def readUrls(url_file):
     keywords = []
     langs = []
     errors = False
+    print(url_file)
     with open(url_file) as fd:
         for line in fd:
             matches = _extract_url_and_kwd(line)
