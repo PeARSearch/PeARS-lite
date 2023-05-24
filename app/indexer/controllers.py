@@ -158,7 +158,7 @@ def progress_file():
             else:
                 logging.error("Error accessing the URL")
             c += 1
-            yield "data:" + str(int(c / len(urls) * 100)) + "\n\n"
+            yield "data processed:" + str(int(c / len(urls) * 100)) + "%\n"
 
     return Response(generate(), mimetype='text/event-stream')
 
