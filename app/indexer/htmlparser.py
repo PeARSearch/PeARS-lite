@@ -30,7 +30,7 @@ def remove_boilerplates(response):
 def BS_parse(url):
     req = None
     try:
-        req = requests.get(url, allow_redirects=True, timeout=30)
+        req = requests.get(url, allow_redirects=True, timeout=30, headers={'Authorization': 'TOK:1234'})
         req.encoding = 'utf-8'
     except Exception:
         print("Request failed when trying to index", url, "...")
@@ -47,7 +47,7 @@ def BS_parse(url):
 def extract_links(url):
     links = []
     try:
-        req = requests.head(url, timeout=10)
+        req = requests.get(url, timeout=10, headers={'Authorization': 'TOK:1234'})
         if "text/html" not in req.headers["content-type"]:
             print("Not a HTML document...")
             return links
@@ -65,7 +65,7 @@ def extract_links(url):
     return links
 
 
-def extract_from_url(url):
+def extract_html(url):
     '''From history info, extract url, title and body of page,
     cleaned with BeautifulSoup'''
     title = ""
@@ -76,10 +76,12 @@ def extract_from_url(url):
     try:
         req = requests.head(url, timeout=10)
         if "text/html" not in req.headers["content-type"]:
-            print("Not a HTML document...")
+            print("Not a HTML document, moving to .txt processing...")
+            title, body_str, snippet, cc = extract_txt(url)
             return title, body_str, snippet, cc
     except Exception:
         return title, body_str, snippet, cc
+
     bs_obj, req = BS_parse(url)
     if not bs_obj:
         print("Failed to get BeautifulSoup object...")
@@ -110,4 +112,33 @@ def extract_from_url(url):
                 snippet = body_str[:200].replace(',', '-')
             else:
                 snippet = body_str[:100].replace(',', '-')
+    return title, body_str, snippet, cc
+
+
+def extract_txt(url):
+    title = url.split('/')[-1]
+    body_str = ""
+    snippet = ""
+    cc = False
+    language = "en"
+    print("EXTRACT",url)
+    print("TITLE",title)
+    try:
+        req = requests.get(url, timeout=10, headers={'Authorization': 'TOK:1234'})
+    except Exception:
+        return title, body_str, snippet, cc
+    body_str = req.text
+    print("BODY",body_str)
+    try:
+        language = detect(body_str)
+        print("Language for", url, ":", language)
+    except Exception:
+        print("Couldn't detect page language.")
+        return title, body_str, snippet, cc
+
+    if language not in installed_languages:
+        print("Ignoring", url, "because language is not supported.")
+        title = ""
+        return title, body_str, snippet, cc
+    snippet = body_str[:200].replace(',', '-')
     return title, body_str, snippet, cc

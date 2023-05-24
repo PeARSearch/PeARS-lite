@@ -46,14 +46,15 @@ SPDX-License-Identifier: AGPL-3.0-only
 
     <div class="col-md-6">
       <div class="card">
-        <div class="card-header text-center"><b>Index a local file (for testing purposes)</b></div>
+        <div class="card-header text-center"><b>Index the files from the OMD index</b></div>
         <div class="card-body">
-	<p>This option lets you index a local file in format &lt;doc&gt;. This is useful when testing and needing to index many documents in one go.</p>
+	<p>This option lets you index from a list of urls contained in a html document. To use with the official OnMyDisk setup.</p>
 
           <form method="POST" accept-charset="UTF-8" enctype="multipart/form-data"
-            action="{{url_for('indexer.from_docs')}}">
+            action="{{url_for('indexer.from_omd_index')}}">
             <div class="input-group p-2">
-              <input required type="file" class="form-control input-s" accept="text/plain" name='file_source'
+              <span class="input-group-text">URL</span>
+              <input required type="text" name='url' class="form-control input-s" accept="text/plain" name='file_source' placeholder="Ex: http://localhost:8080/static/testdocs/index_downloads.html"
                 id='file_source'>
               {% with messages = get_flashed_messages(category_filter=["text"]) %}
               {% if messages %}

@@ -19,7 +19,7 @@ from app.indexer.neighbours import neighbour_urls
 from app.indexer import mk_page_vector
 from app.utils import readDocs, readUrls, get_language, init_podsum
 from app.utils_db import pod_from_file
-from app.indexer.htmlparser import extract_links
+from app.indexer.htmlparser import extract_links, extract_html
 from os.path import dirname, join, realpath, isfile
 
 dir_path = dirname(dirname(realpath(__file__)))
@@ -43,9 +43,34 @@ def index():
  (from file, from url)
 '''
 
+@indexer.route("/from_omd_index", methods=["GET","POST"])
+def from_omd_index():
+    keyword = "home" #hard-coded
+    lang = "en" #hard-coded
 
-@indexer.route("/from_docs", methods=["POST"])
-def from_docs():
+    def process_links(omd_html):
+        links = extract_links(omd_html)
+        print(links)
+        f = open(join(dir_path, "urls_to_index.txt"), 'w')
+        for u in links:
+            f.write(u + ";" + keyword + ";" + lang +"\n")
+        f.close()
+
+    if request.method =="POST":
+        print("DOC FILE:", request.form['url'])
+        omd_html = request.form['url']
+        process_links(omd_html)
+        return render_template('indexer/progress_file.html')
+    else:
+        print("DOC FILE:", request.args['url'])
+        omd_html = request.args['url']
+        process_links(omd_html)
+        return progress_file()
+        
+
+
+@indexer.route("/from_docs2", methods=["POST"])
+def from_docs2():
     print("DOC FILE:", request.files['file_source'])
     if request.files['file_source'].filename[-4:] == ".txt":
         keyword = request.form['docs_keyword']

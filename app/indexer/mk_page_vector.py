@@ -7,7 +7,7 @@ import numpy as np
 import string
 from app import db
 from app.api.models import Urls, installed_languages, sp
-from app.indexer.txtparser import extract_from_url
+from app.indexer.htmlparser import extract_html
 from app.indexer.vectorizer import vectorize_scale
 from app.utils import convert_to_string, convert_dict_to_string, normalise
 from scipy.sparse import csr_matrix, vstack, save_npz, load_npz
@@ -36,7 +36,7 @@ def compute_vectors(target_url, keyword, lang):
     pod_m = load_npz(join(pod_dir,keyword+'.npz'))
     if not db.session.query(Urls).filter_by(url=target_url).all():
         u = Urls(url=target_url)
-        title, body_str, snippet, cc = extract_from_url(target_url)
+        title, body_str, snippet, cc = extract_html(target_url)
         if title != "":
             text = title + " " + body_str
             text = tokenize_text(lang, text)
