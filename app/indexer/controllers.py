@@ -16,8 +16,8 @@ from flask import (Blueprint,
 
 from app.api.models import Urls
 from app.indexer.neighbours import neighbour_urls
-from app.indexer import mk_page_vector, spider
-from app.utils import readDocs, readUrls, readBookmarks, get_language, init_podsum
+from app.indexer import mk_page_vector
+from app.utils import readDocs, readUrls, get_language, init_podsum
 from app.utils_db import pod_from_file
 from app.indexer.htmlparser import extract_links
 from os.path import dirname, join, realpath, isfile
@@ -40,7 +40,7 @@ def index():
 
 '''
  Controllers for various ways to index
- (from file, from url, from crawl)
+ (from file, from url)
 '''
 
 
@@ -71,22 +71,6 @@ def from_file():
         file.save(join(dir_path, "urls_to_index.txt"))
         return render_template('indexer/progress_file.html')
 
-@indexer.route("/from_bookmarks", methods=["POST"])
-def from_bookmarks():
-    print("FILE:", request.files['file_source'])
-    if "bookmarks" in request.files['file_source'].filename:
-        keyword = request.form['bookmark_keyword']
-        keyword, lang = get_language(keyword)
-        file = request.files['file_source']
-        file.save(join(dir_path, "bookmarks.html"))
-        urls = readBookmarks(join(dir_path,"bookmarks.html"), keyword)
-        print(urls)
-        f = open(join(dir_path, "urls_to_index.txt"), 'w')
-        for u in urls:
-            f.write(u + ";" + keyword + ";" + lang +"\n")
-        f.close()
-        return render_template('indexer/progress_file.html')
-
 
 @indexer.route("/from_url", methods=["GET", "POST"])
 def from_url():
@@ -109,19 +93,6 @@ def from_url():
         f.close()
         return progress_file()
 
-@indexer.route("/from_share", methods=["POST"])
-def from_share():
-    print("FILE:", request.files['file_source'])
-    if request.files['file_source'].filename[-6:] == ".share":
-        file = request.files['file_source']
-        pod_name, main_lang, m, titles, urls = joblib.load(file)
-        sparse.save_npz(join(pod_dir,pod_name), m)
-        pod_from_file(pod_name, main_lang, np.sum(m,axis=0))
-        f = open(join(dir_path, "urls_to_index.txt"), 'w')
-        for u in urls:
-            f.write(u + ";" + pod_name + ";" + lang +"\n")
-        f.close()
-        return render_template('indexer/progress_file.html')
 
 
 '''

@@ -4,26 +4,9 @@
 
 import logging
 import requests
-import justext
 from urllib.parse import urljoin
-from app.indexer import detect_open
 from langdetect import detect
 from app.api.models import installed_languages
-
-def remove_boilerplates(response):
-    text = ""
-    paragraphs = justext.justext(
-        response.content,
-        justext.get_stoplist("English"), #FIX FOR MULTIPLE LANGUAGES
-        max_link_density=0.3,
-        stopwords_low=0.1,
-        stopwords_high=0.3,
-        length_low=30,
-        length_high=100)
-    for paragraph in paragraphs:
-        if not paragraph.is_boilerplate:
-            text += paragraph.text + " "
-    return text
 
 
 
