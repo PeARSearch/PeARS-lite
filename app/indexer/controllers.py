@@ -17,12 +17,13 @@ from flask import (Blueprint,
 from app.api.models import Urls
 from app.indexer.neighbours import neighbour_urls
 from app.indexer import mk_page_vector, spider
-from app.utils import readDocs, readUrls, readBookmarks, get_language
+from app.utils import readDocs, readUrls, readBookmarks, get_language, init_podsum
 from app.utils_db import pod_from_file
 from app.indexer.htmlparser import extract_links
 from os.path import dirname, join, realpath, isfile
 
 dir_path = dirname(dirname(realpath(__file__)))
+pod_dir = join(dir_path,'static','pods')
 
 # Define the blueprint:
 indexer = Blueprint('indexer', __name__, url_prefix='/indexer')
@@ -57,15 +58,18 @@ def from_docs():
         return render_template('indexer/progress_docs.html')
 
 
-@indexer.route("/from_file", methods=["POST"])
+@indexer.route("/from_file", methods=["GET","POST"])
 def from_file():
-    print("FILE:", request.files['file_source'])
-    if request.files['file_source'].filename[-4:] == ".txt":
-        file = request.files['file_source']
-        # filename = secure_filename(file.filename)
+    if request.method == "POST":
+        print("FILE:", request.files['file_source'])
+        if request.files['file_source'].filename[-4:] == ".txt":
+            file = request.files['file_source']
+            file.save(join(dir_path, "urls_to_index.txt"))
+            return render_template('indexer/progress_file.html')
+    if request.method == "GET":
+        file = request.args['file_source']
         file.save(join(dir_path, "urls_to_index.txt"))
         return render_template('indexer/progress_file.html')
-
 
 @indexer.route("/from_bookmarks", methods=["POST"])
 def from_bookmarks():
@@ -84,18 +88,26 @@ def from_bookmarks():
         return render_template('indexer/progress_file.html')
 
 
-@indexer.route("/from_url", methods=["POST"])
+@indexer.route("/from_url", methods=["GET", "POST"])
 def from_url():
-    if request.form['url'] != "":
+    if request.method == "POST":
+        if request.form['url'] != "":
+            f = open(join(dir_path, "urls_to_index.txt"), 'w')
+            u = request.form['url']
+            keyword = request.form['url_keyword']
+            keyword, lang = get_language(keyword)
+            print(u, keyword, lang)
+            f.write(u + ";" + keyword + ";" + lang +"\n")
+            f.close()
+            return render_template('indexer/progress_url.html', url=u)
+    if request.method == "GET":
+        u = request.args['url']
+        keyword = 'home' #hard-coded
+        lang = 'en' #hard-coded for now
         f = open(join(dir_path, "urls_to_index.txt"), 'w')
-        u = request.form['url']
-        keyword = request.form['url_keyword']
-        keyword, lang = get_language(keyword)
-        print(u, keyword, lang)
         f.write(u + ";" + keyword + ";" + lang +"\n")
         f.close()
-        return render_template('indexer/progress_url.html', url=u)
-
+        return progress_file()
 
 @indexer.route("/from_share", methods=["POST"])
 def from_share():
@@ -132,6 +144,10 @@ def progress_file():
         kwd = keywords[0]
         pod_name = kwd+'.npz'
         pod_dir = join(dir_path,'static','pods')
+        
+        #Checking matrix files
+        if not isfile(join(pod_dir,'podsum.npz')):
+            init_podsum()
         print("POD DIR",pod_dir)
         if not isfile(join(pod_dir,pod_name)):
             print("Making 0 CSR matrix")
@@ -159,11 +175,16 @@ def progress_docs():
         urls, titles, snippets = readDocs(join(dir_path, "docs_to_index.txt"))
         pod_name = kwd+'.npz'
         pod_dir = join(dir_path,'static','pods')
+
+        #Checking matrix files
+        if not isfile(join(pod_dir,'podsum.npz')):
+            init_podsum()
         if not isfile(join(pod_dir,pod_name)):
             print("Making 0 CSR matrix")
             pod = np.zeros((1,10000))
             pod = sparse.csr_matrix(pod)
             sparse.save_npz(join(pod_dir,pod_name), pod)
+
         c = 0
         for url, title, snippet in zip(urls, titles, snippets):
             print(url,title)

@@ -9,7 +9,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 ## What and why
 
-This version of *PeARS Lite* is the one integrated with the On My Disk framework.
+This version of *PeARS Lite* is the one that will be integrated with the On My Disk framework.
 
 
 ## Installation and Setup
@@ -18,7 +18,7 @@ This version of *PeARS Lite* is the one integrated with the On My Disk framework
 ##### 1. Clone this repo on your machine:
 
 ```
-    git clone https://github.com/PeARSearch/PeARS-orchard.git
+    git clone -b ngi-search https://github.com/PeARSearch/PeARS-lite.git
 ```
 
 ##### 2. **Optional step** Setup a virtualenv in your directory.
@@ -33,9 +33,9 @@ If you haven't yet set up virtualenv on your machine, please install it via pip:
 
     sudo pip install virtualenv
 
-Then change into the PeARS-orchard directory:
+Then change into the PeARS-lite directory:
 
-    cd PeARS-for-toppix
+    cd PeARS-lite
 
 Then run:
 
@@ -44,7 +44,7 @@ Then run:
 
 ##### 3. Install the build dependencies:
 
-From the PeARS-orchard directory, run:
+From the PeARS-lite directory, run:
 
     pip install -r requirements.txt
 
@@ -60,5 +60,22 @@ In the root of the repo, run:
 
 ## Usage
 
-Now, go to your browser at *localhost:8080*. You should see the search page for PeARS. You don't have any pages indexed yet, so go to the F.A.Q. page (link at the top of the page) and follow the short instructions to get you going!
+The installation contains three sample .txt documents in the static folder, to provide a toy example. When the app is running, these documents are accessible at:
 
+```
+http://localhost:8080/static/testdocs/letter_to_grandma.txt
+http://localhost:8080/static/testdocs/novel_draft.txt
+http://localhost:8080/static/testdocs/invoice_24_05_2023.txt
+```
+
+To index a document on localhost:
+
+```
+curl localhost:8080/indexer/from_url?url=http://localhost:8080/static/testdocs/invoice_24_05_2023.txt
+```
+
+To search:
+
+```
+curl localhost:8080/index?q=invoice
+```

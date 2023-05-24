@@ -19,6 +19,7 @@ import re
 import logging
 from os.path import dirname, join, realpath, isfile
 from flask import jsonify
+from ..utils import init_podsum
 
 LOG = logging.getLogger(__name__)
 
@@ -37,11 +38,7 @@ def index():
         internal_message = "Hey there! It looks like you're here\
          for the first time :) To understand how to use PeARS,\
          go to the FAQ (link at the top of the page)."
-
-        print("Making 0 CSR matrix for pod summaries")
-        pod_summaries = np.zeros((1,10000))
-        pod_summaries = sparse.csr_matrix(pod_summaries)
-        sparse.save_npz(join(pod_dir,"podsum.npz"), pod_summaries)
+        init_podsum()
 
     query = request.args.get('q')
     if not query:

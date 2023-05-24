@@ -38,7 +38,6 @@ def extract_from_url(url):
     except Exception:
         return title, body_str, snippet, cc
     body_str = req.text
-    print(req.text)
     try:
         language = detect(body_str)
         print("Language for", url, ":", language)

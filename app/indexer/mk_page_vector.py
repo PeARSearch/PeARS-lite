@@ -18,9 +18,9 @@ dir_path = dirname(dirname(realpath(__file__)))
 pod_dir = join(dir_path,'static','pods')
 
 def tokenize_text(lang, text):
-    print(text)
     sp.load(f'app/api/models/{lang}/{lang}wiki.model')
     text = ' '.join([wp for wp in sp.encode_as_pieces(text.lower())])
+    print("TOKENIZED",text)
     return text
 
 

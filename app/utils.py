@@ -11,6 +11,8 @@ from math import sqrt
 import numpy as np
 from urllib.parse import urljoin
 from scipy.spatial import distance
+from scipy.sparse import csr_matrix, save_npz
+from os.path import dirname, join, realpath, isfile
 
 
 def _extract_url_and_kwd(line):
@@ -85,6 +87,15 @@ def readPods(pod_file):
     f.close()
     return pods
 
+
+def init_podsum():
+    print("Making 0 CSR matrix for pod summaries")
+    dir_path = dirname(dirname(realpath(__file__)))
+    pod_dir = join(dir_path,'app','static','pods')
+    print("POD DIR",pod_dir)
+    pod_summaries = np.zeros((1,10000))
+    pod_summaries = csr_matrix(pod_summaries)
+    save_npz(join(pod_dir,"podsum.npz"), pod_summaries)
 
 def normalise(v):
     norm = np.linalg.norm(v)
