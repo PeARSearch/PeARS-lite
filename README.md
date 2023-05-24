@@ -113,4 +113,6 @@ The search function returns json objects containing all information about the se
 }
 ```
 
-The indexer now has an authorisation header, currently set up as the placeholder TOK:1234 (see [here]()https://github.com/PeARSearch/PeARS-lite/blob/760c5d306f64b9e0907f2b9c9f44f048f353ddd0/app/indexer/txtparser.py#L20).
+The indexer now has an authorisation header, currently set up as the placeholder TOK:1234:
+
+https://github.com/PeARSearch/PeARS-lite/blob/760c5d306f64b9e0907f2b9c9f44f048f353ddd0/app/indexer/txtparser.py#L20.
