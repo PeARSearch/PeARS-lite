@@ -25,11 +25,11 @@ This version of *PeARS Lite* is the one that will be integrated with the On My D
 
 If you haven't yet set up virtualenv on your machine, please install it via pip:
 
-    sudo apt-get update
+    sudo apt update
 
-    sudo apt-get install python3-setuptools
+    sudo apt install python3-setuptools
 
-    sudo apt-get install python3-pip
+    sudo apt install python3-pip
 
     sudo pip install virtualenv
 
@@ -60,11 +60,12 @@ In the root of the repo, run:
 
 ## Usage
 
-The installation contains three sample .txt documents in the static folder, to provide a toy example. When the app is running, these documents are accessible at:
+The installation contains four sample .txt documents in the static folder, to provide a toy example. When the app is running, these documents are accessible at:
 
 ```
 http://localhost:8080/static/testdocs/letter_to_grandma.txt
 http://localhost:8080/static/testdocs/novel_draft.txt
+http://localhost:8080/static/testdocs/invoice_23_05_2023.txt
 http://localhost:8080/static/testdocs/invoice_24_05_2023.txt
 ```
 
@@ -74,8 +75,42 @@ To index a document on localhost:
 curl localhost:8080/indexer/from_url?url=http://localhost:8080/static/testdocs/invoice_24_05_2023.txt
 ```
 
-To search:
+Example searches:
 
 ```
-curl localhost:8080/index?q=invoice
+curl localhost:8080?q=invoice
+curl localhost:8080?q=novel+moss
 ```
+
+The search function returns json objects containing all information about the selected URLs in the database. For instance, searching for the word 'invoice' returns the following two documents:
+
+```
+{
+  "http://localhost:8080/static/testdocs/invoice_23_05_2023.txt": {
+    "cc": "False", 
+    "date_created": "2023-05-24 10:16:59", 
+    "date_modified": "2023-05-24 10:16:59", 
+    "id": "4", 
+    "notes": "None", 
+    "pod": "home", 
+    "snippet": "Dear customer-\n\nThank you for your order- and for supporting local artists. Your parrot sculpture has been dispatched.  I allow myself to send you this invoice- for the amount of 2000 EUR. It is payab", 
+    "title": "invoice_23_05_2023.txt", 
+    "url": "http://localhost:8080/static/testdocs/invoice_23_05_2023.txt", 
+    "vector": "4"
+  }, 
+  "http://localhost:8080/static/testdocs/invoice_24_05_2023.txt": {
+    "cc": "False", 
+    "date_created": "2023-05-24 07:23:39", 
+    "date_modified": "2023-05-24 07:23:39", 
+    "id": "3", 
+    "notes": "None", 
+    "pod": "home", 
+    "snippet": "Esteemed customer-\n\nI thank you for your order. It has been a pleasure doing business with you. I allow myself to send you this invoice- for the amount of 200EUR. It is payable with the next four week", 
+    "title": "invoice_24_05_2023.txt", 
+    "url": "http://localhost:8080/static/testdocs/invoice_24_05_2023.txt", 
+    "vector": "3"
+  }
+}
+```
+
+The indexer now has an authorisation header, currently set up as the placeholder TOK:1234 (see [here]()https://github.com/PeARSearch/PeARS-lite/blob/760c5d306f64b9e0907f2b9c9f44f048f353ddd0/app/indexer/txtparser.py#L20).
