@@ -19,7 +19,7 @@ import re
 import logging
 from os.path import dirname, join, realpath, isfile
 from flask import jsonify
-from ..utils import init_podsum
+from app.utils import init_podsum
 
 LOG = logging.getLogger(__name__)
 
