@@ -11,6 +11,8 @@ from bs4 import BeautifulSoup
 from langdetect import detect
 from app.api.models import installed_languages
 
+auth_token = "TOK:1234"
+
 def remove_boilerplates(response):
     text = ""
     paragraphs = justext.justext(
@@ -30,7 +32,7 @@ def remove_boilerplates(response):
 def BS_parse(url):
     req = None
     try:
-        req = requests.get(url, allow_redirects=True, timeout=30, headers={'Authorization': 'TOK:1234'})
+        req = requests.get(url, allow_redirects=True, timeout=30, headers={'Authorization': auth_token})
         req.encoding = 'utf-8'
     except Exception:
         print("Request failed when trying to index", url, "...")
@@ -47,7 +49,7 @@ def BS_parse(url):
 def extract_links(url):
     links = []
     try:
-        req = requests.get(url, timeout=10, headers={'Authorization': 'TOK:1234'})
+        req = requests.get(url, timeout=10, headers={'Authorization': auth_token})
         if "text/html" not in req.headers["content-type"]:
             print("Not a HTML document...")
             return links
@@ -124,7 +126,7 @@ def extract_txt(url):
     print("EXTRACT",url)
     print("TITLE",title)
     try:
-        req = requests.get(url, timeout=10, headers={'Authorization': 'TOK:1234'})
+        req = requests.get(url, timeout=10, headers={'Authorization': auth_token})
     except Exception:
         return title, body_str, snippet, cc
     body_str = req.text
