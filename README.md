@@ -60,33 +60,54 @@ In the root of the repo, run:
 
 ## Usage
 
-The installation contains four sample .txt documents in the static folder, to provide a toy example. When the app is running, these documents are accessible at:
+To provide a toy example, the installation contains five sample .txt/.html documents in the static folder, organised in folders as follows:
 
 ```
-http://localhost:8080/static/testdocs/letter_to_grandma.txt
-http://localhost:8080/static/testdocs/novel_draft.txt
-http://localhost:8080/static/testdocs/invoice_23_05_2023.txt
-http://localhost:8080/static/testdocs/invoice_24_05_2023.txt
+http://localhost:9090/static/testdocs/
+    |_index.html
+    |_root/
+        |_index.html
+        |_Invoices
+            |_index.html
+            |_invoice_23_05_2023.txt
+            |_invoice_24_05_2023.txt
+        |_Webpages
+            |_index.html
+            |_example.html
+        |_Writing
+            |_index.html
+            |_letter_to_grandma.txt
+            |_novel_draft.txt
+			
+
 ```
 
-To index a document on localhost:
+To index a single document on localhost:
 
 ```
-curl localhost:8080/indexer/from_url?url=http://localhost:8080/static/testdocs/invoice_24_05_2023.txt
+curl localhost:9090/indexer/from_url?url=http://localhost:9090/static/testdocs/root/Invoices/invoice_24_05_2023.txt
 ```
+
+To recursively index from base folder:
+
+```
+curl localhost:9090/indexer/from_omd_index?url=http://localhost:9090/static/testdocs/
+```
+
+
 
 Example searches:
 
 ```
-curl localhost:8080?q=invoice
-curl localhost:8080?q=novel+moss
+curl localhost:9090?q=invoice
+curl localhost:9090?q=novel+moss
 ```
 
 The search function returns json objects containing all information about the selected URLs in the database. For instance, searching for the word 'invoice' returns the following two documents:
 
 ```
 {
-  "http://localhost:8080/static/testdocs/invoice_23_05_2023.txt": {
+  "http://localhost:9090/static/testdocs/root/Invoices/invoice_23_05_2023.txt": {
     "cc": "False", 
     "date_created": "2023-05-24 10:16:59", 
     "date_modified": "2023-05-24 10:16:59", 
@@ -98,7 +119,7 @@ The search function returns json objects containing all information about the se
     "url": "http://localhost:8080/static/testdocs/invoice_23_05_2023.txt", 
     "vector": "4"
   }, 
-  "http://localhost:8080/static/testdocs/invoice_24_05_2023.txt": {
+  "http://localhost:9090/static/testdocs/root/Invoices/invoice_24_05_2023.txt": {
     "cc": "False", 
     "date_created": "2023-05-24 07:23:39", 
     "date_modified": "2023-05-24 07:23:39", 

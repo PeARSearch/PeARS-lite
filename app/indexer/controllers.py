@@ -16,7 +16,7 @@ from flask import (Blueprint,
 
 from app.api.models import Urls
 from app.indexer.neighbours import neighbour_urls
-from app.indexer import mk_page_vector
+from app.indexer import mk_page_vector, spider
 from app.utils import readDocs, readUrls, get_language, init_podsum
 from app.utils_db import pod_from_file
 from app.indexer.htmlparser import extract_links, extract_html
@@ -49,6 +49,8 @@ def from_omd_index():
     lang = "en" #hard-coded
 
     def process_links(omd_html):
+        if omd_html[-1] == '/':
+            omd_html+='index.html'
         links = extract_links(omd_html)
         print(links)
         f = open(join(dir_path, "urls_to_index.txt"), 'w')
@@ -60,12 +62,12 @@ def from_omd_index():
         print("DOC FILE:", request.form['url'])
         omd_html = request.form['url']
         process_links(omd_html)
-        return render_template('indexer/progress_file.html')
+        return render_template('indexer/progress_crawl.html')
     else:
         print("DOC FILE:", request.args['url'])
         omd_html = request.args['url']
         process_links(omd_html)
-        return progress_file()
+        return progress_crawl()
         
 
 
@@ -159,6 +161,46 @@ def progress_file():
                 logging.error("Error accessing the URL")
             c += 1
             yield "data processed:" + str(int(c / len(urls) * 100)) + "%\n"
+
+    return Response(generate(), mimetype='text/event-stream')
+
+@indexer.route("/progress_crawl")
+def progress_crawl():
+    print("Running progress crawl")
+    urls, keywords, langs, errors = readUrls(join(dir_path, "urls_to_index.txt"))
+    if urls and keywords:
+        url = urls[0]
+        kwd = keywords[0]
+        lang = langs[0]
+    pod_name = kwd+'.npz'
+    pod_dir = join(dir_path,'static','pods')
+
+    #Checking matrix files
+    if not isfile(join(pod_dir,'podsum.npz')):
+        init_podsum()
+    if not isfile(join(pod_dir,pod_name)):
+        print("Making 0 CSR matrix")
+        pod = np.zeros((1,10000))
+        pod = sparse.csr_matrix(pod)
+        sparse.save_npz(join(pod_dir,pod_name), pod)
+
+    def generate():
+        # netloc = urlparse(url).netloc
+        all_links = [url]
+        stack = spider.get_links(url,200)
+        indexed = 0
+        while len(stack) > 0:
+            all_links.append(stack[0])
+            print("Processing", stack[0])
+            success, podsum = mk_page_vector.compute_vectors(stack[0], kwd, lang)
+            if success:
+                pod_from_file(kwd, lang, podsum)
+                stack.pop(0)
+                indexed += 1
+                yield "data processed: " + str(indexed) + " pages.\n"
+            else:
+                stack.pop(0)
+        yield "data processing: " + "Finished!" + "\n\n"
 
     return Response(generate(), mimetype='text/event-stream')
 

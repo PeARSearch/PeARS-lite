@@ -27,7 +27,7 @@ SPDX-License-Identifier: AGPL-3.0-only
             action="{{url_for('indexer.from_url')}}">
             <div class="input-group p-2">
               <span class="input-group-text">URL</span>
-              <input required type="text" class="form-control" placeholder="Ex: http://localhost:8080/static/testdocs/novel_draft.txt" name='url' id='url'>
+              <input required type="text" class="form-control" placeholder="Ex: http://localhost:9090/static/testdocs/root/Writing/novel_draft.txt" name='url' id='url'>
             </div>
             <div class="input-group p-2">
               <span class="input-group-text">Keyword</span>
@@ -48,13 +48,13 @@ SPDX-License-Identifier: AGPL-3.0-only
       <div class="card">
         <div class="card-header text-center"><b>Index the files from the OMD index</b></div>
         <div class="card-body">
-	<p>This option lets you index from a list of urls contained in a html document. To use with the official OnMyDisk setup.</p>
+	<p>This option recursively indexes the files in a directory. To use with the official OnMyDisk setup.</p>
 
           <form method="POST" accept-charset="UTF-8" enctype="multipart/form-data"
             action="{{url_for('indexer.from_omd_index')}}">
             <div class="input-group p-2">
               <span class="input-group-text">URL</span>
-              <input required type="text" name='url' class="form-control input-s" accept="text/plain" name='file_source' placeholder="Ex: http://localhost:8080/static/testdocs/index_downloads.html"
+              <input required type="text" name='url' class="form-control input-s" accept="text/plain" name='file_source' placeholder="Ex: http://localhost:9090/static/testdocs/index.html"
                 id='file_source'>
               {% with messages = get_flashed_messages(category_filter=["text"]) %}
               {% if messages %}
