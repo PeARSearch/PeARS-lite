@@ -106,7 +106,7 @@ def pod_from_json(pod, url):
 def pod_from_file(name, lang, podsum):
     # TODO: pods can't be named any old thing,
     # if they're going to be in localhost URLs
-    url = "http://localhost:8080/api/pods/" + name.replace(' ', '+')
+    url = "http://localhost:9090/api/pods/" + name.replace(' ', '+') # change hard-coded port
     if not db.session.query(Pods).filter_by(url=url).all():
         p = Pods(url=url)
         p.name = name
@@ -116,21 +116,21 @@ def pod_from_file(name, lang, podsum):
         p.DS_vector = str(len(db.session.query(Pods).all()))
         db.session.add(p)
         db.session.commit()
-    print("UPDATING SUMMARY POD")
-    p = db.session.query(Pods).filter_by(url=url).first()
-    print(podsum)
-    print(np.sum(podsum))
-    if np.sum(podsum) != 0: # check necessary for cases where pod has been deleted before
+    if podsum != None and np.sum(podsum) != 0: # check necessary for cases where pod has been deleted before
+        print("UPDATING SUMMARY POD")
+        p = db.session.query(Pods).filter_by(url=url).first()
         p.registered = True
-    p_idx = int(p.DS_vector)
-    pod_m = load_npz(join(pod_dir,'podsum.npz'))
-    print("--- current shape",pod_m.shape)
-    if pod_m.shape[0] >= p_idx + 1:
-        pod_m[p_idx] = podsum
-    else:
-        pod_m = vstack((pod_m, csr_matrix(podsum)))
-    print("--- new shape",pod_m.shape)
-    save_npz(join(pod_dir,'podsum.npz'),pod_m)
-    db.session.commit()
+        print(podsum)
+        print(np.sum(podsum))
+        p_idx = int(p.DS_vector)
+        pod_m = load_npz(join(pod_dir,'podsum.npz'))
+        print("--- current shape",pod_m.shape)
+        if pod_m.shape[0] >= p_idx + 1:
+            pod_m[p_idx] = podsum
+        else:
+            pod_m = vstack((pod_m, csr_matrix(podsum)))
+        print("--- new shape",pod_m.shape)
+        save_npz(join(pod_dir,'podsum.npz'),pod_m)
+        db.session.commit()
 
 
