@@ -39,7 +39,6 @@ def readUrls(url_file):
     keywords = []
     langs = []
     errors = False
-    print(url_file)
     with open(url_file) as fd:
         for line in fd:
             matches = _extract_url_and_kwd(line)

@@ -52,7 +52,6 @@ def from_omd_index():
         if omd_html[-1] == '/':
             omd_html+='index.html'
         links = extract_links(omd_html)
-        print(links)
         f = open(join(dir_path, "urls_to_index.txt"), 'w')
         for u in links:
             f.write(u + ";" + keyword + ";" + lang +"\n")
@@ -169,10 +168,10 @@ def progress_file():
 def progress_crawl():
     print("Running progress crawl")
     urls, keywords, langs, errors = readUrls(join(dir_path, "urls_to_index.txt"))
-    if urls and keywords:
+    if urls:
         url = urls[0]
-        kwd = keywords[0]
-        lang = langs[0]
+    kwd = 'home' #hard-coded
+    lang = 'en'  #hard-coded
     pod_name = kwd+'.npz'
     pod_dir = join(dir_path,'static','pods')
 
