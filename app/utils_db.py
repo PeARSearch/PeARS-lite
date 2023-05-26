@@ -116,7 +116,7 @@ def pod_from_file(name, lang, podsum):
         p.DS_vector = str(len(db.session.query(Pods).all()))
         db.session.add(p)
         db.session.commit()
-    if podsum != None and np.sum(podsum) != 0: # check necessary for cases where pod has been deleted before
+    if type(podsum) != None or np.sum(podsum) != 0: # check necessary for cases where pod has been deleted before
         print("UPDATING SUMMARY POD")
         p = db.session.query(Pods).filter_by(url=url).first()
         p.registered = True

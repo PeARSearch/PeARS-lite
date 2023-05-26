@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-only
 
-# import logging 
 import logging
 
 # Import flask and template operators
@@ -53,7 +52,7 @@ app.register_blueprint(settings_module)
 
 # Build the database:
 # This will create the database file using SQLAlchemy
-# db.drop_all()
+#db.drop_all()
 with app.app_context():
     db.create_all()
 

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 PeARS Project, <community@pearsproject.org>, 
+# SPDX-FileCopyrightText: 2023 PeARS Project, <community@pearsproject.org>, 
 #
 # SPDX-License-Identifier: AGPL-3.0-only
 
@@ -105,12 +105,11 @@ def from_url():
         if request.form['url'] != "":
             f = open(join(dir_path, "urls_to_index.txt"), 'w')
             u = request.form['url']
-            keyword = request.form['url_keyword']
-            keyword, lang = get_language(keyword)
-            print(u, keyword, lang)
+            keyword = 'home' #hard-coded
+            lang = 'en' #hard-coded for now
             f.write(u + ";" + keyword + ";" + lang +"\n")
             f.close()
-            return render_template('indexer/progress_url.html', url=u)
+            return render_template('indexer/progress_file.html')
     if request.method == "GET":
         u = request.args['url']
         keyword = 'home' #hard-coded
@@ -134,12 +133,13 @@ def progress_file():
     logging.debug("Running progress file")
     def generate():
         urls, keywords, langs, errors = readUrls(join(dir_path, "urls_to_index.txt"))
+        print("PROGRESS FILE",urls,keywords,langs)
         if errors:
             logging.error('Some URLs could not be processed')
         if not urls or not keywords or not langs:
             logging.error('Invalid file format')
             yield "data: 0 \n\n"
-        kwd = keywords[0]
+        kwd = 'home' #hard-coded
         pod_name = kwd+'.npz'
         pod_dir = join(dir_path,'static','pods')
         
@@ -153,6 +153,7 @@ def progress_file():
             pod = sparse.csr_matrix(pod)
             sparse.save_npz(join(pod_dir,pod_name), pod)
         c = 0
+        print(len(urls),"URLS to index")
         for url, kwd, lang in zip(urls, keywords, langs):
             success, podsum = mk_page_vector.compute_vectors(url, kwd, lang)
             if success:
@@ -160,7 +161,7 @@ def progress_file():
             else:
                 logging.error("Error accessing the URL")
             c += 1
-            yield "data processed:" + str(int(c / len(urls) * 100)) + "%\n"
+            yield "data:" + str(int(c / len(urls) * 100)) + "\n\n"
 
     return Response(generate(), mimetype='text/event-stream')
 
@@ -197,10 +198,10 @@ def progress_crawl():
                 pod_from_file(kwd, lang, podsum)
                 stack.pop(0)
                 indexed += 1
-                yield "data processed: " + str(indexed) + " pages.\n"
+                yield "data:" + str(indexed) + "\n\n"
             else:
                 stack.pop(0)
-        yield "data processing: " + "Finished!" + "\n\n"
+        yield "data: " + "Finished!" + "\n\n"
 
     return Response(generate(), mimetype='text/event-stream')
 
@@ -230,7 +231,7 @@ def progress_docs():
             pod_from_file(kwd, lang, podsum)
             c += 1
             print('###', str(ceil(c / len(urls) * 100)))
-            yield "data processed:" + str(ceil(c / len(urls) * 100)) + "%\n"
+            yield "data:" + str(ceil(c / len(urls) * 100)) + "\n\n"
 
     return Response(generate(), mimetype='text/event-stream')
 

@@ -19,8 +19,20 @@ from pathlib import Path
 def _extract_url_and_kwd(line):
     # The following regexp pattern matches lines in the form "url;keyword". This
     # accepts both http and https link as of now
-    pattern = "(\S+);(.+);(.+)"
-    return re.match(pattern, line)
+    pattern = "(\S+);(.*);(.*)"
+    matches =  re.match(pattern, line)
+    if matches:
+        url = matches.group(1)
+        kwd = matches.group(2)
+        lang = matches.group(3)
+        #In case keyword or lang is not given, go back to defaults
+        if kwd == '':
+            kwd = 'home'
+        if lang == '':
+            lang = 'en'
+        return url, kwd, lang
+    else:
+        return None
 
 def readUrls(url_file):
     urls = []
@@ -32,9 +44,9 @@ def readUrls(url_file):
         for line in fd:
             matches = _extract_url_and_kwd(line)
             if matches:
-                urls.append(matches.group(1))
-                keywords.append(matches.group(2))
-                langs.append(matches.group(3))
+                urls.append(matches[0])
+                keywords.append(matches[1])
+                langs.append(matches[2])
             else:
                 errors = True
     return urls, keywords, langs, errors
