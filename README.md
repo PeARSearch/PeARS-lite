@@ -80,10 +80,13 @@ http://localhost:9090/static/testdocs/
             |_novel_draft.txt
 			
 
+NB: the index.html files will be created on-the-fly my OMD at runtime.
+ 
 
 To recursively crawl from base url:
 
 ```
+curl localhost:9090/indexer/from_crawl?url=http://localhost:9090/static/testdocs/
 curl localhost:9090/indexer/from_crawl?url=http://localhost:9090/static/testdocs/root/Webpages/example.html
 ```
 
