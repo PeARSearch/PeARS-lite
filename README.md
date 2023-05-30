@@ -78,6 +78,7 @@ http://localhost:9090/static/testdocs/
             |_index.html
             |_letter_to_grandma.txt
             |_novel_draft.txt
+```
 			
 
 NB: the index.html files will be created on-the-fly my OMD at runtime.
