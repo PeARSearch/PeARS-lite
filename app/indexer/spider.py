@@ -36,12 +36,49 @@ class LinkParser(HTMLParser):
             return "",[]
 
 def get_links(base_url, max_pages):  
+    #netloc = urlparse(url).netloc
+    if base_url[-5:] == ".html":
+        urldir = '/'.join(base_url.split('/')[:-1])
+    else:
+        urldir = base_url
     pages_to_visit = [base_url]
     pages_visited = []
     number_visited = 0
     while number_visited < max_pages and pages_to_visit != []:
         number_visited+=1
         # Start from base url
+        print("Starting crawl from",base_url)
+        print("Pages to visit",pages_to_visit)
+        url = pages_to_visit[0]
+        if not url.startswith(urldir):
+            continue
+        pages_visited.append(url)
+        pages_to_visit = pages_to_visit[1:]
+        try:
+            print(number_visited, "Scraping:", url)
+            parser = LinkParser()
+            data, links = parser.getLinks(url)
+            print(urldir, links)
+            for link in links:
+                print(link,pages_visited)
+                print(link,pages_to_visit)
+                print(link,urldir)
+                if link not in pages_visited and link not in pages_to_visit and '#' not in link and urldir in link:
+                    print("Found href:",link)
+                    pages_to_visit.append(link)
+        except:
+            print(" **Failed visiting current url!**")
+    return pages_visited
+
+
+def get_links_from_index_html(base_url, max_pages):  
+    pages_to_visit = [base_url]
+    pages_visited = []
+    number_visited = 0
+    while number_visited < max_pages and pages_to_visit != []:
+        number_visited+=1
+        # Start from base url
+        print("Starting crawl from",base_url)
         url = pages_to_visit[0]
         if not url.startswith(base_url):
             continue

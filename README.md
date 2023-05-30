@@ -80,18 +80,11 @@ http://localhost:9090/static/testdocs/
             |_novel_draft.txt
 			
 
-```
 
-To index a single document on localhost:
-
-```
-curl localhost:9090/indexer/from_url?url=http://localhost:9090/static/testdocs/root/Invoices/invoice_24_05_2023.txt
-```
-
-To recursively index from base folder:
+To recursively crawl from base url:
 
 ```
-curl localhost:9090/indexer/from_omd_index?url=http://localhost:9090/static/testdocs/
+curl localhost:9090/indexer/from_crawl?url=http://localhost:9090/static/testdocs/root/Webpages/example.html
 ```
 
 
@@ -100,7 +93,7 @@ Example searches:
 
 ```
 curl localhost:9090?q=invoice
-curl localhost:9090?q=novel+moss
+curl localhost:9090?q=search+engine
 ```
 
 The search function returns json objects containing all information about the selected URLs in the database. For instance, searching for the word 'invoice' returns the following two documents:

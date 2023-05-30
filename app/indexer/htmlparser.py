@@ -74,20 +74,24 @@ def extract_html(url):
     body_str = ""
     snippet = ""
     cc = False
+    error = None
     language = "en"
     try:
         req = requests.head(url, timeout=10)
         if "text/html" not in req.headers["content-type"]:
             print("Not a HTML document, moving to .txt processing...")
             title, body_str, snippet, cc = extract_txt(url)
-            return title, body_str, snippet, cc
+            return title, body_str, snippet, cc, error
     except Exception:
-        return title, body_str, snippet, cc
+        error = "IGNORING URL: Not .html or .txt."
+        print(error)
+        return title, body_str, snippet, cc, error
 
     bs_obj, req = BS_parse(url)
     if not bs_obj:
-        print("Failed to get BeautifulSoup object...")
-        return title, body_str, snippet, cc
+        error = "IGNORING URL: Failed to get BeautifulSoup object..."
+        print(error)
+        return title, body_str, snippet, cc, error
     if hasattr(bs_obj.title, 'string'):
         if url.startswith('http'):
             title = bs_obj.title.string
@@ -98,14 +102,14 @@ def extract_html(url):
                 language = detect(title + " " + body_str)
                 print("Language for", url, ":", language)
             except Exception:
-                title = ""
-                print("Couldn't detect page language.")
-                return title, body_str, snippet, cc
+                error = "IGNORING URL: Could not detect page language"
+                print(error)
+                return title, body_str, snippet, cc, error
 
             if language not in installed_languages:
-                print("Ignoring", url, "because language is not supported.")
-                title = ""
-                return title, body_str, snippet, cc
+                error = "IGNORING URL: Language is not supported."
+                print(error)
+                return title, body_str, snippet, cc, error
             try:
                 cc = detect_open.is_cc(url, bs_obj)
             except Exception:
@@ -114,7 +118,7 @@ def extract_html(url):
                 snippet = body_str[:200].replace(',', '-')
             else:
                 snippet = body_str[:100].replace(',', '-')
-    return title, body_str, snippet, cc
+    return title, body_str, snippet, cc, error
 
 
 def extract_txt(url):

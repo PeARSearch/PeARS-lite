@@ -67,11 +67,31 @@ def from_omd_index():
         omd_html = request.args['url']
         process_links(omd_html)
         return progress_crawl()
-        
+
+@indexer.route("/from_crawl", methods=["GET","POST"])
+def from_crawl():
+    keyword = "home" #hard-coded
+    lang = "en" #hard-coded
+   
+    def process_start_url(u):
+        print("Now crawling", u)
+        f = open(join(dir_path, "urls_to_index.txt"), 'w')
+        f.write(u + ";" + keyword + ";" + lang +"\n")
+        f.close()
+
+    if request.method == "POST":
+        u = request.form['url']
+        process_start_url(u)
+        return render_template('indexer/progress_crawl.html')
+    else:
+        u = request.args['url']
+        process_start_url(u)
+        return progress_crawl()
 
 
-@indexer.route("/from_docs2", methods=["POST"])
-def from_docs2():
+
+@indexer.route("/from_docs", methods=["POST"])
+def from_docs():
     print("DOC FILE:", request.files['file_source'])
     if request.files['file_source'].filename[-4:] == ".txt":
         keyword = request.form['docs_keyword']
@@ -127,6 +147,48 @@ The URL indexing uses same progress as file.
 '''
 
 
+
+@indexer.route("/progress_crawl")
+def progress_crawl():
+    print("Running progress crawl")
+    urls, keywords, langs, errors = readUrls(join(dir_path, "urls_to_index.txt"))
+    if urls:
+        url = urls[0]
+    kwd = 'home' #hard-coded
+    lang = 'en'  #hard-coded
+    pod_name = kwd+'.npz'
+    pod_dir = join(dir_path,'static','pods')
+
+    #Checking matrix files
+    if not isfile(join(pod_dir,'podsum.npz')):
+        init_podsum()
+    if not isfile(join(pod_dir,pod_name)):
+        print("Making 0 CSR matrix")
+        pod = np.zeros((1,10000))
+        pod = sparse.csr_matrix(pod)
+        sparse.save_npz(join(pod_dir,pod_name), pod)
+
+    def generate():
+        all_links = [url]
+        print("Calling spider on",url)
+        stack = spider.get_links(url,200)
+        indexed = 0
+        while len(stack) > 0:
+            all_links.append(stack[0])
+            print("Processing", stack[0])
+            success, podsum = mk_page_vector.compute_vectors(stack[0], kwd, lang)
+            if success:
+                pod_from_file(kwd, lang, podsum)
+                stack.pop(0)
+                indexed += 1
+                yield "data:" + str(indexed) + "\n\n"
+            else:
+                stack.pop(0)
+        yield "data: " + "Finished!" + "\n\n"
+
+    return Response(generate(), mimetype='text/event-stream')
+
+
 @indexer.route("/progress_file")
 def progress_file():
     logging.debug("Running progress file")
@@ -161,46 +223,6 @@ def progress_file():
                 logging.error("Error accessing the URL")
             c += 1
             yield "data:" + str(int(c / len(urls) * 100)) + "\n\n"
-
-    return Response(generate(), mimetype='text/event-stream')
-
-@indexer.route("/progress_crawl")
-def progress_crawl():
-    print("Running progress crawl")
-    urls, keywords, langs, errors = readUrls(join(dir_path, "urls_to_index.txt"))
-    if urls:
-        url = urls[0]
-    kwd = 'home' #hard-coded
-    lang = 'en'  #hard-coded
-    pod_name = kwd+'.npz'
-    pod_dir = join(dir_path,'static','pods')
-
-    #Checking matrix files
-    if not isfile(join(pod_dir,'podsum.npz')):
-        init_podsum()
-    if not isfile(join(pod_dir,pod_name)):
-        print("Making 0 CSR matrix")
-        pod = np.zeros((1,10000))
-        pod = sparse.csr_matrix(pod)
-        sparse.save_npz(join(pod_dir,pod_name), pod)
-
-    def generate():
-        # netloc = urlparse(url).netloc
-        all_links = [url]
-        stack = spider.get_links(url,200)
-        indexed = 0
-        while len(stack) > 0:
-            all_links.append(stack[0])
-            print("Processing", stack[0])
-            success, podsum = mk_page_vector.compute_vectors(stack[0], kwd, lang)
-            if success:
-                pod_from_file(kwd, lang, podsum)
-                stack.pop(0)
-                indexed += 1
-                yield "data:" + str(indexed) + "\n\n"
-            else:
-                stack.pop(0)
-        yield "data: " + "Finished!" + "\n\n"
 
     return Response(generate(), mimetype='text/event-stream')
 
