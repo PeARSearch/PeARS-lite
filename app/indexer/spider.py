@@ -64,6 +64,8 @@ def get_links(base_url, max_pages):
                 print(link,pages_to_visit)
                 print(link,urldir)
                 if link not in pages_visited and link not in pages_to_visit and '#' not in link and urldir in link:
+                    if link[-1] == '/':
+                        link+="index.html"
                     print("Found href:",link)
                     pages_to_visit.append(link)
         except:

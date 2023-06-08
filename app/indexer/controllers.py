@@ -154,6 +154,10 @@ def progress_crawl():
     urls, keywords, langs, errors = readUrls(join(dir_path, "urls_to_index.txt"))
     if urls:
         url = urls[0]
+        if url[-1] == '/':
+            url+="index.html"
+    else:
+        url = None
     kwd = 'home' #hard-coded
     lang = 'en'  #hard-coded
     pod_name = kwd+'.npz'
@@ -169,22 +173,26 @@ def progress_crawl():
         sparse.save_npz(join(pod_dir,pod_name), pod)
 
     def generate():
-        all_links = [url]
-        print("Calling spider on",url)
-        stack = spider.get_links(url,200)
-        indexed = 0
-        while len(stack) > 0:
-            all_links.append(stack[0])
-            print("Processing", stack[0])
-            success, podsum = mk_page_vector.compute_vectors(stack[0], kwd, lang)
-            if success:
-                pod_from_file(kwd, lang, podsum)
-                stack.pop(0)
-                indexed += 1
-                yield "data:" + str(indexed) + "\n\n"
-            else:
-                stack.pop(0)
-        yield "data: " + "Finished!" + "\n\n"
+        if url is None:
+            print("ERROR: no urls found")
+            yield "data: " + "Finished!" + "\n\n"
+        else:
+            all_links = [url]
+            print("Calling spider on",url)
+            stack = spider.get_links(url,200)
+            indexed = 0
+            while len(stack) > 0:
+                all_links.append(stack[0])
+                print("Processing", stack[0])
+                success, podsum = mk_page_vector.compute_vectors(stack[0], kwd, lang)
+                if success:
+                    pod_from_file(kwd, lang, podsum)
+                    stack.pop(0)
+                    indexed += 1
+                    yield "data:" + str(indexed) + "\n\n"
+                else:
+                    stack.pop(0)
+            yield "data: " + "Finished!" + "\n\n"
 
     return Response(generate(), mimetype='text/event-stream')
 
