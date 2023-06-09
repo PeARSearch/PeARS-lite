@@ -46,7 +46,7 @@ class Urls(Base):
     snippet = db.Column(db.String(1000))
     cc = db.Column(db.Boolean)
     pod = db.Column(db.String(1000))
-    notes = db.Column(db.String(1000))
+    description = db.Column(db.String(1000))
 
     def __init__(self,
                  url=None,
@@ -55,14 +55,14 @@ class Urls(Base):
                  snippet=None,
                  cc=False,
                  pod=None,
-                 notes=None):
+                 description=None):
         self.url = url
         self.title = title
         self.vector = vector
         self.snippet = snippet
         self.cc = cc
         self.pod = pod
-        self.notes = notes
+        self.description = description
 
     def __repr__(self):
         return self.url
@@ -77,7 +77,7 @@ class Urls(Base):
             'snippet': self.snippet,
             'cc': self.cc,
             'pod': self.pod,
-            'notes': self.notes
+            'notes': self.description
         }
 
     def as_dict(self):

@@ -64,8 +64,6 @@ def get_links(base_url, max_pages):
                 print(link,pages_to_visit)
                 print(link,urldir)
                 if link not in pages_visited and link not in pages_to_visit and '#' not in link and urldir in link:
-                    if link[-1] == '/':
-                        link+="index.html"
                     print("Found href:",link)
                     pages_to_visit.append(link)
         except:
@@ -87,8 +85,6 @@ def get_links_from_index_html(base_url, max_pages):
         pages_visited.append(url)
         pages_to_visit = pages_to_visit[1:]
         try:
-            if url[-1] == '/':
-                url+='index.html'
             print(number_visited, "Scraping:", url)
             parser = LinkParser()
             data, links = parser.getLinks(url)

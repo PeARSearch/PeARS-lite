@@ -66,8 +66,8 @@ admin = Admin(app, name='PeARS DB', template_mode='bootstrap3')
 class UrlsModelView(ModelView):
     list_template = 'admin/pears_list.html'
     column_exclude_list = ['vector','cc']
-    column_searchable_list = ['url', 'title', 'notes', 'pod']
-    column_editable_list = ['notes']
+    column_searchable_list = ['url', 'title', 'description', 'pod']
+    column_editable_list = ['description']
     can_edit = True
     page_size = 50
     form_widget_args = {

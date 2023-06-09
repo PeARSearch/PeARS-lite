@@ -49,8 +49,6 @@ def from_omd_index():
     lang = "en" #hard-coded
 
     def process_links(omd_html):
-        if omd_html[-1] == '/':
-            omd_html+='index.html'
         links = extract_links(omd_html)
         f = open(join(dir_path, "urls_to_index.txt"), 'w')
         for u in links:
@@ -154,8 +152,6 @@ def progress_crawl():
     urls, keywords, langs, errors = readUrls(join(dir_path, "urls_to_index.txt"))
     if urls:
         url = urls[0]
-        if url[-1] == '/':
-            url+="index.html"
     else:
         url = None
     kwd = 'home' #hard-coded
