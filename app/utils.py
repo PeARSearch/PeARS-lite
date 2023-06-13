@@ -17,21 +17,16 @@ from pathlib import Path
 
 
 def _extract_url_and_kwd(line):
-    # The following regexp pattern matches lines in the form "url;keyword". This
-    # accepts both http and https link as of now
-    pattern = "(\S+);(.*);(.*)"
-    matches =  re.match(pattern, line)
-    if matches:
-        url = matches.group(1)
-        kwd = matches.group(2)
-        lang = matches.group(3)
+    try:
+        url, kwd, lang = line.split(';')
         #In case keyword or lang is not given, go back to defaults
         if kwd == '':
             kwd = 'home'
         if lang == '':
             lang = 'en'
         return url, kwd, lang
-    else:
+    except:
+        print("ERROR: urls_to_index.txt does not have the right format.")
         return None
 
 def readUrls(url_file):

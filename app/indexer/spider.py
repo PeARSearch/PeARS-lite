@@ -50,8 +50,8 @@ def get_links(base_url, max_pages):
         print("Starting crawl from",base_url)
         print("Pages to visit",pages_to_visit)
         url = pages_to_visit[0]
-        if not url.startswith(urldir):
-            continue
+        #if not url.startswith(urldir):
+        #    continue
         pages_visited.append(url)
         pages_to_visit = pages_to_visit[1:]
         try:
@@ -63,7 +63,7 @@ def get_links(base_url, max_pages):
                 print(link,pages_visited)
                 print(link,pages_to_visit)
                 print(link,urldir)
-                if link not in pages_visited and link not in pages_to_visit and '#' not in link and urldir in link:
+                if link not in pages_visited and link not in pages_to_visit and '#' not in link: # and urldir in link:
                     print("Found href:",link)
                     pages_to_visit.append(link)
         except:
