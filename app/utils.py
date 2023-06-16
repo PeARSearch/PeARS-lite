@@ -11,13 +11,23 @@ from math import sqrt
 import numpy as np
 from urllib.parse import urljoin
 from scipy.spatial import distance
+from scipy.sparse import csr_matrix, save_npz
+from os.path import dirname, join, realpath, isfile
+from pathlib import Path
 
 
 def _extract_url_and_kwd(line):
-    # The following regexp pattern matches lines in the form "url;keyword". This
-    # accepts both http and https link as of now
-    pattern = "(https?://\S+);(.+);(.+)"
-    return re.match(pattern, line)
+    try:
+        url, kwd, lang = line.rstrip('\n').split(';')
+        #In case keyword or lang is not given, go back to defaults
+        if kwd == '':
+            kwd = 'home'
+        if lang == '':
+            lang = 'en'
+        return url, kwd, lang
+    except:
+        print("ERROR: urls_to_index.txt does not have the right format.")
+        return None
 
 def readUrls(url_file):
     urls = []
@@ -28,9 +38,9 @@ def readUrls(url_file):
         for line in fd:
             matches = _extract_url_and_kwd(line)
             if matches:
-                urls.append(matches.group(1))
-                keywords.append(matches.group(2))
-                langs.append(matches.group(3))
+                urls.append(matches[0])
+                keywords.append(matches[1])
+                langs.append(matches[2])
             else:
                 errors = True
     return urls, keywords, langs, errors
@@ -84,6 +94,17 @@ def readPods(pod_file):
     f.close()
     return pods
 
+
+def init_podsum():
+    dir_path = dirname(dirname(realpath(__file__)))
+    pod_dir = join(dir_path,'app','static','pods')
+    print("Create pods directory if needed")
+    Path(pod_dir).mkdir(exist_ok=True, parents=True)
+    print("Making 0 CSR matrix for pod summaries")
+    print("POD DIR",pod_dir)
+    pod_summaries = np.zeros((1,10000))
+    pod_summaries = csr_matrix(pod_summaries)
+    save_npz(join(pod_dir,"podsum.npz"), pod_summaries)
 
 def normalise(v):
     norm = np.linalg.norm(v)

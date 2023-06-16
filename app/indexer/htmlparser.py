@@ -22,8 +22,8 @@ def remove_boilerplates(response):
         length_low=30,
         length_high=100)
     for paragraph in paragraphs:
-        if not paragraph.is_boilerplate:
-            text += paragraph.text + " "
+        #if not paragraph.is_boilerplate:
+        text += paragraph.text + " "
     return text
 
 
@@ -33,7 +33,7 @@ def BS_parse(url):
         req = requests.get(url, allow_redirects=True, timeout=30)
         req.encoding = 'utf-8'
     except Exception:
-        print("Request failed when trying to index", url, "...")
+        print("ERROR BS_parse: Request failed when trying to index", url, "...")
         return False, req
     if req.status_code != 200:
         logging.exception(
@@ -65,7 +65,7 @@ def extract_links(url):
     return links
 
 
-def extract_from_url(url):
+def extract_html(url):
     '''From history info, extract url, title and body of page,
     cleaned with BeautifulSoup'''
     title = ""
@@ -73,41 +73,44 @@ def extract_from_url(url):
     snippet = ""
     cc = False
     language = "en"
+    error = None
     try:
         req = requests.head(url, timeout=10)
         if "text/html" not in req.headers["content-type"]:
-            print("Not a HTML document...")
-            return title, body_str, snippet, cc
+            error = "ERROR extract_html: Not a HTML document."
+            return title, body_str, snippet, cc, error
     except Exception:
-        return title, body_str, snippet, cc
+        error = "ERROR extract_html: Request failed."
+        return title, body_str, snippet, cc, error
     bs_obj, req = BS_parse(url)
     if not bs_obj:
-        print("Failed to get BeautifulSoup object...")
-        return title, body_str, snippet, cc
+        error = "ERROR extract_html: Failed to get BeautifulSoup object."
+        return title, body_str, snippet, cc, error
     if hasattr(bs_obj.title, 'string'):
         if url.startswith('http'):
             title = bs_obj.title.string
             if title is None:
                 title = ""
             body_str = remove_boilerplates(req)
+            print(body_str)
             try:
                 language = detect(title + " " + body_str)
                 print("Language for", url, ":", language)
             except Exception:
                 title = ""
-                print("Couldn't detect page language.")
-                return title, body_str, snippet, cc
+                error = "ERROR extract_html: Couldn't detect page language."
+                return title, body_str, snippet, cc, error
 
             if language not in installed_languages:
-                print("Ignoring", url, "because language is not supported.")
+                error = "ERROR extract_html: language is not supported."
                 title = ""
-                return title, body_str, snippet, cc
+                return title, body_str, snippet, cc, error
             try:
                 cc = detect_open.is_cc(url, bs_obj)
             except Exception:
-                print("Failed to get CC status for", url, "...")
+                error = "ERROR extract_html: Failed to get CC status for", url, "..."
             if cc:
                 snippet = body_str[:200].replace(',', '-')
             else:
                 snippet = body_str[:100].replace(',', '-')
-    return title, body_str, snippet, cc
+    return title, body_str, snippet, cc, error

@@ -18,7 +18,7 @@ from scipy import sparse
 import re
 import logging
 from os.path import dirname, join, realpath, isfile
-
+from app.utils import init_podsum
 
 LOG = logging.getLogger(__name__)
 
@@ -37,6 +37,7 @@ def index():
         internal_message = "Hey there! It looks like you're here\
          for the first time :) To understand how to use PeARS,\
          go to the FAQ (link at the top of the page)."
+        init_podsum()
 
         print("Making 0 CSR matrix for pod summaries")
         pod_summaries = np.zeros((1,10000))

@@ -7,7 +7,7 @@ import numpy as np
 import string
 from app import db
 from app.api.models import Urls, installed_languages, sp
-from app.indexer.htmlparser import extract_from_url
+from app.indexer.htmlparser import extract_html
 from app.indexer.vectorizer import vectorize_scale
 from app.utils import convert_to_string, convert_dict_to_string, normalise
 from scipy.sparse import csr_matrix, vstack, save_npz, load_npz
@@ -18,9 +18,9 @@ dir_path = dirname(dirname(realpath(__file__)))
 pod_dir = join(dir_path,'static','pods')
 
 def tokenize_text(lang, text):
-    print(text)
     sp.load(f'app/api/models/{lang}/{lang}wiki.model')
     text = ' '.join([wp for wp in sp.encode_as_pieces(text.lower())])
+    print("TOKENIZED",text)
     return text
 
 
@@ -36,19 +36,18 @@ def compute_vectors(target_url, keyword, lang):
     pod_m = load_npz(join(pod_dir,keyword+'.npz'))
     if not db.session.query(Urls).filter_by(url=target_url).all():
         u = Urls(url=target_url)
-        title, body_str, snippet, cc = extract_from_url(target_url)
-        if title != "":
+        title, body_str, snippet, cc, error = extract_html(target_url)
+        print("TITLE",title,"SNIPPET",snippet,"CC",cc,"ERROR",error)
+        if error is None and snippet != '':
             text = title + " " + body_str
             text = tokenize_text(lang, text)
+            print(text)
             pod_m = compute_vec(lang, text, pod_m)
             u.title = str(title)
             u.vector = str(pod_m.shape[0]-1)
             u.keyword = keyword
             u.pod = keyword
-            if snippet != "":
-                u.snippet = str(snippet)
-            else:
-                u.snippet = u.title
+            u.snippet = str(snippet)
             if cc:
                 u.cc = True
             print(u.url,u.title,u.vector,u.snippet,u.cc,u.pod)
@@ -58,15 +57,17 @@ def compute_vectors(target_url, keyword, lang):
             podsum = np.sum(pod_m, axis=0)
             return True, podsum
         else:
-            print("Urgh")
+            if snippet == '':
+                print("IGNORING URL: Snippet empty.")
+            else:
+                print(error)
             return False, None
     else:
         return True, None
 
 
-def compute_vectors_local_docs(target_url, title, snippet, keyword):
-    lang = 'en'
-    cc = True
+def compute_vectors_local_docs(target_url, title, snippet, keyword, lang):
+    cc = False
     pod_m = load_npz(join(pod_dir,keyword+'.npz'))
     if not db.session.query(Urls).filter_by(title=title).all():
         print("Computing vectors for", target_url, "(",keyword,")",lang)
@@ -77,21 +78,19 @@ def compute_vectors_local_docs(target_url, title, snippet, keyword):
         pod_m = compute_vec(lang, text, pod_m)
         u.title = str(title)
         u.vector = str(pod_m.shape[0]-1)
-        if keyword == "":
-            keyword = "generic"
         u.keyword = keyword
         u.pod = keyword
         if snippet != "":
             u.snippet = str(snippet)
         else:
             u.snippet = u.title
-        if cc:
-            u.cc = True
+        u.cc = cc
         print(u.url,u.title,u.vector,u.snippet,u.cc,u.pod)
         db.session.add(u)
         db.session.commit()
         save_npz(join(pod_dir,keyword+'.npz'),pod_m)
-    return True
+    podsum = np.sum(pod_m, axis=0)
+    return True, podsum
 
 
 
