@@ -50,15 +50,16 @@ def readDocs(doc_file):
     titles = []
     snippets = []
     with open(doc_file) as df:
+        snippet = ""
         for l in df:
             l=l.rstrip('\n')
             if l[:4] == "<doc":
-                m = re.search('url=\"([^\"]*)\"',l)
+                m = re.search('url=\'([^\']*)\'',l)
                 url = m.group(1)
-                m = re.search('title=\"([^\"]*)\"',l)
+                m = re.search('title=\'([^\']*)\'',l)
                 title = m.group(1)
             elif "</doc" not in l:
-                snippet = l
+                snippet+=l+' '
             else:
                 urls.append(url)
                 titles.append(title)

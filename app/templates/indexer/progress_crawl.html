@@ -21,7 +21,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 	source.onmessage = function(event) {
 		$('.progress-bar-label').text(event.data);
 
-		if(event.data == "Finished!"){
+		if(event.data == 100){
 			source.close()
 		}
 	}

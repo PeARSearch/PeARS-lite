@@ -27,6 +27,7 @@ def tokenize_text(lang, text):
 def compute_vec(lang, text, pod_m):
     v = vectorize_scale(lang, text, 5, 100) #log prob power 5, top words 100
     pod_m = vstack((pod_m,csr_matrix(v)))
+    print("VEC",v,pod_m.shape)
     return pod_m
 
 
