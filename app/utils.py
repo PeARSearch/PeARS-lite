@@ -49,8 +49,9 @@ def readDocs(doc_file):
     urls = []
     titles = []
     snippets = []
+    docs = []
     with open(doc_file) as df:
-        snippet = ""
+        doc = ""
         for l in df:
             l=l.rstrip('\n')
             if l[:4] == "<doc":
@@ -59,12 +60,14 @@ def readDocs(doc_file):
                 m = re.search('title=\'([^\']*)\'',l)
                 title = m.group(1)
             elif "</doc" not in l:
-                snippet+=l+' '
+                doc+=l+' '
             else:
+                snippet = doc[:200]
                 urls.append(url)
                 titles.append(title)
                 snippets.append(snippet)
-    return urls, titles, snippets
+                docs.append(doc)
+    return urls, titles, snippets, docs
 
 
 def readBookmarks(bookmark_file, keyword):

@@ -75,11 +75,11 @@ def score_docs(query, query_dist, kwd):
     document_scores = {}  # Document scores
     DS_scores, completeness_scores, title_scores = score(query, query_dist, kwd)
     for url in list(DS_scores.keys()):
-        if completeness_scores[url] > 0.5:
+        if completeness_scores[url] >= 0.5:
             print(url,DS_scores[url], completeness_scores[url], title_scores[url])
         document_scores[url] = 0.5*DS_scores[url] + completeness_scores[url] + 0.1*title_scores[url]
         #document_scores[url] = DS_scores[url]
-        if math.isnan(document_scores[url]) or completeness_scores[url] < 0.6:  # Check for potential NaN -- messes up with sorting in bestURLs.
+        if math.isnan(document_scores[url]) or completeness_scores[url] < 0.5:  # Check for potential NaN -- messes up with sorting in bestURLs.
             document_scores[url] = 0
     return document_scores
 

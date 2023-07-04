@@ -4,6 +4,7 @@
 
 import xmltodict
 import requests
+from collections import OrderedDict
 from os.path import join, dirname, realpath
 from app.indexer.htmlparser import extract_html
 
@@ -11,30 +12,34 @@ dir_path = dirname(dirname(realpath(__file__)))
 
 
 def omd_parse(current_url):
-    print("\n\nRunning OMD parse")
+    print("\n\nRunning OMD parse on", current_url)
     links = []
     fout = open(join(dir_path,'docs_to_index.txt'),'a')
 
     xml = requests.get(current_url, stream =True).raw
     parse = xmltodict.parse(xml.read())
-    print("PARSE:",parse)
-    for doc in parse['omd_index']['doc']:
+    docs = parse['omd_index']['doc']
+    print("PARSE:",parse, type(docs))
+    if type(docs) is not list:
+        docs = [docs]
+    print(docs)
+    for doc in docs:
         urldir = '/'.join(current_url.split('/')[:-1])
 
         # URL
-        try:
-            print("# DOC URL", urldir, doc['@url'])
-            if doc['@url'][0] == '/':
-                url = doc['@url'][1:]
-            else:
-                url = doc['@url']
-            url = join(urldir, url)
-            #if url[-1] == '/': #For local test only
-            #    url = join(url,'index.html')
-            links.append(url)
-        except:
-            print("\t--- No valid url")
-            continue
+        #try:
+        if doc['@url'][0] == '/':
+            url = doc['@url'][1:]
+        else:
+            url = doc['@url']
+        url = join(urldir, url)
+        print("# DOC URL", url)
+        #if url[-1] == '/': #For local test only
+        #    url = join(url,'index.html')
+        links.append(url)
+        #except:
+        #    print("\t--- No valid url")
+        #    continue
 
         # CONTENT TYPE
         try:
@@ -46,12 +51,13 @@ def omd_parse(current_url):
             print("\t--- No contentType")
 
         # TITLE
-        title = ""
         try:
             print("# DOC TITLE", urldir, doc['title'])
             title = doc['title']
         except:
             print("\t--- No title")
+        if title == None:
+            title = ''
         print("<doc title='"+title+"' url='"+url+"'>\n")
         fout.write("<doc title='"+title+"' url='"+url+"'>\n")
 
