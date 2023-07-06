@@ -49,7 +49,7 @@ def compute_vectors(target_url, keyword, lang):
             u.snippet = str(snippet)
             if cc:
                 u.cc = True
-            print(u.url,u.title,u.vector,u.snippet,u.cc,u.pod)
+            #print(u.url,u.title,u.vector,u.snippet,u.cc,u.pod)
             db.session.add(u)
             db.session.commit()
             save_npz(join(pod_dir,keyword+'.npz'),pod_m)
@@ -72,12 +72,12 @@ def compute_vectors_local_docs(target_url, title, snippet, description, doc, key
         print("Computing vectors for", target_url, "(",keyword,")",lang)
         u = Urls(url=target_url)
         text = title + " " + description + " " + doc
-        print(text)
+        #print(text)
         text = tokenize_text(lang, text)
         pod_m = compute_vec(lang, text, pod_m)
         u.title = title
         u.snippet = snippet
-        u.description = description
+        u.description = description[:100]
         u.vector = str(pod_m.shape[0]-1)
         u.keyword = keyword
         u.pod = keyword
