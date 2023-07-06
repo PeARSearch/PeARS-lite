@@ -7,6 +7,7 @@ from flask import Blueprint, request, render_template, send_from_directory
 from flask import current_app
 
 # Import the database object from the main app module
+from app import app
 from app.api.models import Urls
 from app.search import score_pages
 
@@ -18,7 +19,7 @@ from scipy import sparse
 import re
 import logging
 from os.path import dirname, join, realpath, isfile
-from flask import jsonify
+from flask import jsonify, Response
 from app.utils import init_podsum
 
 LOG = logging.getLogger(__name__)
@@ -50,10 +51,11 @@ def index():
         results = []
         query = query.lower()
         pears = ['0.0.0.0']
-        #results, pods = score_pages.run(query, pears, 'Black writers')
         results, pods = score_pages.run(query, pears)
         print(results)
-        return jsonify(results)
+        r = app.make_response(jsonify(results))
+        r.mimetype = "application/json"
+        return r
 
 
 @search.route('/html_cache/<path:filename>')

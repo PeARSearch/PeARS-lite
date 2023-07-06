@@ -35,8 +35,8 @@ def omd_parse(current_url):
             url = doc['@url']
         url = join(urldir, url)
         print("# DOC URL:", url)
-        #if url[-1] == '/': #For local test only
-        #    url = join(url,'index.html')
+        if url[-1] == '/': #For local test only
+            url = join(url,'index.html')
 
         # CONTENT TYPE
         try:
@@ -65,7 +65,7 @@ def omd_parse(current_url):
             print("# DOC DESCRIPTION:", doc['description'][:100])
             description = doc['description']
             print("\t"+description+"\n")
-            fout.write("\t"+description+"\n")
+            fout.write("{{DESCRIPTION}} "+description+"\n")
         except:
             print("# DOC DESCRIPTION: No description")
     
@@ -74,7 +74,7 @@ def omd_parse(current_url):
             title, body_str, snippet, cc, error = extract_html(url)
             if not error:
                 print("# DOC BODY:", body_str[:100])
-                fout.write(body_str+"\n")
+                fout.write("{{BODY}} "+body_str+"\n")
         else:
             print("# DOC BODY: Skipping request: content is neither text/plain nor text/html.")
 

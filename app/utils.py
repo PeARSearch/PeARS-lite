@@ -50,7 +50,9 @@ def readDocs(doc_file):
     titles = []
     snippets = []
     docs = []
+    descriptions = []
     with open(doc_file) as df:
+        description = ""
         doc = ""
         for l in df:
             l=l.rstrip('\n')
@@ -60,14 +62,23 @@ def readDocs(doc_file):
                 m = re.search('title=\'([^\']*)\'',l)
                 title = m.group(1)
             elif "</doc" not in l:
-                doc+=l+' '
+                if "{{DESCRIPTION}}" in l:
+                    description = l.replace("{{DESCRIPTION}} ","")
+                elif "{{BODY}}" in l:
+                    l = l.replace("{{BODY}} ","")
+                    doc+=l+' '
+                else:
+                    doc+=l+' '
             else:
                 snippet = doc[:200]
                 urls.append(url)
                 titles.append(title)
                 snippets.append(snippet)
-                docs.append(doc)
-    return urls, titles, snippets, docs
+                descriptions.append(description)
+                docs.append(description+' '+doc)
+                description = ""
+                doc = ""
+    return urls, titles, snippets, descriptions, docs
 
 
 def readBookmarks(bookmark_file, keyword):

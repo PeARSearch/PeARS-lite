@@ -103,8 +103,9 @@ def progress_crawl():
     def generate():
         kwd = 'home' #hard-coded - change if needed
         lang='en' #hard-coded - change in multilingual version
-        print(">>> CONTROLLER: READING DOCS")
-        urls, titles, snippets, docs = readDocs(join(dir_path, "docs_to_index.txt"))
+        print("\n\n>>> CONTROLLER: READING DOCS")
+        urls, titles, snippets, descriptions, docs = readDocs(join(dir_path, "docs_to_index.txt"))
+        print("DOCS",docs)
         pod_name = kwd+'.npz'
         pod_dir = join(dir_path,'static','pods')
 
@@ -118,9 +119,9 @@ def progress_crawl():
             sparse.save_npz(join(pod_dir,pod_name), pod)
 
         c = 0
-        for url, title, snippet, doc in zip(urls, titles, snippets, docs):
+        for url, title, snippet, description, doc in zip(urls, titles, snippets, descriptions, docs):
             print(url,title)
-            success, podsum = mk_page_vector.compute_vectors_local_docs(url, title, doc, kwd, lang)
+            success, podsum = mk_page_vector.compute_vectors_local_docs(url, title, snippet, description, doc, kwd, lang)
             pod_from_file(kwd, lang, podsum)
             c += 1
             print('###', str(ceil(c / len(urls) * 100)))
