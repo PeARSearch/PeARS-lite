@@ -35,8 +35,8 @@ def omd_parse(current_url):
             url = doc['@url']
         url = join(urldir, url)
         print("# DOC URL:", url)
-        if url[-1] == '/': #For local test only
-            url = join(url,'index.html')
+        #if url[-1] == '/': #For local test only
+        #    url = join(url,'index.html')
 
         # CONTENT TYPE
         try:
