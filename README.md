@@ -52,32 +52,47 @@ From the PeARS-lite directory, run:
 
 ##### 5. Run your pear!
 
-In the root of the repo, run:
+If you are running/testing PeARS-lite locally (as opposed to the OMD server), first uncomment lines 38-39 in app/indexer/spider.py:
+
+```
+if url[-1] == '/': #For local test only
+            url = join(url,'index.html')
+```
+
+Then, in the root of the repo, run:
 
     python3 run.py
 
+NB: whenever you want to come back to a clean install, manually delete your database and pods:
+
+```
+rm -f app/static/db/app.db
+rm -fr app/static/pods/*npz
+```
 
 
 ## Usage
 
-To provide a toy example, the installation contains five sample .txt/.html documents in the static folder, organised in folders as follows:
+To provide a toy example, the installation contains sample documents in the static folder, organised in folders as follows:
 
 ```
 http://localhost:9090/static/testdocs/
     |_index.html
-    |_root/
+    |_tester/
         |_index.html
-        |_Invoices
+        |_localhost.localdomain
             |_index.html
-            |_invoice_23_05_2023.txt
-            |_invoice_24_05_2023.txt
-        |_Webpages
-            |_index.html
-            |_example.html
-        |_Writing
-            |_index.html
-            |_letter_to_grandma.txt
-            |_novel_draft.txt
+            |_Downloads
+                |_index.html
+                |_sample2.txt
+                |_sample3.txt
+                |_sample4.txt
+            |_Music
+                |_index.html
+            |_Pictures
+                |_index.html
+            |_Videos
+                |_index.html
 ```
 			
 
@@ -87,8 +102,7 @@ NB: the index.html files will be created on-the-fly my OMD at runtime.
 To recursively crawl from base url:
 
 ```
-curl localhost:9090/indexer/from_crawl?url=http://localhost:9090/static/testdocs/
-curl localhost:9090/indexer/from_crawl?url=http://localhost:9090/static/testdocs/root/Webpages/example.html
+curl localhost:9090/indexer/from_crawl?url=http://localhost:9090/static/testdocs/tester/localhost.localdomain/index.html
 ```
 
 
@@ -96,41 +110,59 @@ curl localhost:9090/indexer/from_crawl?url=http://localhost:9090/static/testdocs
 Example searches:
 
 ```
-curl localhost:9090?q=invoice
-curl localhost:9090?q=search+engine
+curl localhost:9090?q=grandma
+curl localhost:9090?q=theory+of+everything
 ```
 
-The search function returns json objects containing all information about the selected URLs in the database. For instance, searching for the word 'invoice' returns the following two documents:
+The search function returns json objects containing all information about the selected URLs in the database. For instance, searching for the word 'grandma' returns the following two documents:
 
 ```
 {
-  "http://localhost:9090/static/testdocs/root/Invoices/invoice_23_05_2023.txt": {
+  "http://localhost:9090/static/testdocs/tester/localhost.localdomain/Downloads/sample2.txt": {
     "cc": "False", 
-    "date_created": "2023-05-24 10:16:59", 
-    "date_modified": "2023-05-24 10:16:59", 
-    "id": "4", 
-    "notes": "None", 
+    "date_created": "2023-07-31 14:24:42", 
+    "date_modified": "2023-07-31 14:24:42", 
+    "description": "Telling grandma about the roses.", 
+    "id": "7", 
     "pod": "home", 
-    "snippet": "Dear customer-\n\nThank you for your order- and for supporting local artists. Your parrot sculpture has been dispatched.  I allow myself to send you this invoice- for the amount of 2000 EUR. It is payab", 
-    "title": "invoice_23_05_2023.txt", 
-    "url": "http://localhost:8080/static/testdocs/invoice_23_05_2023.txt", 
-    "vector": "4"
-  }, 
-  "http://localhost:9090/static/testdocs/root/Invoices/invoice_24_05_2023.txt": {
-    "cc": "False", 
-    "date_created": "2023-05-24 07:23:39", 
-    "date_modified": "2023-05-24 07:23:39", 
-    "id": "3", 
-    "notes": "None", 
-    "pod": "home", 
-    "snippet": "Esteemed customer-\n\nI thank you for your order. It has been a pleasure doing business with you. I allow myself to send you this invoice- for the amount of 200EUR. It is payable with the next four week", 
-    "title": "invoice_24_05_2023.txt", 
-    "url": "http://localhost:8080/static/testdocs/invoice_24_05_2023.txt", 
-    "vector": "3"
+    "snippet": "Hi Grandma,  I hope you are doing well. We have planted new roses in our garden, but they still don't look as good as yours!  Lots of love.  ", 
+    "title": "Letter to grandma", 
+    "url": "http://localhost:9090/static/testdocs/tester/localhost.localdomain/Downloads/sample2.txt", 
+    "vector": "7"
   }
 }
+
 ```
 
-The indexer now has an authorisation header, currently set up as the placeholder 'TOK:1234':
+## Adding your own data
 
-https://github.com/PeARSearch/PeARS-lite/blob/d3a8471d8930f971d20f56f7820d1b214e84b108/app/indexer/htmlparser.py#L14
+To test PeARS-lite with your own data, you will have to set up a new user in the static/testdocs folder. The following illustrates this process with a toy example, to be run from the base directory.
+
+First, we will assume that we have a folder somewhere on our computer, containing .txt files. For the sake of illustration, we will reuse the *static/testdocs/tester/localhost.localdomain/Downloads/* directory in this example, but you can use your own.
+
+Second, we will create a new user with a *Documents* directory, where we will copy the .txt files from our chosen folder. There is a script in the root of the repo to do exactly this. You can feed it a new username and the path to the folder with your .txt documents. This script also sets up the directory structure required to match the OMD server. So for instance, let us create a new user called *myuser*, and copy some sample files to their space, using the content of our previous *Downloads* directory:
+
+```
+python3 mkuser.py myuser app/static/testdocs/tester/localhost.localdomain/Downloads/
+```
+
+The result of this call is a new *app/static/testdocs/myuser/* directory, with some .txt files in the *localhost.localdomain/Documents/* folder of that user.
+
+Once we have done this, we can index the files of this new user: 
+
+```
+curl localhost:9090/indexer/from_crawl?url=http://localhost:9090/static/testdocs/myuser/index.html
+```
+
+And finally we can search as before:
+
+```
+curl localhost:9090?q=grandma
+```
+
+NB: again, if you would like to start from a clean install, do not forget to manually delete the existing index:
+
+```
+rm -f app/static/db/app.db
+rm -fr app/static/pods/*npz
+```
