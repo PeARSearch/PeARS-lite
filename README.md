@@ -96,13 +96,13 @@ http://localhost:9090/static/testdocs/
 ```
 			
 
-NB: the index.html files will be created on-the-fly my OMD at runtime.
+NB: on the OMD server, the index.html files will be created on-the-fly at runtime.
  
 
 To recursively crawl from base url:
 
 ```
-curl localhost:9090/indexer/from_crawl?url=http://localhost:9090/static/testdocs/tester/localhost.localdomain/index.html
+curl localhost:9090/indexer/from_crawl?url=http://localhost:9090/static/testdocs/tester/index.html
 ```
 
 
