@@ -37,7 +37,7 @@ def return_urls():
     return jsonify(json_list=[i.serialize for i in Urls.query.all()])
 
 
-@api.route('/urls/delete')
+@api.route('/urls/delete', methods=["GET","POST"])
 def return_delete():
     path = request.args.get('path')
     try:
@@ -71,7 +71,7 @@ def return_delete():
     return "Deleted document with vector id"+str(vid)
 
 
-@api.route('/urls/move')
+@api.route('/urls/move', methods=["GET","POST"])
 def return_rename():
     src = request.args.get('src')
     target = request.args.get('target')
