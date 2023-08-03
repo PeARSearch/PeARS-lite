@@ -58,6 +58,11 @@ with app.app_context():
 
 from flask_admin.contrib.sqla import ModelView
 from app.api.models import Pods, Urls
+from app.api.controllers import return_delete
+
+from flask_admin import expose
+from flask_admin.contrib.sqla.view import ModelView
+from flask_admin.model.template import EndpointLinkRowAction
 
 # Flask and Flask-SQLAlchemy initialization here
 
@@ -81,6 +86,27 @@ class UrlsModelView(ModelView):
             'readonly': True
         },
     }
+    def delete_model(self, model):
+        try:
+            self.on_model_delete(model)
+            print("DELETING",model.url,model.vector)
+            # Add your custom logic here and don't forget to commit any changes e.g.
+            print(return_delete(model.vector))
+            self.session.commit()
+        except Exception as ex:
+            if not self.handle_view_exception(ex):
+                flash(gettext('Failed to delete record. %(error)s', error=str(ex)), 'error')
+                log.exception('Failed to delete record.')
+
+            self.session.rollback()
+
+            return False
+        else:
+            self.after_model_delete(model)
+
+        return True
+
+
 
 class PodsModelView(ModelView):
     list_template = 'admin/pears_list.html'
@@ -102,6 +128,7 @@ class PodsModelView(ModelView):
             'readonly': True
         },
     }
+
 
 admin.add_view(PodsModelView(Pods, db.session))
 admin.add_view(UrlsModelView(Urls, db.session))
