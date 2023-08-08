@@ -1,0 +1,40 @@
+import json
+import numpy as np
+
+
+def score_precision_recall_f1(query_file, res_file):
+    true_path_list = []
+    with open(query_file) as f:
+        for line in f:
+            true_path_list.append(list(json.loads(line).values())[0])
+
+    res_path_list = []
+    with open(res_file) as f:
+        for line in f:
+            res_path_list.append(list(json.loads(line).values())[0])
+
+    precision_list, recall_list, f1_list = [], [], []
+    for i in range(len(true_path_list)):
+        if len(res_path_list[i]):
+            precision = len(set(true_path_list[i]).intersection(set(res_path_list[i]))) / len(res_path_list[i])
+        else:
+            precision = 0
+        recall = len(set(true_path_list[i]).intersection(set(res_path_list[i]))) / len(true_path_list[i])
+        if precision + recall:
+            f1 = 2 * precision * recall / (precision + recall)
+        else:
+            f1 = 0
+        precision_list.append(precision)
+        recall_list.append(recall)
+        f1_list.append(f1)
+
+    return precision_list, recall_list, f1_list
+
+
+if __name__ == '__main__':
+    persona_name = '0_hr'
+    precision_list, recall_list, f1_list = score_precision_recall_f1(query_file=f'./data/query/{persona_name}_query.json',
+                                            res_file=f'./data/query/{persona_name}_search_results.json')
+    print(np.mean(precision_list) * 100, np.std(precision_list) * 100)
+    print(np.mean(recall_list) * 100, np.std(recall_list) * 100)
+    print(np.mean(f1_list) * 100, np.std(f1_list) * 100)
