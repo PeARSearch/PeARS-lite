@@ -19,13 +19,14 @@ pod_dir = join(dir_path,'static','pods')
 
 def tokenize_text(lang, text):
     sp.load(f'app/api/models/{lang}/{lang}wiki.model')
+    # sp.load(f'app/api/models/{lang}/accountant.model')
     text = ' '.join([wp for wp in sp.encode_as_pieces(text.lower())])
     print("TOKENIZED",text)
     return text
 
 
 def compute_vec(lang, text, pod_m):
-    v = vectorize_scale(lang, text, 5, 500) #log prob power 5, top words 100
+    v = vectorize_scale(lang, text, 5, 10000) #log prob power 5, top words 100
     pod_m = vstack((pod_m,csr_matrix(v)))
     print("VEC",v,pod_m.shape)
     return pod_m
