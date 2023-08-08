@@ -28,10 +28,11 @@ write_index(join("app/static/testdocs/",user,"localhost.localdomain"),localdomai
 
 documents_content = "<omd_index>\n"
 
-docs = glob(join(src_path,'*txt'))
+# docs = glob(join(src_path,'*txt'))
+docs = glob(join(src_path, '**/*.txt'), recursive=True)
 for doc in docs:
-    shutil.copy2(doc, doc_path)
-    docname = basename(doc)
+    shutil.copy2(doc, doc_path)  # TODO
+    docname = basename(doc)#.replace("'", "")
     doc_xml = f"<doc url='{docname}' contentType='text/plain'><title>{docname}</title></doc>\n"
     documents_content+=doc_xml
 
