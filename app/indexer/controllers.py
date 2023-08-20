@@ -28,6 +28,8 @@ pod_dir = join(dir_path,'static','pods')
 # Define the blueprint:
 indexer = Blueprint('indexer', __name__, url_prefix='/indexer')
 
+# Import the vec size
+from app import VEC_SIZE
 
 # Set the route and accepted methods
 @indexer.route("/", methods=["GET", "POST"])
@@ -111,10 +113,10 @@ def progress_crawl():
 
         #Checking matrix files
         if not isfile(join(pod_dir,'podsum.npz')):
-            init_podsum()
+            init_podsum(VEC_SIZE) # todo
         if not isfile(join(pod_dir,pod_name)):
             print("Making 0 CSR matrix")
-            pod = np.zeros((1,10000))
+            pod = np.zeros((1, VEC_SIZE))  # todo
             pod = sparse.csr_matrix(pod)
             sparse.save_npz(join(pod_dir,pod_name), pod)
 

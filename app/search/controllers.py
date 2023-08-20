@@ -24,6 +24,9 @@ from app.utils import init_podsum
 
 LOG = logging.getLogger(__name__)
 
+# Import the vec size
+from app import VEC_SIZE
+
 # Define the blueprint:
 search = Blueprint('search', __name__, url_prefix='')
 
@@ -39,7 +42,7 @@ def index():
         internal_message = "Hey there! It looks like you're here\
          for the first time :) To understand how to use PeARS,\
          go to the FAQ (link at the top of the page)."
-        init_podsum()
+        init_podsum(VEC_SIZE) # todo
 
     query = request.args.get('q')
     if not query:
