@@ -110,16 +110,17 @@ def readPods(pod_file):
     return pods
 
 
-def init_podsum():
+def init_podsum(pod_shape):
     dir_path = dirname(dirname(realpath(__file__)))
     pod_dir = join(dir_path,'app','static','pods')
     print("Create pods directory if needed")
     Path(pod_dir).mkdir(exist_ok=True, parents=True)
     print("Making 0 CSR matrix for pod summaries")
     print("POD DIR",pod_dir)
-    pod_summaries = np.zeros((1,10000))
+    pod_summaries = np.zeros((1, pod_shape))  # todo
     pod_summaries = csr_matrix(pod_summaries)
     save_npz(join(pod_dir,"podsum.npz"), pod_summaries)
+
 
 def normalise(v):
     norm = np.linalg.norm(v)

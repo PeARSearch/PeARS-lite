@@ -60,10 +60,9 @@ def get_db_pod_language(url):
     return pod_language
 
 
-def compute_pod_summary(name):
+def compute_pod_summary(name, pod_shape):
     '''This function is very similar to 'self' in PeARS-pod'''
-    DS_vector = np.zeros(10000) 
-    #DS_vector = np.zeros(256) 
+    DS_vector = np.zeros(pod_shape) # pod_shape is the number of elements in a pod vector (num column)
     for u in db.session.query(Urls).filter_by(pod=name).all():
         DS_vector += convert_to_array(u.vector)
     DS_vector = convert_to_string(normalise(DS_vector))

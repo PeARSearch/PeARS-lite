@@ -36,7 +36,7 @@ def generic_overlap(i1, i2):
     return dice(set(words1), set(words2))
 
 def completeness(v, m):
-    v = v.reshape(10000,)
+    v = v.reshape(v.shape[1],)  # todo
     idx = np.where(v != 0)
     v_nz = v[idx]
     numcols = v_nz.shape[0]
