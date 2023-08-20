@@ -35,6 +35,6 @@ if __name__ == '__main__':
     persona_name = '0_hr'
     precision_list, recall_list, f1_list = score_precision_recall_f1(query_file=f'./data/query/{persona_name}_query.json',
                                             res_file=f'./data/query/{persona_name}_search_results.json')
-    print(np.mean(precision_list) * 100, np.std(precision_list) * 100)
-    print(np.mean(recall_list) * 100, np.std(recall_list) * 100)
-    print(np.mean(f1_list) * 100, np.std(f1_list) * 100)
+    print(round(np.mean(precision_list) * 100), round(np.std(precision_list) * 100))
+    print(round(np.mean(recall_list) * 100), round(np.std(recall_list) * 100))
+    print(round(np.mean(f1_list) * 100), round(np.std(f1_list) * 100))
