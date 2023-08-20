@@ -65,6 +65,7 @@ def read_n_encode_dataset(doc=None, vectorizer=None, logprobs=None, power=None, 
 
 def init_vectorizer(lang): 
     spm_vocab = f"app/api/models/{lang}/{lang}wiki.vocab"
+    # spm_vocab = f"app/api/models/{lang}/news.vocab" # todo
     vocab, reverse_vocab, logprobs = read_vocab(spm_vocab)
     vectorizer = CountVectorizer(vocabulary=vocab, lowercase=True, token_pattern='[^ ]+')
     return vectorizer, logprobs
