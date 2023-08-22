@@ -14,7 +14,7 @@ from flask_sqlalchemy import SQLAlchemy
 # Define vector size
 from app.indexer.vectorizer import read_vocab
 lang = 'en'
-spm_vocab = f'app/api/models/{lang}/{lang}wiki.model'
+spm_vocab = f'app/api/models/{lang}/{lang}wiki.vocab'
 # spm_vocab = f"app/api/models/{lang}/news.vocab"
 vocab, _, _ = read_vocab(spm_vocab)
 VEC_SIZE = len(vocab)
