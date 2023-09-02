@@ -9,24 +9,15 @@ SPDX-License-Identifier: AGPL-3.0-only
   <div class="row">
     <div class="col-lg-2"></div>
     <div class="col-lg-8 text-center mt-5">
-      <a href="{{ url_for('.index')}}"><img width=350px; src="{{ url_for('static', filename='pears-logo.png')}}"></a>
-      <form  action="{{url_for('.index')}}">
+      <a href="{{ url_for('.anonymous')}}"><img width=350px; src="{{ url_for('static', filename='pears-logo.png')}}"></a>
+      <form  action="{{url_for('.anonymous')}}">
         <div class="input-group group mt-4" >
           <input class="form-control" title="Enter your Search Query." placeholder="Enter your Search Query" type="search" name='q' required>
           <button class="btn btn-lg btn-success" type="submit">Search</button>
         </div>
       </form>
+      <br>Hey there! You don't seem to be logged in. Please <a href="{{ url_for('.login') }}">sign in</a>.
     </div>
   </div> 
-  {% if internal_message %}
-  <div class="row">
-    <div class="col-lg-10 text-center mt-5 mx-auto">
-      <div class="alert alert-info alert-dismissible">
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        {{internal_message}}
-      </div>
-    </div>
-  </div>
-      {% endif %}
 
 {% endblock %}

@@ -9,8 +9,8 @@ SPDX-License-Identifier: AGPL-3.0-only
   <div class="row">
     <div class="col-lg-2"></div>
     <div class="col-lg-8 text-center mt-5">
-      <a href="{{ url_for('.index')}}"><img width=350px; src="{{ url_for('static', filename='pears-logo.png')}}"></a>
-      <form  action="{{url_for('.index')}}">
+      <a href="{{ url_for('.user')}}"><img width=350px; src="{{ url_for('static', filename='pears-logo.png')}}"></a>
+      <form  action="{{url_for('.user')}}">
         <div class="input-group group mt-4" >
           <input class="form-control" title="Enter your Search Query." placeholder="Enter your Search Query" type="search" name='q' required>
           <button class="btn btn-lg btn-success" type="submit">Search</button>
@@ -18,12 +18,12 @@ SPDX-License-Identifier: AGPL-3.0-only
       </form>
     </div>
   </div> 
-  {% if internal_message %}
+  {% if welcome %}
   <div class="row">
     <div class="col-lg-10 text-center mt-5 mx-auto">
       <div class="alert alert-info alert-dismissible">
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        {{internal_message}}
+        {{welcome}}
       </div>
     </div>
   </div>
