@@ -2,7 +2,7 @@ import requests
 import json
 from collections import OrderedDict
 from tqdm import tqdm
-
+import sys, os
 
 def search_queries(query_file):
     queries = []
@@ -27,9 +27,9 @@ def search_queries(query_file):
 
 
 if __name__ == '__main__':
-    persona_name = '0_hr'
+    persona_name = sys.argv[1]
     res = search_queries(f'./data/query/{persona_name}_query.json')
-    with open(f'./data/query/{persona_name}_search_results.json', 'w') as f:
+    with open(f'./data/query/{persona_name}_wiki_search_results.json', 'w') as f:
         for row in res:
             json_str = json.dumps(row)
             f.write(json_str + '\n')

@@ -12,5 +12,9 @@ score_res.py: read the search results and compute the performance of the search/
 
 ## To create a new query file for a new dataset:
 
-1. Run the function preprocess_dataset in utils.py
-2. Run the script create_query.py. It takes times, up to 1 2 hours for the news and moviescripts dataset.
+Run the preprocess.py file with persona name as an argument (e.g python preprocess.py 0_hr)
+
+## To evaluate the system for particular persona:
+
+Run the eval.py file with persona name as an argument (e.g python eval.py 0_hr)
+
