@@ -1,4 +1,6 @@
 env/
-app/
+app/*.txt
+app/static/pods
+app/static/webmap
 __pycache__/
 app.db
