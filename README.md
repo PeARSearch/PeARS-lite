@@ -18,7 +18,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 ##### 1. Clone this repo on your machine:
 
 ```
-    git clone https://github.com/PeARSearch/PeARS-orchard.git
+    git clone https://github.com/PeARSearch/PeARS-lite.git
 ```
 
 ##### 2. **Optional step** Setup a virtualenv in your directory.
@@ -35,7 +35,7 @@ If you haven't yet set up virtualenv on your machine, please install it via pip:
 
 Then change into the PeARS-orchard directory:
 
-    cd PeARS-for-toppix
+    cd PeARS-lite
 
 Then run:
 
