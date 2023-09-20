@@ -45,6 +45,12 @@ def index():
         init_podsum(VEC_SIZE) # todo
 
     query = request.args.get('q')
+
+    # execute query only against a set of predefined pods
+    predefined_pods = request.args.get('pods', None)
+    if predefined_pods is not None:
+        predefined_pods = predefined_pods.split(",")
+
     if not query:
         LOG.info("No query")
         return render_template(
@@ -54,7 +60,7 @@ def index():
         results = []
         query = query.lower()
         pears = ['0.0.0.0']
-        results, pods = score_pages.run(query, pears)
+        results, pods = score_pages.run(query, pears, predefined_pods)
         print(results)
         r = app.make_response(jsonify(results))
         r.mimetype = "application/json"

@@ -18,7 +18,7 @@ from pathlib import Path
 
 def _extract_url_and_kwd(line):
     try:
-        url, kwd, lang = line.split(';')
+        url, kwd, lang = line.rstrip("\n").split(';')
         #In case keyword or lang is not given, go back to defaults
         if kwd == '':
             kwd = 'home'

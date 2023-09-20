@@ -105,7 +105,13 @@ To recursively crawl from base url:
 curl localhost:9090/indexer/from_crawl?url=http://localhost:9090/static/testdocs/tester/index.html
 ```
 
+By default, this will index the crawled pages in the `"home"` pod. However, you can also specify a pod of your choice: 
 
+```
+curl "localhost:9090/indexer/from_crawl?url=http://localhost:9090/static/testdocs/tester/index.html&keyword=$POD"
+```
+
+where `$POD` is the name of the pod (existing or new) that you want to use. 
 
 Example searches:
 
@@ -132,6 +138,16 @@ The search function returns json objects containing all information about the se
   }
 }
 
+```
+
+It is also possible to restrict queries to one or more specific pods. The `pod` parameter accepts either a specific pod name or a comma-separated list. If the parameter is not specified, the system will search through all pods.
+
+For example:
+
+```
+curl localhost:9090?q=grandma # search in all pods
+curl localhost:9090?q=grandma?pod=home # search only in the 'home' pod
+curl localhost:9090?q=grandma?pod=accountant,home # search only in the 'accountant' and 'home' pods
 ```
 
 ## Adding your own data

@@ -47,9 +47,14 @@ def index():
 
 @indexer.route("/from_crawl", methods=["GET","POST"])
 def from_crawl():
-    keyword = "home" #hard-coded
+    # keyword = "home" #hard-coded
     lang = "en" #hard-coded
-   
+
+    if request.method == "POST":
+        keyword = request.form.get("keyword", "home")
+    else:
+        keyword = request.args.get("keyword", "home")
+
     def process_start_url(u):
         print("Now crawling", u)
         f = open(join(dir_path, "urls_to_index.txt"), 'w')
@@ -96,15 +101,20 @@ def progress_crawl():
     urls, keywords, langs, errors = readUrls(join(dir_path, "urls_to_index.txt"))
     if urls:
         url = urls[0]
+        keyword = keywords[0]
+        language = langs[0]
     else:
-        url = None
+        url = keyword = lang = None
+
     print("Calling spider on",url)
     spider.write_docs(url) #Writing docs to docs_to_index.txt
 
 
     def generate():
-        kwd = 'home' #hard-coded - change if needed
-        lang='en' #hard-coded - change in multilingual version
+        kwd = keyword #hard-coded - change if needed
+        lang = language #hard-coded - change in multilingual version
+        assert lang == "en", f"Language {lang} not supported yet"
+
         print("\n\n>>> CONTROLLER: READING DOCS")
         urls, titles, snippets, descriptions, docs = readDocs(join(dir_path, "docs_to_index.txt"))
         print("DOCS",docs)

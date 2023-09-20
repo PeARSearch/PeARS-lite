@@ -118,11 +118,15 @@ def output(best_urls):
     return results, pods
 
 
-def run(query, pears):
+def run(query, pears, predefined_pods=None):
     document_scores = {}
     query, lang = get_language(query)
     q_dist = compute_query_vectors(query, lang)
-    best_pods = score_pods(query, q_dist, lang)
+
+    if predefined_pods is None:
+        best_pods = score_pods(query, q_dist, lang)
+    else:
+        best_pods = predefined_pods
     for pod in best_pods:
         document_scores.update(score_docs(query, q_dist, pod))
     best_urls = bestURLs(document_scores)
