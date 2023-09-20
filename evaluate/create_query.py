@@ -43,7 +43,7 @@ def select_query(persona_name, save_path):
     count_mat_1 = vectorizer_1['count_mat']
     vocab_1 = vectorizer_1['vocab']
     freqs = zip(vocab_1, np.array(count_mat_1.astype(bool).sum(axis=0)).flatten())  # toarray
-    #freqs = sorted(freqs, key=lambda x: -x[1])#[25000:] # manually adjust this number to calibrate the amount of retrieved paths
+    freqs = sorted(freqs, key=lambda x: -x[1])#[25000:] # manually adjust this number to calibrate the amount of retrieved paths
     one_token_list = [w for w, c in random.sample(freqs, 1000)]
     one_token_idx_list = []
     for query in one_token_list:
@@ -83,7 +83,7 @@ def select_query(persona_name, save_path):
     count_mat_2 = vectorizer_2['count_mat']
     vocab_2 = vectorizer_2['vocab']
     freqs = zip(vocab_2, np.array(count_mat_2.astype(bool).sum(axis=0)).flatten())
-    #freqs = sorted(freqs, key=lambda x: -x[1])#[4000000:] # manually adjust this number to calibrate the amount of retrieved paths
+    freqs = sorted(freqs, key=lambda x: -x[1])#[4000000:] # manually adjust this number to calibrate the amount of retrieved paths
     bigram_list, bigram_idx_list = [], []
     while len(bigram_list) < 300:
         bigram = random.choice(freqs)[0]
@@ -101,7 +101,7 @@ def select_query(persona_name, save_path):
     count_mat_3 = vectorizer_3['count_mat']
     vocab_3 = vectorizer_3['vocab']
     freqs = zip(vocab_3, np.array(count_mat_3.astype(bool).sum(axis=0)).flatten())
-    #freqs = sorted(freqs, key=lambda x: -x[1])#[8000000:] # manually adjust this number to calibrate the amount of retrieved paths
+    freqs = sorted(freqs, key=lambda x: -x[1])#[8000000:] # manually adjust this number to calibrate the amount of retrieved paths
     trigram_list, trigram_idx_list = [], []
     while len(trigram_list) < 200:
         trigram = random.choice(freqs)[0]

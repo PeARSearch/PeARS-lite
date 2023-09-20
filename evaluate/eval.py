@@ -1,7 +1,16 @@
+import argparse
 import os
 import sys
 
-persona = sys.argv[1]
+ap = argparse.ArgumentParser()
+ap.add_argument("persona", help="Persona name")
+ap.add_argument("--query_dir", default="./data/query")
+ap.add_argument("--pod", default="home", help="PeARS pod name (keyword)")
+args = ap.parse_args()
 
-os.system('python ./search.py '+ persona)
-os.system('python ./score_res.py '+ persona)
+persona = args.persona
+query_dir = args.query_dir
+pod = args.pod
+
+os.system(f"python ./search.py {persona} --query_dir {query_dir} --pod {pod}")
+os.system(f"python ./score_res.py {persona} --query_dir {query_dir}")
