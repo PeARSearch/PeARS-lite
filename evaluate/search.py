@@ -13,7 +13,7 @@ def search_queries(query_file, pod="home"):
 
     results = []
     for q in tqdm(queries):
-        url = 'http://localhost:9090?q=' + str(q).replace(' ', '+')
+        url = 'http://localhost:9090'
         params = {
             "q": q.replace(" ", "+"), # TODO check  if conversion ' ' -> '+' is not done already automatically?
             "pods": pod
