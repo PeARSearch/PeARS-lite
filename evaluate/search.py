@@ -15,7 +15,7 @@ def search_queries(query_file, pod="home"):
     for q in tqdm(queries):
         url = 'http://localhost:9090'
         params = {
-            "q": q.replace(" ", "+"), # TODO check  if conversion ' ' -> '+' is not done already automatically?
+            "q": q,
             "pods": pod
         }
         try:
