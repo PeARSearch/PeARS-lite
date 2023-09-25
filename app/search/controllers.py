@@ -43,6 +43,10 @@ def user():
     access_token = request.cookies.get('OMD_SESSION_ID')  
     if not access_token:
         return render_template('search/anonymous.html')
+    data = {'action': 'getUserInfo', 'session_id': access_token}
+    resp = requests.post(url, data=data)
+    username = resp.json()['username']
+
     results = []
     if Urls.query.count() == 0:
         init_podsum()
@@ -56,7 +60,8 @@ def user():
         results = []
         query = query.lower()
         pears = ['0.0.0.0']
-        results, pods = score_pages.run(query, pears, url_filter=['http://localhost:9090/static/']) #TODO: replace filter with correct OMD endpoint
+        #results, pods = score_pages.run(query, pears, url_filter=['http://localhost:9090/static/']) #TODO: replace filter with correct OMD endpoint
+        results, pods = score_pages.run(query, pears, url_filter=[ join('https://demo.onmydisk.net/',username), 'http://localhost:9090/static/']) #TODO: replace filter with correct OMD endpoint
         print(results)
         r = app.make_response(jsonify(results))
         r.mimetype = "application/json"
@@ -77,7 +82,8 @@ def anonymous():
         results = []
         query = query.lower()
         pears = ['0.0.0.0']
-        results, pods = score_pages.run(query, pears, url_filter=[]) #TODO: replace filter with correct OMD endpoint
+        #results, pods = score_pages.run(query, pears, url_filter=[]) #TODO: replace filter with correct OMD endpoint
+        results, pods = score_pages.run(query, pears, url_filter=[' https://demo.onmydisk.net/shared'])
         print(results)
         r = app.make_response(jsonify(results))
         r.mimetype = "application/json"
@@ -92,7 +98,8 @@ def index():
     if not access_token:
         return render_template('search/anonymous.html')
     else:
-        url = 'http://localhost:9191/api' #TODO: change URL to OMD endpoint
+        #url = 'http://localhost:9191/api' #TODO: change URL to OMD endpoint
+        url = ' https://demo.onmydisk.net/'
         data = {'action': 'getUserInfo', 'session_id': access_token}
         resp = requests.post(url, data=data)
         username = resp.json()['username']
@@ -118,7 +125,8 @@ def login():
         username = request.form.get('username', '', type=str)
         password = request.form.get('password', '', type=str)
         # send authorization message to on my disk
-        url = 'http://localhost:9191/api' #TODO: change URL to OMD endpoint
+        #url = 'http://localhost:9191/api' #TODO: change URL to OMD endpoint
+        url = ' https://demo.onmydisk.net/'
         data = {'action': 'signin', 'username': username, 'password': password}
         user_info = requests.post(url, data=data)
         access_token = user_info.cookies.get('OMD_SESSION_ID')
@@ -141,7 +149,8 @@ def login():
 def logout():
     access_token = request.cookies.get('OMD_SESSION_ID')
     print(access_token)
-    url = 'http://localhost:9191/api' #TODO: change URL to OMD endpoint
+    #url = 'http://localhost:9191/api' #TODO: change URL to OMD endpoint
+    url = ' https://demo.onmydisk.net/'
     data = {'action': 'signout', 'session_id': access_token}
     logout_confirmation = requests.post(url, data=data)
     # Create a new response object
