@@ -25,7 +25,7 @@ def tokenize_text(lang, text):
 
 
 def compute_vec(lang, text, pod_m):
-    v = vectorize_scale(lang, text, 5, 500) #log prob power 5, top words 100
+    v = vectorize_scale(lang, text, 5, 10000) #log prob power 5, top words 100
     pod_m = vstack((pod_m,csr_matrix(v)))
     print("VEC",v,pod_m.shape)
     return pod_m
@@ -68,23 +68,26 @@ def compute_vectors(target_url, keyword, lang):
 def compute_vectors_local_docs(target_url, title, snippet, description, doc, keyword, lang):
     cc = False
     pod_m = load_npz(join(pod_dir,keyword+'.npz'))
-    if not db.session.query(Urls).filter_by(title=title).all():
-        print("Computing vectors for", target_url, "(",keyword,")",lang)
-        u = Urls(url=target_url)
-        text = title + " " + description + " " + doc
-        #print(text)
-        text = tokenize_text(lang, text)
-        pod_m = compute_vec(lang, text, pod_m)
-        u.title = title
-        u.snippet = snippet
-        u.description = description[:100]
-        u.vector = str(pod_m.shape[0]-1)
-        u.keyword = keyword
-        u.pod = keyword
-        u.cc = cc
-        db.session.add(u)
-        db.session.commit()
-        save_npz(join(pod_dir,keyword+'.npz'),pod_m)
+    f = open(join(pod_dir,'corpus.tok'),'a')
+    #if not db.session.query(Urls).filter_by(title=title).all():
+    print("Computing vectors for", target_url, "(",keyword,")",lang)
+    u = Urls(url=target_url)
+    text = title + " " + description + " " + doc
+    #print(text)
+    text = tokenize_text(lang, text)
+    f.write('\n\n'+title+'\n')
+    f.write(text)
+    pod_m = compute_vec(lang, text, pod_m)
+    u.title = title
+    u.snippet = snippet
+    u.description = description[:100]
+    u.vector = str(pod_m.shape[0]-1)
+    u.keyword = keyword
+    u.pod = keyword
+    u.cc = cc
+    db.session.add(u)
+    db.session.commit()
+    save_npz(join(pod_dir,keyword+'.npz'),pod_m)
     podsum = np.sum(pod_m, axis=0)
     return True, podsum
 

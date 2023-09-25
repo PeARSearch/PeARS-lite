@@ -40,6 +40,9 @@ class LoginForm(FlaskForm):
 
 @search.route('/user', methods=['POST','GET'])
 def user():  
+    access_token = request.cookies.get('OMD_SESSION_ID')  
+    if not access_token:
+        return render_template('search/anonymous.html')
     results = []
     if Urls.query.count() == 0:
         init_podsum()
@@ -49,10 +52,11 @@ def user():
         LOG.info("No query")
         return render_template("search/user.html")
     else:
+
         results = []
         query = query.lower()
         pears = ['0.0.0.0']
-        results, pods = score_pages.run(query, pears)
+        results, pods = score_pages.run(query, pears, url_filter=['http://localhost:9090/static/']) #TODO: replace filter with correct OMD endpoint
         print(results)
         r = app.make_response(jsonify(results))
         r.mimetype = "application/json"
@@ -73,7 +77,7 @@ def anonymous():
         results = []
         query = query.lower()
         pears = ['0.0.0.0']
-        results, pods = score_pages.run(query, pears)
+        results, pods = score_pages.run(query, pears, url_filter=[]) #TODO: replace filter with correct OMD endpoint
         print(results)
         r = app.make_response(jsonify(results))
         r.mimetype = "application/json"
@@ -92,7 +96,13 @@ def index():
         data = {'action': 'getUserInfo', 'session_id': access_token}
         resp = requests.post(url, data=data)
         username = resp.json()['username']
-        return render_template('search/user.html', username=username)
+        # Create a new response object
+        resp_frontend = make_response(render_template( 'search/user.html', welcome="Welcome "+username))
+        # Transfer the cookies from backend response to frontend response
+        for name, value in request.cookies.items():
+            print("SETTING COOKIE:",name,value)
+            resp_frontend.set_cookie(name, value, samesite='Lax')
+        return resp_frontend
 
 
 
@@ -110,14 +120,31 @@ def login():
         # send authorization message to on my disk
         url = 'http://localhost:9191/api' #TODO: change URL to OMD endpoint
         data = {'action': 'signin', 'username': username, 'password': password}
-        resp = requests.post(url, data=data)
-        access_token = resp.cookies.get('OMD_SESSION_ID')
-        print(resp.json())
-        data = {'action': 'getUserInfo', 'session_id': access_token}
-        resp = requests.post(url, data=data)
-        username = resp.json()['username']
-        return render_template('search/user.html', welcome="Welcome "+username)
+        user_info = requests.post(url, data=data)
+        access_token = user_info.cookies.get('OMD_SESSION_ID')
+        print(user_info.json())
+        print(user_info.cookies)
+        username = user_info.json()['username']
+        # Create a new response object
+        resp_frontend = make_response(render_template( 'search/user.html', welcome="Welcome "+username))
+        # Transfer the cookies from backend response to frontend response
+        for name, value in user_info.cookies.items():
+            print("SETTING COOKIE:",name,value)
+            resp_frontend.set_cookie(name, value, samesite='Lax')
+        return resp_frontend
+        #return render_template('search/user.html', welcome="Welcome "+username)
     else:
        msg = "Unknown user"
        return render_template( 'search/login.html', form=form, msg=msg)
 
+@search.route('/logout', methods=['GET','POST'])
+def logout():
+    access_token = request.cookies.get('OMD_SESSION_ID')
+    print(access_token)
+    url = 'http://localhost:9191/api' #TODO: change URL to OMD endpoint
+    data = {'action': 'signout', 'session_id': access_token}
+    logout_confirmation = requests.post(url, data=data)
+    # Create a new response object
+    resp_frontend = make_response(render_template( 'search/anonymous.html'))
+    resp_frontend.set_cookie('OMD_SESSION_ID', '', expires=0, samesite='Lax')
+    return resp_frontend

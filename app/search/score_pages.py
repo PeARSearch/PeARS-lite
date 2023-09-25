@@ -78,25 +78,23 @@ def score_docs(query, query_dist, kwd):
         if completeness_scores[url] >= 0.5:
             print(url,DS_scores[url], completeness_scores[url], title_scores[url])
         document_scores[url] = 0.5*DS_scores[url] + completeness_scores[url] + 0.1*title_scores[url]
-        #document_scores[url] = DS_scores[url]
-        if math.isnan(document_scores[url]) or completeness_scores[url] < 0.5:  # Check for potential NaN -- messes up with sorting in bestURLs.
+        #document_scores[url] = completeness_scores[url]
+        #if math.isnan(document_scores[url]) or completeness_scores[url] < 0.5:  # Check for potential NaN -- messes up with sorting in bestURLs.
+        if math.isnan(document_scores[url]) or completeness_scores[url] < 1:  # Check for potential NaN -- messes up with sorting in bestURLs.
             document_scores[url] = 0
     return document_scores
 
 
-def bestURLs(doc_scores):
+def bestURLs(doc_scores, url_filter):
     best_urls = []
-    netlocs_used = []  # Don't return 100 pages from the same site
     c = 0
-    for w in sorted(doc_scores, key=doc_scores.get, reverse=True):
-        loc = urlparse(w).netloc
+    for url in sorted(doc_scores, key=doc_scores.get, reverse=True):
         if c < 100:
-            if doc_scores[w] > 0:
-                #if netlocs_used.count(loc) < 10:
-                #print(w,doc_scores[w])
-                best_urls.append(w)
-                netlocs_used.append(loc)
-                c += 1
+            if doc_scores[url] > 0:
+                for f in url_filter:
+                    if f in url:
+                        best_urls.append(url)
+                        c += 1
             else:
                 break
         else:
@@ -118,12 +116,12 @@ def output(best_urls):
     return results, pods
 
 
-def run(query, pears):
+def run(query, pears, url_filter=None):
     document_scores = {}
     query, lang = get_language(query)
     q_dist = compute_query_vectors(query, lang)
     best_pods = score_pods(query, q_dist, lang)
     for pod in best_pods:
         document_scores.update(score_docs(query, q_dist, pod))
-    best_urls = bestURLs(document_scores)
+    best_urls = bestURLs(document_scores, url_filter)
     return output(best_urls)
