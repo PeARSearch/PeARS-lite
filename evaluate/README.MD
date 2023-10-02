@@ -1,3 +1,10 @@
+# Evaluate search performance on each persona
+This directory contains scripts and data for evaluating the search algorithms on
+each persona. Preprocessing dataset for each persona, and creating queries set also can
+be found here.
+
+## Usage of the scripts
+
 json_dataset.py and pdf2txt.py: used for preprocessing the raw datasets,
 for example: transform pdf and json format to text format.
 

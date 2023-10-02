@@ -2,6 +2,8 @@ import numpy as np
 import random
 import json
 import pathlib
+
+import setuptools.package_index
 from sklearn.feature_extraction.text import CountVectorizer
 from scipy.sparse import save_npz, load_npz
 import joblib
@@ -19,7 +21,7 @@ def construct_count_max(persona_name, n_gram=1, save_path=None):
     Returns:
         None
     """
-    path_list = sorted(pathlib.Path(f'./persona_preprocess/{persona_name}/').glob('*.txt'))
+    path_list = sorted(pathlib.Path(f'./data/persona_preprocess/{persona_name}/').glob('*.txt'))
     docs = []
     for path in path_list:
         with open(path) as f:
@@ -36,14 +38,15 @@ def select_query(persona_name, save_path):
     """
     Create pairs of query - file paths containing the query.
     """
-    path_list = np.array(sorted(pathlib.Path(f'./persona_preprocess/{persona_name}/').glob('*.txt')))
+    path_list = np.array(sorted(pathlib.Path(f'./data/persona_preprocess/{persona_name}/').glob('*.txt')))
 
     # 1000 1-token query
-    vectorizer_1 = joblib.load(f'./query/{persona_name}_vectorizer_1.pkl')
+    vectorizer_1 = joblib.load(f'./data/query/{persona_name}_vectorizer_1.pkl')
     count_mat_1 = vectorizer_1['count_mat']
     vocab_1 = vectorizer_1['vocab']
     freqs = zip(vocab_1, np.array(count_mat_1.astype(bool).sum(axis=0)).flatten())  # toarray
-    freqs = sorted(freqs, key=lambda x: -x[1])#[25000:] # manually adjust this number to calibrate the amount of retrieved paths
+    freqs = sorted(freqs, key=lambda x: -x[1])
+    freqs = freqs[int(0.1*len(freqs)):] # ignore 10% most frequent tokens, we don't want to have too common tokens in the query list
     one_token_list = [w for w, c in random.sample(freqs, 1000)]
     one_token_idx_list = []
     for query in one_token_list:
@@ -51,39 +54,61 @@ def select_query(persona_name, save_path):
         one_token_idx_list.append([p.name for p in path_list[idx_doc.nonzero()[0]]])
 
     # 300 2-token query
+    # two_token_list, two_token_idx_list = [], []
+    # while len(two_token_list) < 300:
+    #     two_random_tokens = [w for w, c in random.sample(freqs, 2)] # manually adjust this number to calibrate the amount of retrieved paths
+    #     idx_doc_1 = count_mat_1[:, np.where(vocab_1 == two_random_tokens[0])[0][0]]
+    #     idx_doc_2 = count_mat_1[:, np.where(vocab_1 == two_random_tokens[1])[0][0]]
+    #     intersection_idx = (np.array(idx_doc_1.todense()).flatten() *
+    #                         np.array(idx_doc_2.todense()).flatten()).nonzero()[0]
+    #     if len(intersection_idx):
+    #         two_token_list.append(' '.join(two_random_tokens))
+    #         two_token_idx_list.append([p.name for p in path_list[intersection_idx]])
+    #         if len(two_token_list) % 10 == 0: print(len(two_token_list) / 300 * 100)
     two_token_list, two_token_idx_list = [], []
     while len(two_token_list) < 300:
-        two_random_tokens = [w for w, c in random.sample(freqs, 2)] # manually adjust this number to calibrate the amount of retrieved paths
-        idx_doc_1 = count_mat_1[:, np.where(vocab_1 == two_random_tokens[0])[0][0]]
-        idx_doc_2 = count_mat_1[:, np.where(vocab_1 == two_random_tokens[1])[0][0]]
-        intersection_idx = (np.array(idx_doc_1.todense()).flatten() *
-                            np.array(idx_doc_2.todense()).flatten()).nonzero()[0]
-        if len(intersection_idx):
-            two_token_list.append(' '.join(two_random_tokens))
-            two_token_idx_list.append([p.name for p in path_list[intersection_idx]])
-            if len(two_token_list) % 10 == 0: print(len(two_token_list) / 300 * 100)
+        doc_id = random.choice(range(count_mat_1.shape[0])) # randomly select a document
+        two_tokens = random.sample(list(np.nonzero(count_mat_1[doc_id])[1]), 2) # randomly select 2 tokens in the document
+        if ' '.join(vocab_1[two_tokens]) not in two_token_list:
+            docs_with_token_1 = np.nonzero(count_mat_1[:, two_tokens[0]])[0] # search for all docs containing token 1
+            docs_with_token_2 = np.nonzero(count_mat_1[:, two_tokens[1]])[0] # search for all docs containing token 2
+            docs_with_2_tokens = set(docs_with_token_1).intersection(set(docs_with_token_2))
+            two_token_idx_list.append([p.name for p in path_list[list(docs_with_2_tokens)]])
+            two_token_list.append(' '.join(vocab_1[two_tokens]))
 
     # 200 3-token query
+    # three_token_list, three_token_idx_list = [], []
+    # while len(three_token_list) < 200:
+    #     three_random_tokens = [w for w, c in random.sample(freqs, 3)] # manually adjust this number to calibrate the amount of retrieved paths
+    #     idx_doc_1 = count_mat_1[:, np.where(vocab_1 == three_random_tokens[0])[0][0]]
+    #     idx_doc_2 = count_mat_1[:, np.where(vocab_1 == three_random_tokens[1])[0][0]]
+    #     idx_doc_3 = count_mat_1[:, np.where(vocab_1 == three_random_tokens[2])[0][0]]
+    #     intersection_idx = (np.array(idx_doc_1.todense()).flatten() *
+    #                         np.array(idx_doc_2.todense()).flatten() *
+    #                         np.array(idx_doc_3.todense()).flatten()).nonzero()[0]
+    #     if len(intersection_idx):
+    #         three_token_list.append(' '.join(three_random_tokens))
+    #         three_token_idx_list.append([p.name for p in path_list[intersection_idx]])
+    #         if len(three_token_list) % 10 == 0: print(len(three_token_list) / 200 * 100)
     three_token_list, three_token_idx_list = [], []
     while len(three_token_list) < 200:
-        three_random_tokens = [w for w, c in random.sample(freqs, 3)] # manually adjust this number to calibrate the amount of retrieved paths
-        idx_doc_1 = count_mat_1[:, np.where(vocab_1 == three_random_tokens[0])[0][0]]
-        idx_doc_2 = count_mat_1[:, np.where(vocab_1 == three_random_tokens[1])[0][0]]
-        idx_doc_3 = count_mat_1[:, np.where(vocab_1 == three_random_tokens[2])[0][0]]
-        intersection_idx = (np.array(idx_doc_1.todense()).flatten() *
-                            np.array(idx_doc_2.todense()).flatten() *
-                            np.array(idx_doc_3.todense()).flatten()).nonzero()[0]
-        if len(intersection_idx):
-            three_token_list.append(' '.join(three_random_tokens))
-            three_token_idx_list.append([p.name for p in path_list[intersection_idx]])
-            if len(three_token_list) % 10 == 0: print(len(three_token_list) / 200 * 100)
+        doc_id = random.choice(range(count_mat_1.shape[0]))  # randomly select a document
+        three_tokens = random.sample(list(np.nonzero(count_mat_1[doc_id])[1]), 3)  # randomly select 3 tokens in the document
+        if ' '.join(vocab_1[three_tokens]) not in three_token_list:
+            docs_with_token_1 = np.nonzero(count_mat_1[:, three_tokens[0]])[0]  # search for all docs containing token 1
+            docs_with_token_2 = np.nonzero(count_mat_1[:, three_tokens[1]])[0]  # search for all docs containing token 2
+            docs_with_token_3 = np.nonzero(count_mat_1[:, three_tokens[2]])[0]  # search for all docs containing token 3
+            docs_with_3_tokens = set.intersection(set(docs_with_token_1), set(docs_with_token_2), set(docs_with_token_3))
+            three_token_idx_list.append([p.name for p in path_list[list(docs_with_3_tokens)]])
+            three_token_list.append(' '.join(vocab_1[three_tokens]))
 
     # 300 2-gram query
-    vectorizer_2 = joblib.load(f'./query/{persona_name}_vectorizer_2.pkl')
+    vectorizer_2 = joblib.load(f'./data/query/{persona_name}_vectorizer_2.pkl')
     count_mat_2 = vectorizer_2['count_mat']
     vocab_2 = vectorizer_2['vocab']
     freqs = zip(vocab_2, np.array(count_mat_2.astype(bool).sum(axis=0)).flatten())
-    freqs = sorted(freqs, key=lambda x: -x[1])#[4000000:] # manually adjust this number to calibrate the amount of retrieved paths
+    freqs = sorted(freqs, key=lambda x: -x[1])
+    freqs = freqs[int(0.2*len(freqs)):] # ignore 20% most frequent tokens, we don't want to have too common tokens in the query list
     bigram_list, bigram_idx_list = [], []
     while len(bigram_list) < 300:
         bigram = random.choice(freqs)[0]
@@ -97,11 +122,12 @@ def select_query(persona_name, save_path):
                 bigram_idx_list.append([p.name for p in path_list[intersection_idx]])
 
     # 200 3-gram query
-    vectorizer_3 = joblib.load(f'./query/{persona_name}_vectorizer_3.pkl')
+    vectorizer_3 = joblib.load(f'./data/query/{persona_name}_vectorizer_3.pkl')
     count_mat_3 = vectorizer_3['count_mat']
     vocab_3 = vectorizer_3['vocab']
     freqs = zip(vocab_3, np.array(count_mat_3.astype(bool).sum(axis=0)).flatten())
-    freqs = sorted(freqs, key=lambda x: -x[1])#[8000000:] # manually adjust this number to calibrate the amount of retrieved paths
+    freqs = sorted(freqs, key=lambda x: -x[1])
+    freqs = freqs[int(0.3*len(freqs)):] # ignore 30% most frequent tokens, we don't want to have too common tokens in the query list
     trigram_list, trigram_idx_list = [], []
     while len(trigram_list) < 200:
         trigram = random.choice(freqs)[0]
@@ -131,6 +157,6 @@ if __name__ == '__main__':
 
     for n_gram in range(1, 4): # 1 2 3
         construct_count_max(persona_name=persona_name, n_gram=n_gram,
-                            save_path=f'./query/{persona_name}_vectorizer_{n_gram}.pkl')
+                            save_path=f'./data/query/{persona_name}_vectorizer_{n_gram}.pkl')
     select_query(persona_name=persona_name,
-                 save_path=f'./query/{persona_name}_query.json')
+                 save_path=f'./data/query/{persona_name}_query.json')
