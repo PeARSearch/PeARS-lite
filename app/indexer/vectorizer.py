@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-only
 
+from app import spm_vocab_path
 import numpy as np
 from scipy.sparse import csr_matrix, vstack
 from sklearn.feature_extraction.text import CountVectorizer
@@ -64,9 +65,7 @@ def read_n_encode_dataset(doc=None, vectorizer=None, logprobs=None, power=None, 
     return X
 
 def init_vectorizer(lang): 
-    spm_vocab = f"app/api/models/{lang}/{lang}wiki.vocab"
-    # spm_vocab = f"app/api/models/{lang}/news.vocab" # todo
-    vocab, reverse_vocab, logprobs = read_vocab(spm_vocab)
+    vocab, reverse_vocab, logprobs = read_vocab(spm_vocab_path)
     vectorizer = CountVectorizer(vocabulary=vocab, lowercase=True, token_pattern='[^ ]+')
     return vectorizer, logprobs
 

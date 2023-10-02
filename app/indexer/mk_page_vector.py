@@ -6,6 +6,7 @@ import re
 import numpy as np
 import string
 from app import db
+from app import spm_model_path
 from app.api.models import Urls, installed_languages, sp
 from app.indexer.htmlparser import extract_html
 from app.indexer.vectorizer import vectorize_scale
@@ -18,8 +19,7 @@ dir_path = dirname(dirname(realpath(__file__)))
 pod_dir = join(dir_path,'static','pods')
 
 def tokenize_text(lang, text):
-    sp.load(f'app/api/models/{lang}/{lang}wiki.model')
-    # sp.load(f'app/api/models/{lang}/news.model')
+    sp.load(spm_model_path)
     text = ' '.join([wp for wp in sp.encode_as_pieces(text.lower())])
     print("TOKENIZED",text)
     return text
