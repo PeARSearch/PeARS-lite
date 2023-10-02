@@ -29,7 +29,7 @@ SPDX-License-Identifier: AGPL-3.0-only
             <h4 class="card-title"><a href="{{result[0]}}">{{result[1]}}</a>
               {% if result[3] == True %}<img src="{{ url_for('static', filename='cc.png')}}" width='24px' />{% endif %}
             </h4>
-            <p class="card-text">{{result[2]}} ...</p>
+            <p class="card-text">{{result[2]|safe}} ...</p>
 	    <a href="{{result[0]}}" class="card-link">{{result[0]}}</a><br>
           </div>
           {% if result[4] != None %}

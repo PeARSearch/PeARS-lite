@@ -39,11 +39,6 @@ def index():
          go to the FAQ (link at the top of the page)."
         init_podsum()
 
-        print("Making 0 CSR matrix for pod summaries")
-        pod_summaries = np.zeros((1,10000))
-        pod_summaries = sparse.csr_matrix(pod_summaries)
-        sparse.save_npz(join(pod_dir,"podsum.npz"), pod_summaries)
-
     query = request.args.get('q')
     if not query:
         LOG.info("No query")
@@ -60,6 +55,10 @@ def index():
             pears = ['no pear found :(']
             #score_pages.ddg_redirect(query)
             results = [['','','No results found.','',None]]
+        for r in results:
+            for w in query.split():
+                r[2] = r[2].replace(w,'<b>'+w+'</b>')
+                r[2] = r[2].replace(w.title(),'<b>'+w.title()+'</b>')
 
         return render_template(
             'search/results.html', pears=pods, query=query, results=results)

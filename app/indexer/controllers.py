@@ -17,7 +17,7 @@ from flask import (Blueprint,
 from app.api.models import Urls
 from app.indexer.neighbours import neighbour_urls
 from app.indexer import mk_page_vector, spider
-from app.utils import readDocs, readUrls, readBookmarks, get_language
+from app.utils import readDocs, readUrls, readBookmarks, get_language, init_podsum
 from app.utils_db import pod_from_file
 from app.indexer.htmlparser import extract_links
 from os.path import dirname, join, realpath, isfile
@@ -45,10 +45,14 @@ def index():
 
 @indexer.route("/from_docs", methods=["POST"])
 def from_docs():
+    if Urls.query.count() == 0:
+        init_podsum()
+
     print("DOC FILE:", request.files['file_source'])
     if request.files['file_source'].filename[-4:] == ".txt":
         keyword = request.form['docs_keyword']
         keyword, lang = get_language(keyword)
+        print("LANGUAGE:",lang)
         file = request.files['file_source']
         file.save(join(dir_path, "docs_to_index.txt"))
         f = open(join(dir_path, "keyword_lang.txt"), 'w')
@@ -59,6 +63,9 @@ def from_docs():
 
 @indexer.route("/from_file", methods=["POST"])
 def from_file():
+    if Urls.query.count() == 0:
+        init_podsum()
+
     print("FILE:", request.files['file_source'])
     if request.files['file_source'].filename[-4:] == ".txt":
         file = request.files['file_source']
@@ -69,6 +76,9 @@ def from_file():
 
 @indexer.route("/from_bookmarks", methods=["POST"])
 def from_bookmarks():
+    if Urls.query.count() == 0:
+        init_podsum()
+
     print("FILE:", request.files['file_source'])
     if "bookmarks" in request.files['file_source'].filename:
         keyword = request.form['bookmark_keyword']
@@ -86,6 +96,9 @@ def from_bookmarks():
 
 @indexer.route("/from_url", methods=["POST"])
 def from_url():
+    if Urls.query.count() == 0:
+        init_podsum()
+
     if request.form['url'] != "":
         f = open(join(dir_path, "urls_to_index.txt"), 'w')
         u = request.form['url']
@@ -99,6 +112,9 @@ def from_url():
 
 @indexer.route("/from_share", methods=["POST"])
 def from_share():
+    if Urls.query.count() == 0:
+        init_podsum()
+
     print("FILE:", request.files['file_source'])
     if request.files['file_source'].filename[-6:] == ".share":
         file = request.files['file_source']
@@ -170,8 +186,8 @@ def progress_docs():
         c = 0
         for url, title, snippet in zip(urls, titles, snippets):
             print(url,title)
-            mk_page_vector.compute_vectors_local_docs(url, title, snippet, kwd)
-            pod_from_file(kwd, 'en')
+            success, podsum = mk_page_vector.compute_vectors_local_docs(url, title, snippet, kwd, lang)
+            pod_from_file(kwd, 'en', podsum)
             c += 1
             print('###', str(ceil(c / len(urls) * 100)))
             yield "data:" + str(ceil(c / len(urls) * 100)) + "\n\n"
