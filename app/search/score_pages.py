@@ -6,10 +6,11 @@ import webbrowser
 from urllib.parse import urlparse
 import re
 import math
+from pandas import read_csv
 from app.api.models import Urls, Pods
 from app import db
 from app.utils_db import (
-    get_db_url_snippet, get_db_url_title, get_db_url_cc, get_db_url_pod, get_db_url_notes)
+    get_db_url_snippet, get_db_url_title, get_db_url_doctype, get_db_url_pod, get_db_url_notes)
 
 from .overlap_calculation import score_url_overlap, generic_overlap, completeness
 from app.search import term_cosine
@@ -22,6 +23,7 @@ import numpy as np
 
 dir_path = dirname(dirname(realpath(__file__)))
 pod_dir = join(dir_path,'static','pods')
+raw_dir = join(dir_path,'static','toindex')
 
 def score(query, query_dist, kwd):
     URL_scores = {}
@@ -36,7 +38,7 @@ def score(query, query_dist, kwd):
         DS_scores[u.url] = m_cosines[0][int(u.vector)]
         completeness_scores[u.url] = m_completeness[0][int(u.vector)]
         #URL_scores[u.url] = score_url_overlap(query, u.url)
-        snippet_scores[u.url] = generic_overlap(query, u.snippet)
+        snippet_scores[u.url] = generic_overlap(query, u.title+' '+u.snippet)
     return DS_scores, completeness_scores, snippet_scores
 
 
@@ -57,12 +59,12 @@ def score_pods(query, query_dist, lang):
     print("POD SCORES:",pod_scores)
     '''If all scores are rubbish, search entire pod collection
     (we're desperate!)'''
-    if score_sum < 0.9: #FIX FOR FRUIT FLY VERSION
+    if max(pod_scores.values()) < 0.01:
         return list(pod_scores.keys())
     else:
         best_pods = []
         for k in sorted(pod_scores, key=pod_scores.get, reverse=True):
-            if len(best_pods) < 5: 
+            if len(best_pods) < 3: 
                 print("Appending pod",k)
                 best_pods.append(k)
             else:
@@ -75,11 +77,12 @@ def score_docs(query, query_dist, kwd):
     document_scores = {}  # Document scores
     DS_scores, completeness_scores, snippet_scores = score(query, query_dist, kwd)
     for url in list(DS_scores.keys()):
-        if completeness_scores[url] >= 0.75 and snippet_scores[url] >= 0.75:
-            print(url,DS_scores[url], completeness_scores[url], snippet_scores[url])
+        #print(url,completeness_scores[url], snippet_scores[url])
+        if completeness_scores[url] >= 0.3 and snippet_scores[url] >=0.5:
+            print(url,completeness_scores[url], snippet_scores[url])
         #document_scores[url] = 0.5*DS_scores[url] + completeness_scores[url] + 0.1*snippet_scores[url]
         document_scores[url] = completeness_scores[url] + snippet_scores[url]
-        if math.isnan(document_scores[url]) or completeness_scores[url] < 0.75 or snippet_scores[url] < 0.75:  # Check for potential NaN -- messes up with sorting in bestURLs.
+        if math.isnan(document_scores[url]) or completeness_scores[url] < 0.3 or snippet_scores[url] < 0.5:  # Check for potential NaN -- messes up with sorting in bestURLs.
             document_scores[url] = 0
     return document_scores
 
@@ -104,31 +107,64 @@ def bestURLs(doc_scores):
     return best_urls
 
 
-def ddg_redirect(query):
-    print("No suitable pages found.")
-    duckquery = ""
-    for w in query.rstrip('\n').split():
-        duckquery = duckquery + w + "+"
-    webbrowser.open("https://duckduckgo.com/?q=" + duckquery.rstrip('+'))
-    return
+def aggregate_csv(best_urls):
+    urls = list(set([u for u in best_urls if '.csv#' not in u]))
+    print(urls)
+    csvs = []
+    csv_names = list(set([re.sub('#.*','',u) for u in best_urls if '.csv#' in u]))
+    for csv_name in csv_names:
+        rows = [re.sub('.*\[','',u)[:-1] for u in best_urls if csv_name in u]
+        csvs.append([csv_name,rows])
+        print(rows)
+    return urls, csvs
+
+
+def assemble_csv_table(csv_name,rows):
+    df = read_csv(join(raw_dir,csv_name))
+    df_slice = df.iloc[rows].to_numpy()
+    table = "<table class='table table-striped'><thead><tr>"
+    for c in list(df.columns):
+        table+="<th scope='col'>"+c+"</th>"
+    table+="</tr></thead>"
+    for r in df_slice[:10]:
+        table+="<tr>"
+        for i in r:
+            table+="<td>"+str(i)+"</td>"
+        table+="</tr>"
+    table+="</table>"
+    return table
+
 
 
 def output(best_urls):
     results = []
     pods = []
-    if len(best_urls) > 0:
-        for u in best_urls:
-            results.append([
-                u,
-                get_db_url_title(u),
-                get_db_url_snippet(u),
-                get_db_url_cc(u),
-                get_db_url_notes(u),
-            ])
-            pod = get_db_url_pod(u)
-            if pod not in pods:
-                pods.append(pod)
-            # print(results)
+    if len(best_urls) == 0:
+        return results, pods
+    urls, csvs = aggregate_csv(best_urls)
+
+    for csv in csvs:
+        result = {}
+        result['url'] = csv[0]
+        result['title'] = csv[0]
+        result['snippet'] = assemble_csv_table(csv[0],csv[1])
+        result['doctype'] = 'csv'
+        result['notes'] = None
+        results.append(result)
+
+    for u in urls:
+        rec = Urls.query.filter(Urls.url == u).first()
+        result = {}
+        result['url'] = rec.url
+        result['title'] = rec.title
+        result['snippet'] = rec.snippet
+        result['doctype'] = rec.doctype
+        result['notes'] = rec.notes
+        results.append(result)
+        pod = rec.pod
+        if pod not in pods:
+            pods.append(pod)
+        # print(results)
     return results, pods
 
 
@@ -137,6 +173,7 @@ def run(query, pears):
     query, lang = get_language(query)
     q_dist = compute_query_vectors(query, lang)
     best_pods = score_pods(query, q_dist, lang)
+    print("BEST PODS:",best_pods)
     for pod in best_pods:
         document_scores.update(score_docs(query, q_dist, pod))
     best_urls = bestURLs(document_scores)

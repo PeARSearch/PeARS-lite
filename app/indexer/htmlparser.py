@@ -110,7 +110,7 @@ def extract_html(url):
             except Exception:
                 error = "ERROR extract_html: Failed to get CC status for", url, "..."
             if cc:
-                snippet = body_str[:200].replace(',', '-')
+                snippet = body_str[:400].replace(',', '-')
             else:
-                snippet = body_str[:100].replace(',', '-')
+                snippet = body_str[:300].replace(',', '-')
     return title, body_str, snippet, cc, error

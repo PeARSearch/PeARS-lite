@@ -30,9 +30,9 @@ def get_db_url_title(url):
     return url_title
 
 
-def get_db_url_cc(url):
-    url_cc = Urls.query.filter(Urls.url == url).first().cc
-    return url_cc
+def get_db_url_doctype(url):
+    url_doctype = Urls.query.filter(Urls.url == url).first().doctype
+    return url_doctype
 
 
 def get_db_url_notes(url):
@@ -80,9 +80,8 @@ def url_from_json(url, pod):
         u.vector = url['vector']
         u.freqs = url['freqs']
         u.snippet = url['snippet']
+        u.doctype = url['doctype']
         u.pod = pod
-        if url['cc']:
-            u.cc = True
         db.session.add(u)
         db.session.commit()
 

@@ -11,38 +11,12 @@ SPDX-License-Identifier: AGPL-3.0-only
   <div class="row pt-3">
     <div class="col-md-6">
       <div class="row">
-        <div class="col-md-12">
-
-          <div class="card">
-            <div class="card-header text-center"><b>Find a pod</b></div>
-            <div class="card-body">
-              <p>Looking for pods that may interest you? Enter some keywords below and your pear will try to find
-                appropriate
-                pods for
-                you, from 'official' online pods.</p>
-
-              <form accept-charset="UTF-8" enctype="multipart/form-data"
-                action="{{url_for('pod_finder.find_a_pod')}}">
-                <div class="input-group p-2">
-                  <span class="input-group-text">Keyword</span>
-                  <input type="text" class="form-control" placeholder="Enter some keywords" name='search-pod'
-                    id='search-pod'>
-                </div>
-            </div>
-            <div class="card-footer clearfix">
-              <span class="input-group-btn float-end">
-                <input id="submit_button" type="submit" class="btn btn-success" value="Find a pod">
-              </span>
-            </div>
-            </form>
-          </div>
-        </div>
 
         <div class="col-md-12 pt-3">
           <div class="card">
             <div class="card-header text-center"><b>Record pod from file</b></div>
             <div class="card-body">
-              <p>A friend sent you their pod? Add it to your pear! The file you input should be in .fh format.</p>
+              <p>A friend sent you their pod? Add it to your pear! The file you input should be in .share format.</p>
         
               <form method="POST" accept-charset="UTF-8" enctype="multipart/form-data"
                 action="{{url_for('pod_finder.subscribe_from_file')}}">
@@ -74,8 +48,7 @@ SPDX-License-Identifier: AGPL-3.0-only
                     {% for pod in pods %}
                     <div class="form-check">
                         <label class="toggle">
-                            <input type="checkbox" name="pods" id="{{pod[0]}}" value="{{pod[0]}}"> <span class="label-text">{{pod[0]}},
-                                '{{pod[1]}}'</span>
+                            <input type="checkbox" name="pods" id="{{pod[0]}}" value="{{pod[0]}}"> <span class="label-text">{{pod[0]}}</span>
                         </label>
                     </div>
                     {% endfor %}

@@ -9,14 +9,14 @@ SPDX-License-Identifier: AGPL-3.0-only
 <div class="container-full">
   <br><br>
   <div class="row">
-    <div class="col-md-10 p-3"
-      style="padding-left: 20px; display:flex;  flex-direction: row;  flex-wrap: wrap;  margin-bottom: 45px;">
+    <div class="col-md-10 p-3" style="padding-left: 20px; display:flex;  flex-direction: row;  flex-wrap: wrap;  margin-bottom: 45px;">
       {% for p in pears %}
-      <div
-        style="margin-right:20px; width:130px; height:130px; margin-bottom:20px; background-image:url('/static/example_snow_pod.png'); flex-shrink: 0;  position: relative;">
-        <br>
-        <p style="margin-left:10px"><b><a href="{{url_for('orchard.get_a_pod')}}?pod={{p[0]}}"
-              style="color:rgb(2, 111, 17)">{{p[0]}}<br>{{p[1]}}</a></b></p>
+      <div class="card bg-light mb-3" style="width: 18rem; margin:20px">
+	    <div class="card-header"><b>Pod: {{p[0]}}</b></div>
+            <div class="card-body">
+	    <p class="card-text">{{p[1]}} entries.</p>
+	    <a href="{{url_for('orchard.get_a_pod')}}?pod={{p[0]}}" class="btn btn-success">Share</a>
+      </div>
       </div>
       {% endfor %}
     </div>

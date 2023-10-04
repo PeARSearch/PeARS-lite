@@ -48,9 +48,8 @@ def compute_vectors(target_url, keyword, lang):
             u.keyword = keyword
             u.pod = keyword
             u.snippet = str(snippet)
-            if cc:
-                u.cc = True
-            print(u.url,u.title,u.vector,u.snippet,u.cc,u.pod)
+            u.doctype = 'url'
+            print(u.url,u.title,u.vector,u.snippet,u.pod)
             db.session.add(u)
             db.session.commit()
             save_npz(join(pod_dir,keyword+'.npz'),pod_m)
@@ -66,7 +65,7 @@ def compute_vectors(target_url, keyword, lang):
         return True, None
 
 
-def compute_vectors_local_docs(target_url, title, snippet, keyword, lang):
+def compute_vectors_local_docs(target_url, doctype, title, snippet, keyword, lang):
     cc = False
     pod_m = load_npz(join(pod_dir,keyword+'.npz'))
     if not db.session.query(Urls).filter_by(title=title).all():
@@ -84,8 +83,8 @@ def compute_vectors_local_docs(target_url, title, snippet, keyword, lang):
             u.snippet = str(snippet)
         else:
             u.snippet = u.title
-        u.cc = cc
-        print(u.url,u.title,u.vector,u.snippet,u.cc,u.pod)
+        u.doctype = doctype
+        print(u.url,u.doctype,u.title,u.vector,u.snippet,u.pod)
         db.session.add(u)
         db.session.commit()
         save_npz(join(pod_dir,keyword+'.npz'),pod_m)
@@ -101,5 +100,5 @@ def compute_query_vectors(query, lang):
     text = tokenize_text(lang, query)
     print(text)
     v = vectorize_scale(lang, text, 5, len(text)) #log prob power 5
-    print(csr_matrix(v))
+    #print(csr_matrix(v))
     return v

@@ -18,7 +18,7 @@ from scipy import sparse
 import re
 import logging
 from os.path import dirname, join, realpath, isfile
-from app.utils import init_podsum
+from app.utils import init_podsum, beautify_title, beautify_snippet
 
 LOG = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ def index():
             "search/index.html",
             internal_message=internal_message)
     else:
-        results = []
+        displayresults = []
         query = query.lower()
         pears = ['0.0.0.0']
         #results, pods = score_pages.run(query, pears, 'Black writers')
@@ -54,14 +54,14 @@ def index():
         if not results:
             pears = ['no pear found :(']
             #score_pages.ddg_redirect(query)
-            results = [['','','No results found.','',None]]
+            results = [{'url':None, 'title':None, 'snippet':'No pages found', 'doctype':None, 'notes':None}]
         for r in results:
-            for w in query.split():
-                r[2] = r[2].replace(w,'<b>'+w+'</b>')
-                r[2] = r[2].replace(w.title(),'<b>'+w.title()+'</b>')
+            r['title'] = beautify_title(r['title'], r['doctype'])
+            r['snippet'] = beautify_snippet(r['snippet'], query)
+            displayresults.append(list(r.values()))
 
         return render_template(
-            'search/results.html', pears=pods, query=query, results=results)
+            'search/results.html', pears=pods, query=query, results=displayresults)
 
 
 @search.route('/html_cache/<path:filename>')

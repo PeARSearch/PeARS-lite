@@ -7,7 +7,8 @@ import logging
 import joblib
 import numpy as np
 from scipy import sparse
-from math import ceil
+from pandas import read_csv
+from math import ceil, isnan
 from flask import (Blueprint,
                    flash,
                    request,
@@ -48,15 +49,16 @@ def from_docs():
     if Urls.query.count() == 0:
         init_podsum()
 
-    print("DOC FILE:", request.files['file_source'])
-    if request.files['file_source'].filename[-4:] == ".txt":
+    filename = request.files['file_source'].filename
+    print("DOC FILE:", filename)
+    if filename[-4:] == ".txt":
         keyword = request.form['docs_keyword']
         keyword, lang = get_language(keyword)
         print("LANGUAGE:",lang)
         file = request.files['file_source']
         file.save(join(dir_path, "docs_to_index.txt"))
-        f = open(join(dir_path, "keyword_lang.txt"), 'w')
-        f.write(keyword+'::'+lang+'\n')
+        f = open(join(dir_path, "file_source_info.txt"), 'w')
+        f.write(filename+'::'+keyword+'::'+lang+'\n')
         f.close()
         return render_template('indexer/progress_docs.html')
 
@@ -109,6 +111,22 @@ def from_url():
         f.close()
         return render_template('indexer/progress_url.html', url=u)
 
+@indexer.route("/from_csv", methods=["POST"])
+def from_csv():
+    if Urls.query.count() == 0:
+        init_podsum()
+    filename = request.files['file_source'].filename
+    print("FILE:", filename)
+    if filename[-4:] == ".csv":
+        keyword = request.form['csv_keyword']
+        keyword, lang = get_language(keyword)
+        print("LANGUAGE:",lang)
+        file = request.files['file_source']
+        file.save(join(dir_path, "spreadsheet_to_index.csv"))
+        f = open(join(dir_path, "file_source_info.txt"), 'w')
+        f.write(filename+'::'+keyword+'::'+lang+'\n')
+        f.close()
+        return render_template('indexer/progress_csv.html')
 
 @indexer.route("/from_share", methods=["POST"])
 def from_share():
@@ -171,11 +189,12 @@ def progress_docs():
     logging.debug("Running progress local file")
     def generate():
         kwd = ''
-        lang='en'
+        lang = 'en'
+        doctype = 'doc'
         urls, titles, snippets = readDocs(join(dir_path, "docs_to_index.txt"))
-        f = open(join(dir_path, "keyword_lang.txt"), 'r')
+        f = open(join(dir_path, "file_source_info.txt"), 'r')
         for line in f:
-            kwd,lang = line.rstrip('\n').split('::')
+            source, kwd, lang = line.rstrip('\n').split('::')
         pod_name = kwd+'.npz'
         pod_dir = join(dir_path,'static','pods')
         if not isfile(join(pod_dir,pod_name)):
@@ -186,11 +205,52 @@ def progress_docs():
         c = 0
         for url, title, snippet in zip(urls, titles, snippets):
             print(url,title)
-            success, podsum = mk_page_vector.compute_vectors_local_docs(url, title, snippet, kwd, lang)
+            success, podsum = mk_page_vector.compute_vectors_local_docs(url, doctype, title, snippet, kwd, lang)
             pod_from_file(kwd, 'en', podsum)
             c += 1
             print('###', str(ceil(c / len(urls) * 100)))
             yield "data:" + str(ceil(c / len(urls) * 100)) + "\n\n"
+
+    return Response(generate(), mimetype='text/event-stream')
+
+@indexer.route("/progress_csv")
+def progress_csv():
+    logging.debug("Running progress local csv")
+    def generate():
+        kwd = ''
+        lang = 'en'
+        doctype = 'csv'
+        df = read_csv(join(dir_path, "spreadsheet_to_index.csv"))
+        f = open(join(dir_path, "file_source_info.txt"), 'r')
+        for line in f:
+            source, kwd, lang = line.rstrip('\n').split('::')
+        pod_name = kwd+'.npz'
+        pod_dir = join(dir_path,'static','pods')
+        if not isfile(join(pod_dir,pod_name)):
+            print("Making 0 CSR matrix")
+            pod = np.zeros((1,10000))
+            pod = sparse.csr_matrix(pod)
+            sparse.save_npz(join(pod_dir,pod_name), pod)
+        c = 0
+        columns = list(df.columns)
+        table = df.to_numpy()
+        for i in range(table.shape[0]):
+            row = table[i]
+            print(row, type(row[0]))
+            if isinstance(row[0],float) and isnan(row[0]):
+                continue
+            title = source.replace('.csv','').title()+': '+row[0]+' ['+str(i)+']'
+            url = source+'#'+title
+            snippet = ''
+            for i in range(len(columns)):
+                value = str(row[i]).replace('/',' / ')
+                snippet+=str(columns[i])+': ' +value+' # '
+            print(url,title)
+            success, podsum = mk_page_vector.compute_vectors_local_docs(url, doctype, title, snippet, kwd, lang)
+            pod_from_file(kwd, lang, podsum)
+            c += 1
+            print('###', str(ceil(c / table.shape[0] * 100)))
+            yield "data:" + str(ceil(c / table.shape[0] * 100)) + "\n\n"
 
     return Response(generate(), mimetype='text/event-stream')
 

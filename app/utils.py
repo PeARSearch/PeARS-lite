@@ -78,7 +78,7 @@ def readBookmarks(bookmark_file, keyword):
             tag = n.text
             continue
         else:
-            if tag == keyword:
+            if tag.lower() == keyword.lower():
                 print(f'url = {n.get("href")}')
                 print(f'website name = {n.text}')
                 urls.append(n.get("href"))
@@ -233,3 +233,18 @@ def get_language(query):
         query = m.group(1)
         lang = m.group(2)
     return query, lang
+
+def beautify_title(title, doctype):
+    if doctype == 'csv':
+        title = '📈 CSV: '+title
+    if doctype == 'doc':
+        title = '📝 DOC: '+title
+    if doctype == 'url':
+        title = '🌏 URL: '+title
+    return title
+
+def beautify_snippet(snippet, query):
+    for w in query.split():
+        snippet = snippet.replace(w,'<b>'+w+'</b>')
+        snippet = snippet.replace(w.title(),'<b>'+w.title()+'</b>')
+    return snippet
