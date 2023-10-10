@@ -75,7 +75,7 @@ rm -fr app/static/pods/*npz
 ```
 
 
-## Usage
+## API Usage
 
 To provide a toy example, the installation contains sample documents in the static folder, organised in folders as follows:
 
