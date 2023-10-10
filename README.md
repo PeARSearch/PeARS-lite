@@ -9,7 +9,11 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 ## What and why
 
-This version of *PeARS Lite* is the one that will be integrated with the On My Disk framework.
+**What:** This branch of *PeARS-lite* is dedicated to the version of PeARS Lite used in the context of the project *On My Disk: search integration*. A description of the project can be found [on this page](https://www.ngisearch.eu/view/Events/FirstTenSearchersAnnounced). We are grateful to the Next Generation Internet programme of the European Commission for the financial support given to this project (see credits at the bottom of this README).
+
+**Why:** This PeARS version is tailored for use with the [On My Disk](https://onmydisk.com/) private cloud solution. It includes features for indexing and search over a user's decentralised filesystem.
+
+
 
 
 ## Installation and Setup
@@ -166,3 +170,10 @@ NB: again, if you would like to start from a clean install, do not forget to man
 rm -f app/static/db/app.db
 rm -fr app/static/pods/*npz
 ```
+
+## Credits
+
+
+<img src="https://pearsproject.org/images/NGI.png" width='400px'/>
+
+Funded by the European Union. Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or European Commission. Neither the European Union nor the granting authority can be held responsible for them. Funded within the framework of the NGI Search project under grant agreement No101069364.
