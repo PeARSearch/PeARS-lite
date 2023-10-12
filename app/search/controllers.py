@@ -44,7 +44,7 @@ def user():
     if not access_token:
         return render_template('search/anonymous.html')
     data = {'action': 'getUserInfo', 'session_id': access_token}
-    resp = requests.post(url, data=data)
+    resp = requests.post(url, data=data, headers={'Authorization': 'token:'+access_token})
     username = resp.json()['username']
 
     results = []
@@ -101,7 +101,7 @@ def index():
         #url = 'http://localhost:9191/api' #TODO: change URL to OMD endpoint
         url = ' https://demo.onmydisk.net/'
         data = {'action': 'getUserInfo', 'session_id': access_token}
-        resp = requests.post(url, data=data)
+        resp = requests.post(url, data=data, headers={'Authorization': 'token:'+access_token})
         username = resp.json()['username']
         # Create a new response object
         resp_frontend = make_response(render_template( 'search/user.html', welcome="Welcome "+username))
@@ -128,7 +128,7 @@ def login():
         #url = 'http://localhost:9191/api' #TODO: change URL to OMD endpoint
         url = ' https://demo.onmydisk.net/'
         data = {'action': 'signin', 'username': username, 'password': password}
-        user_info = requests.post(url, data=data)
+        user_info = requests.post(url, data=data, headers={'Authorization': 'token:'+access_token})
         access_token = user_info.cookies.get('OMD_SESSION_ID')
         print(user_info.json())
         print(user_info.cookies)
@@ -152,7 +152,7 @@ def logout():
     #url = 'http://localhost:9191/api' #TODO: change URL to OMD endpoint
     url = ' https://demo.onmydisk.net/'
     data = {'action': 'signout', 'session_id': access_token}
-    logout_confirmation = requests.post(url, data=data)
+    logout_confirmation = requests.post(url, data=data, headers={'Authorization': 'token:'+access_token})
     # Create a new response object
     resp_frontend = make_response(render_template( 'search/anonymous.html'))
     resp_frontend.set_cookie('OMD_SESSION_ID', '', expires=0, samesite='Lax')
