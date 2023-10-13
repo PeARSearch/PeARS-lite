@@ -43,6 +43,7 @@ def user():
     access_token = request.cookies.get('OMD_SESSION_ID')  
     if not access_token:
         return render_template('search/anonymous.html')
+    url = ' https://demo.onmydisk.net/'
     data = {'action': 'getUserInfo', 'session_id': access_token}
     resp = requests.post(url, json=data, headers={'Authorization': 'token:'+access_token})
     username = resp.json()['username']
