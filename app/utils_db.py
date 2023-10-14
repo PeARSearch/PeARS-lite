@@ -62,7 +62,7 @@ def get_db_pod_language(url):
 
 def compute_pod_summary(name):
     '''This function is very similar to 'self' in PeARS-pod'''
-    DS_vector = np.zeros(10000) 
+    DS_vector = np.zeros(20000) 
     #DS_vector = np.zeros(256) 
     for u in db.session.query(Urls).filter_by(pod=name).all():
         DS_vector += convert_to_array(u.vector)
@@ -106,7 +106,8 @@ def pod_from_json(pod, url):
 def pod_from_file(name, lang, podsum):
     # TODO: pods can't be named any old thing,
     # if they're going to be in localhost URLs
-    url = "http://0.0.0.0:9090/api/pods/" + name.replace(' ', '+') # change hard-coded port
+    #url = "http://0.0.0.0:9090/api/pods/" + name.replace(' ', '+') # change hard-coded port
+    url = "http://dev.localhost:9090/api/pods/" + name.replace(' ', '+') # change hard-coded port
     if not db.session.query(Pods).filter_by(url=url).all():
         p = Pods(url=url)
         p.name = name
