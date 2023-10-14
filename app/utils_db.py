@@ -62,7 +62,7 @@ def get_db_pod_language(url):
 
 def compute_pod_summary(name):
     '''This function is very similar to 'self' in PeARS-pod'''
-    DS_vector = np.zeros(8000) 
+    DS_vector = np.zeros(16000) 
     #DS_vector = np.zeros(256) 
     for u in db.session.query(Urls).filter_by(pod=name).all():
         DS_vector += convert_to_array(u.vector)

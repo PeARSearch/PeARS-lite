@@ -117,7 +117,7 @@ def init_podsum():
     Path(pod_dir).mkdir(exist_ok=True, parents=True)
     print("Making 0 CSR matrix for pod summaries")
     print("POD DIR",pod_dir)
-    pod_summaries = np.zeros((1,8000))
+    pod_summaries = np.zeros((1,16000))
     pod_summaries = csr_matrix(pod_summaries)
     save_npz(join(pod_dir,"podsum.npz"), pod_summaries)
 

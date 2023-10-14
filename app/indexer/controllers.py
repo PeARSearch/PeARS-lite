@@ -114,7 +114,7 @@ def progress_crawl():
             init_podsum()
         if not isfile(join(pod_dir,pod_name)):
             print("Making 0 CSR matrix")
-            pod = np.zeros((1,8000))
+            pod = np.zeros((1,16000))
             pod = sparse.csr_matrix(pod)
             sparse.save_npz(join(pod_dir,pod_name), pod)
 

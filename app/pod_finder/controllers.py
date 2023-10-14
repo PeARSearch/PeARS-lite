@@ -232,10 +232,10 @@ def unsubscribe():
             pod_entry.registered = False
             db.session.commit()
             print("Reverting CSR matrix to 0")
-            pod = np.zeros((1,10000))
+            pod = np.zeros((1,16000))
             pod = csr_matrix(pod)
             save_npz(join(pod_dir,pod_name+".npz"), pod)
             print("Reverting summary to 0")
-            pod_from_file(pod_name, lang, np.zeros(10000))
+            pod_from_file(pod_name, lang, np.zeros(16000))
     return render_template(
         'pod_finder/unsubscribe-success.html', pods=unsubscribed_pods)

@@ -129,7 +129,7 @@ def login():
         password = request.form.get('password', '', type=str)
         # send authorization message to on my disk
         #url = 'http://localhost:9191/api' #TODO: change URL to OMD endpoint
-        url = ' https://demo.onmydisk.net/'
+        url = ' https://demo.onmydisk.net/signin/'
         data = {'action': 'signin', 'username': username, 'password': password}
         user_info = requests.post(url, json=data) 
         if user_info == None:
@@ -157,7 +157,7 @@ def logout():
     access_token = request.cookies.get('OMD_SESSION_ID')
     print(access_token)
     #url = 'http://localhost:9191/api' #TODO: change URL to OMD endpoint
-    url = ' https://demo.onmydisk.net/'
+    url = ' https://demo.onmydisk.net/signout/'
     data = {'action': 'signout', 'session_id': access_token}
     logout_confirmation = requests.post(url, json=data, headers={'Authorization': 'token:'+access_token})
     # Create a new response object
