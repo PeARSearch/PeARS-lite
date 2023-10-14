@@ -131,7 +131,7 @@ def login():
         #url = 'http://localhost:9191/api' #TODO: change URL to OMD endpoint
         url = ' https://demo.onmydisk.net/'
         data = {'action': 'signin', 'username': username, 'password': password}
-        user_info = requests.post(url, json=data, headers={'Authorization': 'token:'+access_token})
+        user_info = requests.post(url, json=data) 
         access_token = user_info.cookies.get('OMD_SESSION_ID')
         print(user_info.json())
         print(user_info.cookies)
