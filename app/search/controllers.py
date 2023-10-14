@@ -95,6 +95,8 @@ def anonymous():
 @search.route('/', methods=['GET','POST'])
 @search.route('/index', methods=['GET','POST'])
 def index():
+    if Urls.query.count() == 0:
+        init_podsum()
     access_token = request.cookies.get('OMD_SESSION_ID')  
     if not access_token:
         return render_template('search/anonymous.html')
