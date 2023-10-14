@@ -25,7 +25,7 @@ pod_dir = join(dir_path,'static','pods')
 
 def score(query, query_dist, kwd):
     URL_scores = {}
-    title_scores = {}
+    snippet_scores = {}
     DS_scores = {}
     completeness_scores = {}
     pod_m = load_npz(join(pod_dir,kwd+'.npz'))
@@ -36,8 +36,8 @@ def score(query, query_dist, kwd):
         DS_scores[u.url] = m_cosines[0][int(u.vector)]
         completeness_scores[u.url] = m_completeness[0][int(u.vector)]
         #URL_scores[u.url] = score_url_overlap(query, u.url)
-        title_scores[u.url] = generic_overlap(query, u.title)
-    return DS_scores, completeness_scores, title_scores
+        snippet_scores[u.url] = generic_overlap(query, u.snippet)
+    return DS_scores, completeness_scores, snippet_scores
 
 
 def score_pods(query, query_dist, lang):
@@ -74,14 +74,14 @@ def score_pods(query, query_dist, lang):
 def score_docs(query, query_dist, kwd):
     '''Score documents for a query'''
     document_scores = {}  # Document scores
-    DS_scores, completeness_scores, title_scores = score(query, query_dist, kwd)
+    DS_scores, completeness_scores, snippet_scores = score(query, query_dist, kwd)
     for url in list(DS_scores.keys()):
         if completeness_scores[url] >= 0.5:
-            print(url,DS_scores[url], completeness_scores[url], title_scores[url])
-        document_scores[url] = 0.5*DS_scores[url] + completeness_scores[url] + 0.1*title_scores[url]
-        #document_scores[url] = completeness_scores[url]
-        #if math.isnan(document_scores[url]) or completeness_scores[url] < 0.5:  # Check for potential NaN -- messes up with sorting in bestURLs.
-        if math.isnan(document_scores[url]) or completeness_scores[url] < 1:  # Check for potential NaN -- messes up with sorting in bestURLs.
+            print(url,DS_scores[url], completeness_scores[url], snippet_scores[url])
+        #document_scores[url] = 0.5*DS_scores[url] + completeness_scores[url] + 0.1*snippet_scores[url]
+        document_scores[url] = completeness_scores[url] + snippet_scores[url]
+        if math.isnan(document_scores[url]) or completeness_scores[url] < 0.75:  # Check for potential NaN -- messes up with sorting in bestURLs.
+        #if math.isnan(document_scores[url]) or completeness_scores[url] < 1:  # Check for potential NaN -- messes up with sorting in bestURLs.
             document_scores[url] = 0
     return document_scores
 
