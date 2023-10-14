@@ -43,6 +43,7 @@ def user():
     access_token = request.cookies.get('OMD_SESSION_ID')  
     if not access_token:
         return render_template('search/anonymous.html')
+    #url = 'http://localhost:9191/api' #TODO: change URL to OMD endpoint
     url = ' https://demo.onmydisk.net/'
     data = {'action': 'getUserInfo', 'session_id': access_token}
     resp = requests.post(url, json=data, headers={'Authorization': 'token:'+access_token})
@@ -84,7 +85,7 @@ def anonymous():
         query = query.lower()
         pears = ['0.0.0.0']
         #results, pods = score_pages.run(query, pears, url_filter=[]) #TODO: replace filter with correct OMD endpoint
-        results, pods = score_pages.run(query, pears, url_filter=[' https://demo.onmydisk.net/shared'])
+        results, pods = score_pages.run(query, pears, url_filter=['https://demo.onmydisk.net/*/shared'])
         print(results)
         r = app.make_response(jsonify(results))
         r.mimetype = "application/json"
@@ -105,14 +106,21 @@ def index():
         url = ' https://demo.onmydisk.net/'
         data = {'action': 'getUserInfo', 'session_id': access_token}
         resp = requests.post(url, json=data, headers={'Authorization': 'token:'+access_token})
-        username = resp.json()['username']
-        # Create a new response object
-        resp_frontend = make_response(render_template( 'search/user.html', welcome="Welcome "+username))
-        # Transfer the cookies from backend response to frontend response
-        for name, value in request.cookies.items():
-            print("SETTING COOKIE:",name,value)
-            resp_frontend.set_cookie(name, value, samesite='Lax')
-        return resp_frontend
+        if resp.status_code == requests.codes.ok:
+            username = resp.json()['username']
+            # Create a new response object
+            resp_frontend = make_response(render_template( 'search/user.html', welcome="Welcome "+username))
+            # Transfer the cookies from backend response to frontend response
+            for name, value in request.cookies.items():
+                print("SETTING COOKIE:",name,value)
+                resp_frontend.set_cookie(name, value, samesite='Lax')
+            return resp_frontend
+        else:
+            # Create a new response object
+            resp_frontend = make_response(render_template( 'search/anonymous.html'))
+            resp_frontend.set_cookie('OMD_SESSION_ID', '', expires=0, samesite='Lax')
+            return resp_frontend
+
 
 
 
