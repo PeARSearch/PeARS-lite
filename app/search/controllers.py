@@ -85,7 +85,7 @@ def anonymous():
         query = query.lower()
         pears = ['0.0.0.0']
         #results, pods = score_pages.run(query, pears, url_filter=[]) #TODO: replace filter with correct OMD endpoint
-        results, pods = score_pages.run(query, pears, url_filter=['https://demo.onmydisk.net/*/shared'])
+        results, pods = score_pages.run(query, pears, url_filter=['https://demo.onmydisk.net/shared'])
         print(results)
         r = app.make_response(jsonify(results))
         r.mimetype = "application/json"
@@ -168,6 +168,10 @@ def logout():
     url = ' https://demo.onmydisk.net/signout/'
     data = {'action': 'signout', 'session_id': access_token}
     logout_confirmation = requests.post(url, json=data, headers={'Authorization': 'token:'+access_token})
+    if logout_confirmation.status_code == requests.codes.ok:
+        print("Logging out")
+    else:
+        print("Logged out")
     # Create a new response object
     resp_frontend = make_response(render_template( 'search/anonymous.html'))
     resp_frontend.set_cookie('OMD_SESSION_ID', '', expires=0, samesite='Lax')
