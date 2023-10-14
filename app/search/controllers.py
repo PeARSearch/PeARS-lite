@@ -132,18 +132,22 @@ def login():
         url = ' https://demo.onmydisk.net/'
         data = {'action': 'signin', 'username': username, 'password': password}
         user_info = requests.post(url, json=data) 
-        access_token = user_info.cookies.get('OMD_SESSION_ID')
-        print(user_info.json())
-        print(user_info.cookies)
-        username = user_info.json()['username']
-        # Create a new response object
-        resp_frontend = make_response(render_template( 'search/user.html', welcome="Welcome "+username))
-        # Transfer the cookies from backend response to frontend response
-        for name, value in user_info.cookies.items():
-            print("SETTING COOKIE:",name,value)
-            resp_frontend.set_cookie(name, value, samesite='Lax')
-        return resp_frontend
-        #return render_template('search/user.html', welcome="Welcome "+username)
+        if user_info == None:
+            msg = "Incorrect credentials"
+            return render_template( 'search/login.html', form=form, msg=msg)
+        else:
+            access_token = user_info.cookies.get('OMD_SESSION_ID')
+            print(user_info.json())
+            print(user_info.cookies)
+            username = user_info.json()['username']
+            # Create a new response object
+            resp_frontend = make_response(render_template( 'search/user.html', welcome="Welcome "+username))
+            # Transfer the cookies from backend response to frontend response
+            for name, value in user_info.cookies.items():
+                print("SETTING COOKIE:",name,value)
+                resp_frontend.set_cookie(name, value, samesite='Lax')
+            return resp_frontend
+            #return render_template('search/user.html', welcome="Welcome "+username)
     else:
        msg = "Unknown user"
        return render_template( 'search/login.html', form=form, msg=msg)
