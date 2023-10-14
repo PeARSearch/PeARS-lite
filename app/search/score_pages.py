@@ -45,6 +45,7 @@ def score_pods(query, query_dist, lang):
     pod_scores = {}
     score_sum = 0.0
     podsum = load_npz(join(pod_dir,'podsum.npz'))
+    print("DEBUG CDIST:",query_dist.shape, podsum.shape)
     m_cosines = 1 - distance.cdist(query_dist, podsum.todense(), 'cosine')
 
     pods = db.session.query(Pods).filter_by(language=lang).filter_by(registered=True).all()
