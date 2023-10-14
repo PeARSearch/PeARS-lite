@@ -25,7 +25,7 @@ def tokenize_text(lang, text):
 
 
 def compute_vec(lang, text, pod_m):
-    v = vectorize_scale(lang, text, 5, 10000) #log prob power 5, top words 100
+    v = vectorize_scale(lang, text, 5, 8000) #log prob power 5, top words 100
     pod_m = vstack((pod_m,csr_matrix(v)))
     print("VEC",v,pod_m.shape)
     return pod_m
@@ -39,22 +39,26 @@ def compute_vectors(target_url, keyword, lang):
         u = Urls(url=target_url)
         title, body_str, snippet, cc, error = extract_html(target_url)
         if error is None and snippet != '':
-            text = title + " " + body_str
-            text = tokenize_text(lang, text)
-            pod_m = compute_vec(lang, text, pod_m)
-            u.title = str(title)
-            u.vector = str(pod_m.shape[0]-1)
-            u.keyword = keyword
-            u.pod = keyword
-            u.snippet = str(snippet)
-            if cc:
-                u.cc = True
-            #print(u.url,u.title,u.vector,u.snippet,u.cc,u.pod)
-            db.session.add(u)
-            db.session.commit()
-            save_npz(join(pod_dir,keyword+'.npz'),pod_m)
-            podsum = np.sum(pod_m, axis=0)
-            return True, podsum
+            try:
+                text = title + " " + body_str
+                text = tokenize_text(lang, text)
+                pod_m = compute_vec(lang, text, pod_m)
+                u.title = str(title)
+                u.vector = str(pod_m.shape[0]-1)
+                u.keyword = keyword
+                u.pod = keyword
+                u.snippet = str(snippet)
+                if cc:
+                    u.cc = True
+                #print(u.url,u.title,u.vector,u.snippet,u.cc,u.pod)
+                db.session.add(u)
+                db.session.commit()
+                save_npz(join(pod_dir,keyword+'.npz'),pod_m)
+                podsum = np.sum(pod_m, axis=0)
+                return True, podsum
+            except:
+                print("ERROR: try statement failed while indexing url",target_url)
+                return False, None
         else:
             if snippet == '':
                 print("IGNORING URL: Snippet empty.")
