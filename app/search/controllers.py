@@ -41,8 +41,11 @@ class LoginForm(FlaskForm):
 
 @search.route('/user', methods=['POST','GET'])
 @cross_origin()
-def user():  
-    access_token = request.cookies.get('OMD_SESSION_ID')  
+def user():
+    access_token = request.headers.get('Token')
+    if not access_token:     
+        access_token = request.cookies.get('OMD_SESSION_ID')  
+    LOG.info(access_token)    
     if not access_token:
         return render_template('search/anonymous.html')
     #url = 'http://localhost:9191/api' #TODO: change URL to OMD endpoint
