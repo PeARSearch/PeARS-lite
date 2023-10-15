@@ -39,6 +39,7 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Submit')
 
 @search.route('/user', methods=['POST','GET'])
+@cross_origin()
 def user():  
     access_token = request.cookies.get('OMD_SESSION_ID')  
     if not access_token:
@@ -72,6 +73,7 @@ def user():
 
 
 @search.route('/anonymous', methods=['POST','GET'])
+@cross_origin()
 def anonymous():  
     results = []
     if Urls.query.count() == 0:
