@@ -5,6 +5,7 @@
 # Import flask dependencies
 from flask import Blueprint, request, render_template, send_from_directory, make_response
 from flask import current_app
+from flask_cors import cross_origin
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 
