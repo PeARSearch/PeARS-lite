@@ -105,7 +105,7 @@ def index():
         #url = 'http://localhost:9191/api' #TODO: change URL to OMD endpoint
         url = ' https://demo.onmydisk.net/'
         data = {'action': 'getUserInfo', 'session_id': access_token}
-        resp = requests.post(url, json=data, headers={'Authorization': 'token:'+access_token})
+        resp = requests.post(url, json=data, headers={'accept':'application/json', 'Authorization': 'token:'+access_token})
         if resp.status_code == requests.codes.ok:
             username = resp.json()['username']
             # Create a new response object
@@ -167,7 +167,7 @@ def logout():
     #url = 'http://localhost:9191/api' #TODO: change URL to OMD endpoint
     url = ' https://demo.onmydisk.net/signout/'
     data = {'action': 'signout', 'session_id': access_token}
-    logout_confirmation = requests.post(url, json=data, headers={'Authorization': 'token:'+access_token})
+    logout_confirmation = requests.post(url, json=data, headers={'accept':'application/json', 'Authorization': 'token:'+access_token})
     if logout_confirmation.status_code == requests.codes.ok:
         print("Logging out")
     else:
