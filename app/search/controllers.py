@@ -71,7 +71,6 @@ def user():
         results, pods = score_pages.run(query, pears, url_filter=[ join('https://demo.onmydisk.net/',username), 'http://localhost:9090/static/']) #TODO: replace filter with correct OMD endpoint
         print(results)
         r = app.make_response(jsonify(results))
-        r.headers['Access-Control-Allow-Origin'] = '*'
         r.mimetype = "application/json"
         return r
 
@@ -96,7 +95,6 @@ def anonymous():
         print(results)
         r = app.make_response(jsonify(results))
         r.mimetype = "application/json"
-        r.headers['Access-Control-Allow-Origin'] = '*'
         return r
 
 
