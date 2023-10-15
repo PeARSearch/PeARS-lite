@@ -5,6 +5,7 @@
 # Import flask dependencies
 from flask import Blueprint, request, render_template, send_from_directory, make_response
 from flask import current_app
+from flask_cors import cross_origin
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 
@@ -39,6 +40,7 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Submit')
 
 @search.route('/user', methods=['POST','GET'])
+@cross_origin()
 def user():  
     access_token = request.cookies.get('OMD_SESSION_ID')  
     if not access_token:
@@ -66,11 +68,13 @@ def user():
         results, pods = score_pages.run(query, pears, url_filter=[ join('https://demo.onmydisk.net/',username), 'http://localhost:9090/static/']) #TODO: replace filter with correct OMD endpoint
         print(results)
         r = app.make_response(jsonify(results))
+        r.headers['Access-Control-Allow-Origin'] = '*'
         r.mimetype = "application/json"
         return r
 
 
 @search.route('/anonymous', methods=['POST','GET'])
+@cross_origin()
 def anonymous():  
     results = []
     if Urls.query.count() == 0:
@@ -89,6 +93,7 @@ def anonymous():
         print(results)
         r = app.make_response(jsonify(results))
         r.mimetype = "application/json"
+        r.headers['Access-Control-Allow-Origin'] = '*'
         return r
 
 
@@ -105,7 +110,7 @@ def index():
         #url = 'http://localhost:9191/api' #TODO: change URL to OMD endpoint
         url = ' https://demo.onmydisk.net/'
         data = {'action': 'getUserInfo', 'session_id': access_token}
-        resp = requests.post(url, json=data, headers={'Authorization': 'token:'+access_token})
+        resp = requests.post(url, json=data, headers={'accept':'application/json', 'Authorization': 'token:'+access_token})
         if resp.status_code == requests.codes.ok:
             username = resp.json()['username']
             # Create a new response object
@@ -167,7 +172,7 @@ def logout():
     #url = 'http://localhost:9191/api' #TODO: change URL to OMD endpoint
     url = ' https://demo.onmydisk.net/signout/'
     data = {'action': 'signout', 'session_id': access_token}
-    logout_confirmation = requests.post(url, json=data, headers={'Authorization': 'token:'+access_token})
+    logout_confirmation = requests.post(url, json=data, headers={'accept':'application/json', 'Authorization': 'token:'+access_token})
     if logout_confirmation.status_code == requests.codes.ok:
         print("Logging out")
     else:
