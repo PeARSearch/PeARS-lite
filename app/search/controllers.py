@@ -90,6 +90,7 @@ def anonymous():
         print(results)
         r = app.make_response(jsonify(results))
         r.mimetype = "application/json"
+        r.headers['Access-Control-Allow-Origin'] = '*'
         return r
 
 
