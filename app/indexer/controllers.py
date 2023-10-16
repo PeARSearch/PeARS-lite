@@ -47,7 +47,6 @@ def index():
 
 @indexer.route("/from_crawl", methods=["GET","POST"])
 def from_crawl():
-    # keyword = "home" #hard-coded
     lang = "en" #hard-coded
 
     if request.method == "POST":
