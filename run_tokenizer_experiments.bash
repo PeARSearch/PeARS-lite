@@ -1,8 +1,8 @@
 # Script for running the evaluation pipeline with different tokenizers/settings
 
 # replace path by appropriate dirs
-export PERSONAS_DIR="../../datasets/personas"
-export MODEL_DIR="../tokenizer_experiments/output"
+export PERSONAS_DIR=$(realpath "../../datasets/personas")
+export MODEL_DIR=$(realpath "../tokenizer_experiments/output")
 
 # comments/uncomment as necessary
 export USE_SNIPPET_SCORES="true"
