@@ -12,6 +12,13 @@ from flask_admin import Admin
 # Import SQLAlchemy
 from flask_sqlalchemy import SQLAlchemy
 
+# Experimental SentencePiece versions -- call via subprocess instead of via Python library
+SPM_EXPERIMENTAL = os.environ.get("SPM_EXPERIMENTAL", "false").lower() == "true"
+SPM_EXPERIMENTAL_PATH = os.environ.get("SPM_EXPERIMENTAL_PATH", None)  # path to binaries of experimental SPM
+assert SPM_EXPERIMENTAL_PATH or not SPM_EXPERIMENTAL, "If SPM_EXPERIMENTAL is set to True, SPM_EXPERIMENTAL_PATH must be given"
+print(f"SPM_EXPERIMENTAL={SPM_EXPERIMENTAL}")
+print(f"SPM_EXPERIMENTAL_PATH={SPM_EXPERIMENTAL_PATH}")
+
 # Get paths to SentencePiece model and vocab
 lang = 'en' # hardcoded for now
 SPM_DEFAULT_VOCAB_PATH = f'app/api/models/{lang}/{lang}wiki.vocab'
@@ -19,13 +26,29 @@ spm_vocab_path = os.environ.get("SPM_VOCAB", SPM_DEFAULT_VOCAB_PATH)
 SPM_DEFAULT_MODEL_PATH = f'app/api/models/{lang}/{lang}wiki.model'
 spm_model_path = os.environ.get("SPM_MODEL", SPM_DEFAULT_MODEL_PATH)
 
-# Global variable: add EOF markers
+# Global variable: apply pre-tokenization rules
+do_pretokenization = os.environ.get("DO_PRETOK", "false").lower() == "true"
+pretok_path = os.environ.get("PRETOK_PATH", None)
+print(f"do_pretokenization={do_pretokenization}, use files from: {pretok_path}")
+
+# Global variable: add EOF symbol post-tokenization
+add_posttok_eof = os.environ.get("ADD_POSTTOK_EOF", "false").lower() == "true"
+print(f"add_posttok_eof={add_posttok_eof}")
+
+# Global variables: use snippet scoring system
+USE_SNIPPET_SCORES = os.environ.get("USE_SNIPPET_SCORES", "false").lower() == "true"
+SNIPPET_COMPLETENESS_THRESHOLD = float(os.environ.get("SNIPPET_COMPLETENESS_THRESHOLD", "0.75"))
+SNIPPET_OVERLAP_THRESHOLD = float(os.environ.get("SNIPPET_OVERLAP_THRESHOLD", "0.75"))
+print(f"USE_SNIPPET_SCORES={USE_SNIPPET_SCORES}, completeness threshold set to {SNIPPET_COMPLETENESS_THRESHOLD}, overlap threshold set to {SNIPPET_OVERLAP_THRESHOLD}")
+
 
 # Define vector size
 from app.indexer.vectorizer import read_vocab
 
 print(f"Loading SPM vocab from '{spm_vocab_path}' ...")
 vocab, _, _ = read_vocab(spm_vocab_path)
+if add_posttok_eof:
+    vocab.update({f"{w}▁": v + len(vocab) for w, v in vocab.items()})
 VEC_SIZE = len(vocab)
 
 def configure_logging():

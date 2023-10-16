@@ -26,15 +26,22 @@ def score_url_overlap(query, url):
     # print jaccard(set(query.lower()), set(url.lower()))
     return dice(set(query.lower()), set(url.lower()))
 
+def generic_overlap(q, s):
+    '''Overlap between query and another string'''
+    q = "".join(l for l in q if l not in string.punctuation)
+    s = "".join(l for l in s if l not in string.punctuation)
+    q_words = q.lower().split()
+    s_words = s.lower().split()
+    return len(list(set(q_words) & set(s_words))) / len(set(q_words))
 
-def generic_overlap(i1, i2):
-    '''Generic overlap calculation between two strings'''
+def dice_overlap(i1, i2):
+    '''Dice coefficient between two strings'''
     i1 = "".join(l for l in i1 if l not in string.punctuation)
     i2 = "".join(l for l in i2 if l not in string.punctuation)
     words1 = i1.lower().split()
     words2 = i2.lower().split()
     return dice(set(words1), set(words2))
-
+    
 def completeness(v, m):
     v = v.reshape(v.shape[1],)  # todo
     idx = np.where(v != 0)

@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-only
 
-from app import db
+from app import db, SPM_EXPERIMENTAL
 from app.utils import convert_to_array
 import numpy as np
 import configparser
@@ -11,7 +11,10 @@ from glob import glob
 from os.path import isdir, exists
 import sentencepiece as spm
 
-sp = spm.SentencePieceProcessor()
+if SPM_EXPERIMENTAL:
+    sp = None
+else:
+    sp = spm.SentencePieceProcessor()
 
 def get_installed_languages():
     installed_languages = []

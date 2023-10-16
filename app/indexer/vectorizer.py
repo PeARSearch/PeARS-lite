@@ -2,7 +2,8 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-only
 
-from app import spm_vocab_path
+from app import spm_vocab_path, add_posttok_eof
+from collections import OrderedDict
 import numpy as np
 from scipy.sparse import csr_matrix, vstack
 from sklearn.feature_extraction.text import CountVectorizer
@@ -103,6 +104,12 @@ def read_n_encode_dataset(doc=None, vectorizer=None, logprobs=None, power=None, 
 
 def init_vectorizer(lang): 
     vocab, reverse_vocab, logprobs = read_vocab(spm_vocab_path)
+    if add_posttok_eof:
+        vocab = OrderedDict(vocab) # make sure we can rely on the order
+        vocab.update({f"{w}▁": v + len(vocab) for w, v in vocab.items()})
+        reverse_vocab = {v: w for w, v in vocab.items()}
+        logprobs = logprobs + logprobs
+    
     vectorizer = CountVectorizer(vocabulary=vocab, lowercase=True, token_pattern='[^ ]+')
     return vectorizer, logprobs
 
