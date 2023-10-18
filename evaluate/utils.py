@@ -1,20 +1,21 @@
+import argparse
 import pathlib
 import random
 import string
 import nltk
 import re
 from nltk.tokenize import word_tokenize
-from nltk.stem import WordNetLemmatizer
+from nltk.stem import WordNetLemmatizer, SnowballStemmer
 import sys
 from tqdm import tqdm
 import pandas as pd
 
 
-def clean_texts(text):
+def clean_texts(text, language):
     """ Function to perform preprocessing """
     translator = str.maketrans(string.punctuation, ' ' * len(string.punctuation))
-    lemmatizer = WordNetLemmatizer()
-    stop_words = nltk.corpus.stopwords.words('english')
+    lemmatizer = WordNetLemmatizer() if language == "english" else None
+    stop_words = nltk.corpus.stopwords.words(language) if language in ["english", "french", "russian"] else []
 
     # Convert to lower cases
     text = text.lower()
@@ -23,11 +24,14 @@ def clean_texts(text):
     text = text.translate(translator)
 
     # Tokenization
-    tokens = word_tokenize(text)
-    # tokens = text.split()
+    if language in ["english", "french", "russian"]:
+        tokens = word_tokenize(text, language)
+    else:
+        tokens = text.split()
 
     # Lemmatization
-    tokens = [lemmatizer.lemmatize(token) for token in tokens]
+    if language == "english":
+        tokens = [lemmatizer.lemmatize(token) for token in tokens]
 
     # Remove stop words
     tokens = [token for token in tokens if token not in stop_words]
@@ -39,26 +43,36 @@ def clean_texts(text):
     return clean_text
 
 
-def preprocess_dataset(persona_name):
+def preprocess_dataset(in_dir, out_dir, persona_name, language, remove_unk_filename_chars):
     # for root, dirs, file_name in os.walk(f'./persona/{persona_name}'):
     #     for dir in dirs:
     #         # print(os.path.join(root  + '_preprocess', dir))
     #         pathlib.Path(os.path.join(root, dir).replace('persona', 'persona_preprocess')).mkdir(parents=True, exist_ok=True)
 
-    pathlib.Path(f'./data/persona_preprocess/{persona_name}').mkdir(parents=True, exist_ok=True)
-    path_list = pathlib.Path(f'./data/persona/{persona_name}/').glob('*.txt')
-    # print(path_list)
+    pathlib.Path(f'{out_dir}/{persona_name}').mkdir(parents=True, exist_ok=True)
+    path_list = pathlib.Path(f'{in_dir}/{persona_name}/').glob('*.txt')
     for path in tqdm(path_list):
-        text = clean_texts(str(path).split('/')[-1].replace('.txt', '').replace('_', ' ').replace('-', ' ')) + ' '
+        text = clean_texts(str(path).split('/')[-1].replace('.txt', '').replace('_', ' ').replace('-', ' '), language) + ' '
         with open(path) as f:
-            text += clean_texts(f.read())
-        new_file_name = re.sub(r'[^a-zA-Z0-9-_.]', '', path.name)
-        with open(f'./data/persona_preprocess/{persona_name}/' + new_file_name, 'w') as f:
+            text += clean_texts(f.read(), language)
+        if remove_unk_filename_chars:
+            new_file_name = re.sub(r'[^a-zA-Z0-9-_.]', '', path.name)
+        else:
+            new_file_name = path.name
+        with open(f'{out_dir}/{persona_name}/' + new_file_name, 'w') as f:
             f.write(text)
 
 
 if __name__ == '__main__':
-    preprocess_dataset(persona_name=sys.argv[1])
+    ap = argparse.ArgumentParser()
+    ap.add_argument("persona")
+    ap.add_argument("--data_in", default="./data/persona")
+    ap.add_argument("--data_out", default="./data/persona_preprocess")
+    ap.add_argument("--language", default="english")
+    ap.add_argument("--remove_unk_filename_chars", type=int, default=1)
+    args = ap.parse_args()
+
+    preprocess_dataset(in_dir=args.data_in, out_dir=args.data_out, persona_name=args.persona, language=args.language, remove_unk_filename_chars=args.remove_unk_filename_chars)
 
 
 
