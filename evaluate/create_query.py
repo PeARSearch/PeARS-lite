@@ -1,3 +1,4 @@
+import argparse
 import numpy as np
 import random
 import json
@@ -9,7 +10,7 @@ from scipy.sparse import save_npz, load_npz
 import joblib
 import sys
 
-def construct_count_max(persona_name, n_gram=1, save_path=None):
+def construct_count_max(data_in, persona_name, n_gram=1, save_path=None):
     """
     Constructs a count matrix based on persona-specific text data. Count n-gram. Then saves the results.
 
@@ -21,7 +22,7 @@ def construct_count_max(persona_name, n_gram=1, save_path=None):
     Returns:
         None
     """
-    path_list = sorted(pathlib.Path(f'./data/persona_preprocess/{persona_name}/').glob('*.txt'))
+    path_list = sorted(pathlib.Path(f'{data_in}/{persona_name}/').glob('*.txt'))
     docs = []
     for path in path_list:
         with open(path) as f:
@@ -34,14 +35,14 @@ def construct_count_max(persona_name, n_gram=1, save_path=None):
     joblib.dump(save_obj, save_path, compress=True)
 
 
-def select_query(persona_name, save_path):
+def select_query(data_in, query_dir, persona_name, save_path):
     """
     Create pairs of query - file paths containing the query.
     """
-    path_list = np.array(sorted(pathlib.Path(f'./data/persona_preprocess/{persona_name}/').glob('*.txt')))
+    path_list = np.array(sorted(pathlib.Path(f'{data_in}/{persona_name}/').glob('*.txt')))
 
     # 1000 1-token query
-    vectorizer_1 = joblib.load(f'./data/query/{persona_name}_vectorizer_1.pkl')
+    vectorizer_1 = joblib.load(f'{query_dir}/{persona_name}_vectorizer_1.pkl')
     count_mat_1 = vectorizer_1['count_mat']
     vocab_1 = vectorizer_1['vocab']
     freqs = zip(vocab_1, np.array(count_mat_1.astype(bool).sum(axis=0)).flatten())  # toarray
@@ -109,7 +110,7 @@ def select_query(persona_name, save_path):
             three_token_list.append(' '.join(vocab_1[three_tokens]))
 
     # 300 2-gram query
-    vectorizer_2 = joblib.load(f'./data/query/{persona_name}_vectorizer_2.pkl')
+    vectorizer_2 = joblib.load(f'{query_dir}/{persona_name}_vectorizer_2.pkl')
     count_mat_2 = vectorizer_2['count_mat']
     vocab_2 = vectorizer_2['vocab']
     freqs = zip(vocab_2, np.array(count_mat_2.astype(bool).sum(axis=0)).flatten())
@@ -128,7 +129,7 @@ def select_query(persona_name, save_path):
                 bigram_idx_list.append([p.name for p in path_list[intersection_idx]])
 
     # 200 3-gram query
-    vectorizer_3 = joblib.load(f'./data/query/{persona_name}_vectorizer_3.pkl')
+    vectorizer_3 = joblib.load(f'{query_dir}/{persona_name}_vectorizer_3.pkl')
     count_mat_3 = vectorizer_3['count_mat']
     vocab_3 = vectorizer_3['vocab']
     freqs = zip(vocab_3, np.array(count_mat_3.astype(bool).sum(axis=0)).flatten())
@@ -159,10 +160,15 @@ def select_query(persona_name, save_path):
 
 if __name__ == '__main__':
     random.seed(123)
-    persona_name = sys.argv[1]
+
+    ap = argparse.ArgumentParser()
+    ap.add_argument("persona")
+    ap.add_argument("--data_in", default="./data/persona_preprocess")
+    ap.add_argument("--query_dir", default="./data/query")
+    args = ap.parse_args()
 
     for n_gram in range(1, 4): # 1 2 3
-        construct_count_max(persona_name=persona_name, n_gram=n_gram,
-                            save_path=f'./data/query/{persona_name}_vectorizer_{n_gram}.pkl')
-    select_query(persona_name=persona_name,
-                 save_path=f'./data/query/{persona_name}_query.json')
+        construct_count_max(data_in=args.data_in, persona_name=args.persona, n_gram=n_gram,
+                            save_path=f'{args.query_dir}/{args.persona}_vectorizer_{n_gram}.pkl')
+    select_query(data_in=args.data_in, persona_name=args.persona, query_dir=args.query_dir,
+                 save_path=f'{args.query_dir}/{args.persona}_query.json')
