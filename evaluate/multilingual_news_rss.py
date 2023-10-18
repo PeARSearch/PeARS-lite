@@ -1,10 +1,16 @@
 import os
+import re
+import shutil
+import argparse
 import datetime
 import time
+import random
 
 import pandas as pd
 import feedparser
 from newsplease import NewsPlease
+
+random.seed(1996)
 
 MAX_ARCHIVE_SIZE = 1_000_000
 
@@ -241,7 +247,7 @@ def get_new_records(known_urls, language="it"):
     return pd.DataFrame(new_records)
 
 
-def main():
+def scrape():
 
     for language in ["sl", "ru", "fr"]:
         records_file = f"crawled_news/{language}.jsonl"
@@ -260,5 +266,38 @@ def main():
             log_f.write(f"[{time_stamp}] added {len(new_records)} records, new total: {len(final_records)}" + os.linesep)
 
 
+def process(sample_size=0):
+
+    for language in ["sl", "ru", "fr"]:
+        records_file = f"crawled_news/{language}.jsonl"
+        assert os.path.isfile(records_file)
+
+        if sample_size:
+            out_dir = f"crawled_news/txt_{language}_sample{sample_size}"
+        else:
+            out_dir = f"crawled_news/txt_{language}"
+        if os.path.isdir(out_dir):
+            shutil.rmtree(out_dir)
+        os.mkdir(out_dir)
+
+        records = pd.read_json(records_file, orient="records", lines=True)
+        if sample_size > 0:
+            records = records.sample(sample_size)
+
+        for idx, row in records.iterrows():
+            out_file = f"{out_dir}/{idx}_{row['feed']}{row['pubdate_timestamp']}.txt"
+            with open(out_file, "w", encoding="utf-8") as fo:
+                fo.write((row["title"] or "") + os.linesep)
+                fo.write((row["description"] or "") + os.linesep)
+                fo.write((row["body_text"] or "") + os.linesep)
+
 if __name__ == "__main__":
-    main()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("action", choices=["scrape", "process"])
+    ap.add_argument("--process_sample_size", type=int, default=0)
+    args = ap.parse_args()
+
+    if args.action == "scrape":
+        scrape()
+    else:
+        process(args.process_sample_size)
