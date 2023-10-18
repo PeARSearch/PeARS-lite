@@ -68,7 +68,10 @@ def select_query(persona_name, save_path):
     two_token_list, two_token_idx_list = [], []
     while len(two_token_list) < 300:
         doc_id = random.choice(range(count_mat_1.shape[0])) # randomly select a document
-        two_tokens = random.sample(list(np.nonzero(count_mat_1[doc_id])[1]), 2) # randomly select 2 tokens in the document
+        document_tokens = list(np.nonzero(count_mat_1[doc_id])[1])
+        if len(document_tokens) < 3:
+            continue
+        two_tokens = random.sample(document_tokens, 2) # randomly select 2 tokens in the document
         if ' '.join(vocab_1[two_tokens]) not in two_token_list:
             docs_with_token_1 = np.nonzero(count_mat_1[:, two_tokens[0]])[0] # search for all docs containing token 1
             docs_with_token_2 = np.nonzero(count_mat_1[:, two_tokens[1]])[0] # search for all docs containing token 2
@@ -93,7 +96,10 @@ def select_query(persona_name, save_path):
     three_token_list, three_token_idx_list = [], []
     while len(three_token_list) < 200:
         doc_id = random.choice(range(count_mat_1.shape[0]))  # randomly select a document
-        three_tokens = random.sample(list(np.nonzero(count_mat_1[doc_id])[1]), 3)  # randomly select 3 tokens in the document
+        document_tokens = list(np.nonzero(count_mat_1[doc_id])[1])
+        if len(document_tokens) < 4:
+            continue
+        three_tokens = random.sample(document_tokens, 3)  # randomly select 3 tokens in the document
         if ' '.join(vocab_1[three_tokens]) not in three_token_list:
             docs_with_token_1 = np.nonzero(count_mat_1[:, three_tokens[0]])[0]  # search for all docs containing token 1
             docs_with_token_2 = np.nonzero(count_mat_1[:, three_tokens[1]])[0]  # search for all docs containing token 2
