@@ -116,9 +116,5 @@ urls_to_index.txt
 pods_to_index.txt
 
 app/static/webmap/
-evaluate/crawled_news/logs_fr.txt
-evaluate/crawled_news/logs_ru.txt
-evaluate/crawled_news/logs_sl.txt
-evaluate/crawled_news/fr.jsonl
-evaluate/crawled_news/ru.jsonl
-evaluate/crawled_news/sl.jsonl
+evaluate/crawled_news/
+evaluate/crawled_news_archive/
