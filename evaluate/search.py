@@ -36,12 +36,19 @@ if __name__ == '__main__':
     ap.add_argument("persona", help="Persona name")
     ap.add_argument("--query_dir", default="./data/query")
     ap.add_argument("--pod", default="home", help="PeARS pod name (keyword)")
+    ap.add_argument("--filter_frequent_2_and_3_token_queries", action="store_true", default=False)
     args = ap.parse_args()
 
     persona_name = args.persona
     query_dir = args.query_dir
-    res = search_queries(f'{query_dir}/{persona_name}_query.json', pod=args.pod)
-    with open(f'{query_dir}/{persona_name}_wiki_search_results.json', 'w') as f:
+    if args.filter_frequent_2_and_3_token_queries:
+        query_file = f'{query_dir}/{persona_name}_ff23_query.json'
+        results_file = f'{query_dir}/{persona_name}_wiki_search_results_ff23.json'
+    else:
+        query_file = f'{query_dir}/{persona_name}_query.json'
+        results_file = f'{query_dir}/{persona_name}_wiki_search_results.json'
+    res = search_queries(query_file, pod=args.pod)
+    with open(results_file, 'w') as f:
         for row in res:
             json_str = json.dumps(row)
             f.write(json_str + '\n')

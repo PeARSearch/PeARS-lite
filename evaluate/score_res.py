@@ -81,12 +81,19 @@ if __name__ == '__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument("persona", help="Persona name")
     ap.add_argument("--query_dir", default="./data/query")
+    ap.add_argument("--filter_frequent_2_and_3_token_queries", action="store_true", default=False)
     args = ap.parse_args()
 
     persona_name = args.persona
     query_dir = args.query_dir
 
-    query_file = f'{query_dir}/{persona_name}_query.json'
+    if args.filter_frequent_2_and_3_token_queries:
+        query_file = f'{query_dir}/{persona_name}_ff23_query.json'
+        res_file = f'{query_dir}/{persona_name}_wiki_search_results_ff23.json'
+    else:
+        query_file = f'{query_dir}/{persona_name}_query.json'
+        res_file = f'{query_dir}/{persona_name}_wiki_search_results.json'
+
     res_file = f'{query_dir}/{persona_name}_wiki_search_results.json'
 
     precision_list, recall_list, f1_list, false_positives_list, false_negatives_list = \
@@ -128,6 +135,10 @@ if __name__ == '__main__':
     print("==================")
 
 
-    with open(f"{query_dir}/{persona_name}.errors.jsonl", "w", encoding="utf-8") as f:
+    error_file = f"{query_dir}/{persona_name}.errors.jsonl"
+    if args.filter_frequent_2_and_3_token_queries:
+        error_file = f"{query_dir}/{persona_name}_ff23.errors.jsonl"
+
+    with open(error_file, "w", encoding="utf-8") as f:
         for fp, fn in zip(false_positives_list, false_negatives_list):
             f.write(json.dumps({"false_positives": list(fp), "false_negatives": list(fn)}) + os.linesep)
