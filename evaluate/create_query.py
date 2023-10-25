@@ -35,7 +35,7 @@ def construct_count_max(data_in, persona_name, n_gram=1, save_path=None):
     joblib.dump(save_obj, save_path, compress=True)
 
 
-def select_query(data_in, query_dir, persona_name, save_path):
+def select_query(data_in, query_dir, persona_name, save_path, filter_frequent_2_and_3_token_queries=False):
     """
     Create pairs of query - file paths containing the query.
     """
@@ -47,6 +47,7 @@ def select_query(data_in, query_dir, persona_name, save_path):
     vocab_1 = vectorizer_1['vocab']
     freqs = zip(vocab_1, np.array(count_mat_1.astype(bool).sum(axis=0)).flatten())  # toarray
     freqs = sorted(freqs, key=lambda x: -x[1])
+    frequent_words_set = {w for w, f in freqs[:int(0.1*len(freqs))]}
     freqs = freqs[int(0.1*len(freqs)):] # ignore 10% most frequent tokens, we don't want to have too common tokens in the query list
     one_token_list = [w for w, c in random.sample(freqs, 1000)]
     one_token_idx_list = []
@@ -73,6 +74,10 @@ def select_query(data_in, query_dir, persona_name, save_path):
         if len(document_tokens) < 3:
             continue
         two_tokens = random.sample(document_tokens, 2) # randomly select 2 tokens in the document
+        if filter_frequent_2_and_3_token_queries:
+            if any(vocab_1[t] in frequent_words_set for t in two_tokens):
+                continue
+
         if ' '.join(vocab_1[two_tokens]) not in two_token_list:
             docs_with_token_1 = np.nonzero(count_mat_1[:, two_tokens[0]])[0] # search for all docs containing token 1
             docs_with_token_2 = np.nonzero(count_mat_1[:, two_tokens[1]])[0] # search for all docs containing token 2
@@ -101,6 +106,10 @@ def select_query(data_in, query_dir, persona_name, save_path):
         if len(document_tokens) < 4:
             continue
         three_tokens = random.sample(document_tokens, 3)  # randomly select 3 tokens in the document
+        if filter_frequent_2_and_3_token_queries:
+            if any(vocab_1[t] in frequent_words_set for t in three_tokens):
+                continue
+
         if ' '.join(vocab_1[three_tokens]) not in three_token_list:
             docs_with_token_1 = np.nonzero(count_mat_1[:, three_tokens[0]])[0]  # search for all docs containing token 1
             docs_with_token_2 = np.nonzero(count_mat_1[:, three_tokens[1]])[0]  # search for all docs containing token 2
@@ -165,10 +174,17 @@ if __name__ == '__main__':
     ap.add_argument("persona")
     ap.add_argument("--data_in", default="./data/persona_preprocess")
     ap.add_argument("--query_dir", default="./data/query")
+    ap.add_argument("--filter_frequent_2_and_3_token_queries", action="store_true", default=False)
     args = ap.parse_args()
 
     for n_gram in range(1, 4): # 1 2 3
         construct_count_max(data_in=args.data_in, persona_name=args.persona, n_gram=n_gram,
                             save_path=f'{args.query_dir}/{args.persona}_vectorizer_{n_gram}.pkl')
+    save_path = (
+        f'{args.query_dir}/{args.persona}_ff23_query.json'
+        if args.filter_frequent_2_and_3_token_queries
+        else f'{args.query_dir}/{args.persona}_query.json'
+    )
     select_query(data_in=args.data_in, persona_name=args.persona, query_dir=args.query_dir,
-                 save_path=f'{args.query_dir}/{args.persona}_query.json')
+                 filter_frequent_2_and_3_token_queries=args.filter_frequent_2_and_3_token_queries,
+                 save_path=save_path)
