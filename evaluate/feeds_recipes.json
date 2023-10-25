@@ -1,0 +1,39 @@
+{
+    "ru": {
+        "povarenok": "https://www.povarenok.ru/rss/recipes/",
+        "andychef": "https://andychef.ru/recipe/feed",
+        "fullspoon": "https://fullspoon.ru/feed/",
+        "cookarama": "https://cookorama.net/ru/rss",
+        "kulinariya123": "http://kulinariya123.blogspot.com/feeds/posts/default?alt=rss",
+        "kulinarliiblog": "https://kulinarniiblog.com/feed",
+        "gotovka": "https://gotovka.wordpress.com/feed",
+        "vkusnoblog": "http://vkusnoblog.blogspot.com/feeds/posts/default?alt=rss",
+        "jennysmile83": "https://jennysmile83.com/feed",
+        "herringinfurs": "http://herringinfurs.blogspot.com/feeds/posts/default?alt=rss",
+        "lady-cookery": "http://lady-cookery.blogspot.com/feeds/posts/default?alt=rss",
+        "lavrentieva-kitchen": "http://lavrentieva-kitchen.blogspot.com/feeds/posts/default?alt=rss",
+        "bagelandbeagle": "https://bagelandbeagle.wordpress.com/feed",
+        "ru-mickey": "http://ru-mickey.blogspot.com/feeds/posts/default?alt=rss",
+        "malilya-food": "http://malilya-food.blogspot.com/feeds/posts/default?alt=rss",
+        "krasotaizdorovieuyli": "https://krasotaizdorovieuyli.blogspot.com/feeds/posts/default?alt=rss",
+        "feminacook": "https://feminacook.wordpress.com/feed"
+
+    },
+    "sl": {
+        "gurmancekgal": "https://gurmancekgal.blogspot.com/feeds/posts/default?alt=rss",
+        "kodbakeugostima": "https://kodbakeugostima.blogspot.com/feeds/posts/default?alt=rss",
+        "kuhinjica-mignone": "https://kuhinjica-mignone.blogspot.com/feeds/posts/default?alt=rss",
+        "cookeatandsmile": "https://cookeatandsmile.wordpress.com/feed",
+        "kuhinjica": "https://kuhinjica.wordpress.com/feed",
+        "droznifrik": "https://droznifrik.wordpress.com/feed",
+        "ester-kuga": "https://ester-kuha.blogspot.com/feeds/posts/default?alt=rss",
+        "metameti": "https://metameti.wordpress.com/feed",
+        "scepecvanje": "https://scepecvanje.blogspot.com/feeds/posts/default?alt=rss",
+        "mojadarila": "https://mojadarila.blogspot.com/feeds/posts/default?alt=rss",
+        "theminuette": "https://theminuette.blogspot.com/feeds/posts/default?alt=rss",
+        "balgova": "https://balgova.blogspot.com/feeds/posts/default?alt=rss",
+        "recepti-eu": "https://www.recepti.eu.org/feeds/posts/default?alt=rss",
+        "natanjiru": "https://www.natanjiru.com/feeds/posts/default?alt=rss"
+    },
+    "fr": {}
+}
