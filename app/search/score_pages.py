@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 import re
 import math
 from app.api.models import Urls, Pods
-from app import db, SNIPPET_OVERLAP_THRESHOLD, SNIPPET_COMPLETENESS_THRESHOLD
+from app import db, SNIPPET_OVERLAP_THRESHOLD, SNIPPET_COMPLETENESS_THRESHOLD, CACHE_PODS, pod_cache
 from app.utils_db import (
     get_db_url_snippet, get_db_url_title, get_db_url_cc, get_db_url_pod, get_db_url_notes)
 
@@ -23,6 +23,19 @@ import numpy as np
 dir_path = dirname(dirname(realpath(__file__)))
 pod_dir = join(dir_path,'static','pods')
 
+def _load_pod(pod_file):
+    if not CACHE_PODS:
+        return load_npz(pod_file)
+    
+    if pod_file in pod_cache:
+        print(f"Loading cached pod... {pod_file}")
+        return pod_cache[pod_file]
+    
+    pod = load_npz(pod_file)
+    pod_cache[pod_file] = pod
+    return pod
+
+
 def score(query, query_dist, kwd, overlap_setting="title_dice"):
 
     # refers to the changes in https://github.com/PeARSearch/PeARS-lite/commit/1ba99961ebe0704a4cff66b26c97f36d07911602
@@ -35,7 +48,8 @@ def score(query, query_dist, kwd, overlap_setting="title_dice"):
     snippet_scores = {}
     DS_scores = {}
     completeness_scores = {}
-    pod_m = load_npz(join(pod_dir,kwd+'.npz'))
+    # pod_m = load_npz(join(pod_dir,kwd+'.npz'))
+    pod_m = _load_pod(join(pod_dir,kwd+'.npz'))
     m_cosines = 1 - distance.cdist(query_dist, pod_m.todense(), 'cosine')
     m_completeness = completeness(query_dist, pod_m.todense())
 

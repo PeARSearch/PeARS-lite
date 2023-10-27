@@ -41,6 +41,10 @@ SNIPPET_COMPLETENESS_THRESHOLD = float(os.environ.get("SNIPPET_COMPLETENESS_THRE
 SNIPPET_OVERLAP_THRESHOLD = float(os.environ.get("SNIPPET_OVERLAP_THRESHOLD", "0.75"))
 print(f"USE_SNIPPET_SCORES={USE_SNIPPET_SCORES}, completeness threshold set to {SNIPPET_COMPLETENESS_THRESHOLD}, overlap threshold set to {SNIPPET_OVERLAP_THRESHOLD}")
 
+# Global variable: cache pods
+CACHE_PODS = os.environ.get("CACHE_PODS", "false").lower() == "true"
+pod_cache = {}
+print(f"CACHE_PODS={CACHE_PODS}")
 
 # Define vector size
 from app.indexer.vectorizer import read_vocab
