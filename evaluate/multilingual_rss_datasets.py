@@ -28,7 +28,9 @@ def get_new_records(known_urls, domain="news", language="it"):
     with open(f"feeds_{domain}.json", encoding="utf-8") as f:
         feeds_to_watch = json.load(f)
 
-    for feed_name, feed_link in feeds_to_watch[language].items():
+    feeds_and_links = list(feeds_to_watch[language].items())
+    random.shuffle(feeds_and_links)
+    for feed_name, feed_link in feeds_and_links:
         if feed_link.startswith("COLLECTION::"):
             collection_file = feed_link.replace("COLLECTION::", "")
             with open(collection_file, "r") as f:
