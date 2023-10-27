@@ -94,8 +94,6 @@ if __name__ == '__main__':
         query_file = f'{query_dir}/{persona_name}_query.json'
         res_file = f'{query_dir}/{persona_name}_wiki_search_results.json'
 
-    res_file = f'{query_dir}/{persona_name}_wiki_search_results.json'
-
     precision_list, recall_list, f1_list, false_positives_list, false_negatives_list = \
         score_precision_recall_f1(
             query_file=query_file,
