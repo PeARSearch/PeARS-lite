@@ -116,8 +116,7 @@ def _tokenize_via_system_call(text):
 
 
 def tokenize_text(lang, text):
-    if not SPM_EXPERIMENTAL:
-        sp.load(spm_model_path)
+
     if do_pretokenization:
         text = pretokenize(text)            
 
