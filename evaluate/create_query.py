@@ -10,7 +10,7 @@ from scipy.sparse import save_npz, load_npz
 import joblib
 import sys
 
-def construct_count_max(data_in, persona_name, n_gram=1, save_path=None):
+def construct_count_max(data_in, persona_name, n_gram=1, save_path=None, skip_tokenization=False):
     """
     Constructs a count matrix based on persona-specific text data. Count n-gram. Then saves the results.
 
@@ -28,7 +28,10 @@ def construct_count_max(data_in, persona_name, n_gram=1, save_path=None):
         with open(path) as f:
             docs.append(f.read().strip())
 
-    vectorizer = CountVectorizer(ngram_range=(n_gram, n_gram))
+    if skip_tokenization:
+        vectorizer = CountVectorizer(ngram_range=(n_gram, n_gram), tokenizer=lambda s: s.split())
+    else:   
+        vectorizer = CountVectorizer(ngram_range=(n_gram, n_gram))
     count_mat = vectorizer.fit_transform(docs)
     save_obj = {'vocab': vectorizer.get_feature_names_out(),
                 'count_mat': count_mat}
@@ -175,16 +178,19 @@ if __name__ == '__main__':
     ap.add_argument("--data_in", default="./data/persona_preprocess")
     ap.add_argument("--query_dir", default="./data/query")
     ap.add_argument("--filter_frequent_2_and_3_token_queries", action="store_true", default=False)
+    ap.add_argument("--skip_sklearn_tokenization", action="store_true", default=False)
     args = ap.parse_args()
 
     for n_gram in range(1, 4): # 1 2 3
         construct_count_max(data_in=args.data_in, persona_name=args.persona, n_gram=n_gram,
-                            save_path=f'{args.query_dir}/{args.persona}_vectorizer_{n_gram}.pkl')
+                            save_path=f'{args.query_dir}/{args.persona}_vectorizer_{n_gram}.pkl',
+                            skip_tokenization=args.skip_sklearn_tokenization)
     save_path = (
         f'{args.query_dir}/{args.persona}_ff23_query.json'
         if args.filter_frequent_2_and_3_token_queries
         else f'{args.query_dir}/{args.persona}_query.json'
     )
+
     select_query(data_in=args.data_in, persona_name=args.persona, query_dir=args.query_dir,
                  filter_frequent_2_and_3_token_queries=args.filter_frequent_2_and_3_token_queries,
                  save_path=save_path)
