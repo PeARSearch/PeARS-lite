@@ -66,7 +66,7 @@ python3 test-auth.py  & python3 run.py
 If you are the OMD admin, run:
 
 ```
-export LOCAL_RUN=True
+export LOCAL_RUN=False
 python3 run.py
 ```
 
