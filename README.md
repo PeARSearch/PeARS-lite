@@ -35,7 +35,7 @@ If you haven't yet set up virtualenv on your machine, please install it via pip:
 
     sudo apt install python3-pip
 
-    sudo pip install virtualenv
+    sudo apt install python3-virtualenv
 
 Then change into the PeARS-lite directory:
 
