@@ -56,15 +56,19 @@ From the PeARS-lite directory, run:
 
 ##### 5. Run your pear!
 
-If you are running/testing PeARS-lite locally (as opposed to the OMD server), first export the LOCAL_RUN variable:
+If you are running/testing PeARS-lite locally (as opposed to the OMD server), first export the LOCAL_RUN variable and run the toy authentification server provided in *test-auth.py*:
 
 ```
 export LOCAL_RUN=True
+python3 test-auth.py  & python3 run.py 
 ```
 
-Then, in the root of the repo, run:
+If you are the OMD admin, run:
 
-    python3 run.py
+```
+export LOCAL_RUN=True
+python3 run.py
+```
 
 You should now see the login page of PeARS at http://localhost:9090/. You can sign in, either with your On My Disk credentials on the server, or if you are running locally, with a test user called Kim (username: kim, password: pwd).
 
