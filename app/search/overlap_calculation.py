@@ -30,8 +30,8 @@ def generic_overlap(q, s):
     '''Overlap between query and another string'''
     q = "".join(l for l in q if l not in string.punctuation)
     s = "".join(l for l in s if l not in string.punctuation)
-    q_words = q.lower().split()
-    s_words = s.lower().split()
+    q_words = [w[:-1] if w[-1] == 's' else w for w in q.lower().split()] #dealing with English plurals
+    s_words = [w[:-1] if w[-1] == 's' else w for w in s.lower().split()]
     return len(list(set(q_words) & set(s_words))) / len(set(q_words))
 
 def dice_overlap(i1, i2):

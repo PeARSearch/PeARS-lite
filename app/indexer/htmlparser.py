@@ -22,8 +22,8 @@ def remove_boilerplates(response):
         length_low=30,
         length_high=100)
     for paragraph in paragraphs:
-        #if not paragraph.is_boilerplate:
-        text += paragraph.text + " "
+        if not paragraph.is_boilerplate:
+            text += paragraph.text + " "
     return text
 
 

@@ -78,11 +78,11 @@ def score_docs(query, query_dist, kwd):
     DS_scores, completeness_scores, snippet_scores = score(query, query_dist, kwd)
     for url in list(DS_scores.keys()):
         #print(url,completeness_scores[url], snippet_scores[url])
-        if completeness_scores[url] >= 0.3 and snippet_scores[url] >=0.5:
+        if completeness_scores[url] > 0 and snippet_scores[url] >0 and '.csv' not in url:
             print(url,completeness_scores[url], snippet_scores[url])
         #document_scores[url] = 0.5*DS_scores[url] + completeness_scores[url] + 0.1*snippet_scores[url]
         document_scores[url] = completeness_scores[url] + snippet_scores[url]
-        if math.isnan(document_scores[url]) or completeness_scores[url] < 0.3 or snippet_scores[url] < 0.5:  # Check for potential NaN -- messes up with sorting in bestURLs.
+        if math.isnan(document_scores[url]) or completeness_scores[url] < 0.5 or snippet_scores[url] < 0.6:  # Check for potential NaN -- messes up with sorting in bestURLs.
             document_scores[url] = 0
     return document_scores
 
@@ -93,10 +93,10 @@ def bestURLs(doc_scores):
     c = 0
     for w in sorted(doc_scores, key=doc_scores.get, reverse=True):
         loc = urlparse(w).netloc
-        if c < 100:
+        if c < 10:
             if doc_scores[w] > 0:
                 #if netlocs_used.count(loc) < 10:
-                #print(w,doc_scores[w])
+                print(w,doc_scores[w])
                 best_urls.append(w)
                 netlocs_used.append(loc)
                 c += 1
