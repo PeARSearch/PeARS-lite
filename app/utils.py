@@ -14,7 +14,7 @@ from scipy.spatial import distance
 from scipy.sparse import csr_matrix, save_npz
 from os.path import dirname, join, realpath, isfile
 from pathlib import Path
-
+from app import VEC_SIZE, LOCAL_RUN
 
 def _extract_url_and_kwd(line):
     try:
@@ -114,10 +114,11 @@ def init_podsum():
     dir_path = dirname(dirname(realpath(__file__)))
     pod_dir = join(dir_path,'app','static','pods')
     print("Create pods directory if needed")
+    print(LOCAL_RUN)
     Path(pod_dir).mkdir(exist_ok=True, parents=True)
     print("Making 0 CSR matrix for pod summaries")
     print("POD DIR",pod_dir)
-    pod_summaries = np.zeros((1,16000))
+    pod_summaries = np.zeros((1,VEC_SIZE))
     pod_summaries = csr_matrix(pod_summaries)
     save_npz(join(pod_dir,"podsum.npz"), pod_summaries)
 

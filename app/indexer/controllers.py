@@ -14,6 +14,7 @@ from flask import (Blueprint,
                    render_template,
                    Response)
 
+from app import VEC_SIZE
 from app.api.models import Urls
 from app.indexer.neighbours import neighbour_urls
 from app.indexer import mk_page_vector, spider
@@ -114,7 +115,7 @@ def progress_crawl():
             init_podsum()
         if not isfile(join(pod_dir,pod_name)):
             print("Making 0 CSR matrix")
-            pod = np.zeros((1,16000))
+            pod = np.zeros((1,VEC_SIZE))
             pod = sparse.csr_matrix(pod)
             sparse.save_npz(join(pod_dir,pod_name), pod)
 

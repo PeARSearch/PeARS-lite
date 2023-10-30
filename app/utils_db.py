@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 
 import joblib
-from app import db
+from app import db, VEC_SIZE
 from app.api.models import Urls, Pods
 from app.api.models import installed_languages
 from app.utils import convert_to_array, convert_string_to_dict, convert_to_string, normalise
@@ -62,8 +62,7 @@ def get_db_pod_language(url):
 
 def compute_pod_summary(name):
     '''This function is very similar to 'self' in PeARS-pod'''
-    DS_vector = np.zeros(16000) 
-    #DS_vector = np.zeros(256) 
+    DS_vector = np.zeros(VEC_SIZE) 
     for u in db.session.query(Urls).filter_by(pod=name).all():
         DS_vector += convert_to_array(u.vector)
     DS_vector = convert_to_string(normalise(DS_vector))

@@ -7,6 +7,7 @@ import requests
 from collections import OrderedDict
 from os.path import join, dirname, realpath
 from app.indexer.htmlparser import extract_html, auth_token
+from app import LOCAL_RUN
 
 dir_path = dirname(dirname(realpath(__file__)))
 
@@ -35,8 +36,10 @@ def omd_parse(current_url):
             url = doc['@url']
         url = join(urldir, url)
         print("# DOC URL:", url)
-        #if url[-1] == '/': #For local test only
-        #    url = join(url,'index.html')
+        print("LOCAL",LOCAL_RUN)
+        if LOCAL_RUN:
+            if url[-1] == '/': #For local test only
+                url = join(url,'index.html')
 
         # CONTENT TYPE
         try:

@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-only
 
+from app import VEC_SIZE
 import re
 import string
 import numpy as np
@@ -43,7 +44,7 @@ def dice_overlap(i1, i2):
     return dice(set(words1), set(words2))
 
 def completeness(v, m):
-    v = v.reshape(16000,)
+    v = v.reshape(VEC_SIZE,)
     idx = np.where(v != 0)
     v_nz = v[idx]
     numcols = v_nz.shape[0]

@@ -56,16 +56,18 @@ From the PeARS-lite directory, run:
 
 ##### 5. Run your pear!
 
-If you are running/testing PeARS-lite locally (as opposed to the OMD server), first uncomment lines 38-39 in app/indexer/spider.py:
+If you are running/testing PeARS-lite locally (as opposed to the OMD server), first export the LOCAL_RUN variable:
 
 ```
-if url[-1] == '/': #For local test only
-            url = join(url,'index.html')
+export LOCAL_RUN=True
 ```
 
 Then, in the root of the repo, run:
 
     python3 run.py
+
+You should now see the login page of PeARS at http://localhost:9090/. You can sign in, either with your On My Disk credentials on the server, or if you are running locally, with a test user called Kim (username: kim, password: pwd).
+
 
 NB: whenever you want to come back to a clean install, manually delete your database and pods:
 

@@ -1,7 +1,8 @@
-# SPDX-FileCopyrightText: 2022 PeARS Project, <community@pearsproject.org> 
+# SPDX-FileCopyrightText: 2023 PeARS Project, <community@pearsproject.org> 
 #
 # SPDX-License-Identifier: AGPL-3.0-only
 
+import os
 import logging
 
 # Import flask and template operators
@@ -10,6 +11,24 @@ from flask_admin import Admin
 
 # Import SQLAlchemy
 from flask_sqlalchemy import SQLAlchemy
+
+
+# Get paths to SentencePiece model and vocab
+lang = 'en' # hardcoded for now
+SPM_DEFAULT_VOCAB_PATH = f'app/api/models/{lang}/{lang}wiki.vocab'
+spm_vocab_path = os.environ.get("SPM_VOCAB", SPM_DEFAULT_VOCAB_PATH)
+SPM_DEFAULT_MODEL_PATH = f'app/api/models/{lang}/{lang}wiki.model'
+spm_model_path = os.environ.get("SPM_MODEL", SPM_DEFAULT_MODEL_PATH)
+
+# Define vector size
+from app.indexer.vectorizer import read_vocab
+
+print(f"Loading SPM vocab from '{spm_vocab_path}' ...")
+vocab, _, _ = read_vocab(spm_vocab_path)
+VEC_SIZE = len(vocab)
+
+# Assess whether the code is run locally or on the On My Disk server
+LOCAL_RUN = os.environ.get("LOCAL_RUN", "false").lower() == "true"
 
 
 def configure_logging():
@@ -132,3 +151,5 @@ class PodsModelView(ModelView):
 
 admin.add_view(PodsModelView(Pods, db.session))
 admin.add_view(UrlsModelView(Urls, db.session))
+
+

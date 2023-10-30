@@ -25,6 +25,7 @@ import logging
 from os.path import dirname, join, realpath, isfile
 from flask import jsonify, Response
 from app.utils import init_podsum
+from app import LOCAL_RUN
 
 LOG = logging.getLogger(__name__)
 
@@ -48,8 +49,10 @@ def user():
     LOG.info(access_token)    
     if not access_token:
         return render_template('search/anonymous.html')
-    #url = 'http://localhost:9191/api' #TODO: change URL to OMD endpoint
-    url = ' https://demo.onmydisk.net/'
+    if LOCAL_RUN:
+        url = 'http://localhost:9191/api' #Local test
+    else:
+        url = ' https://demo.onmydisk.net/'
     data = {'action': 'getUserInfo', 'session_id': access_token}
     resp = requests.post(url, json=data, headers={'Authorization': 'token:'+access_token})
     username = resp.json()['username']
@@ -90,8 +93,11 @@ def anonymous():
         results = []
         query = query.lower()
         pears = ['0.0.0.0']
-        #results, pods = score_pages.run(query, pears, url_filter=[]) #TODO: replace filter with correct OMD endpoint
-        results, pods = score_pages.run(query, pears, url_filter=['https://demo.onmydisk.net/shared'])
+        if LOCAL_RUN:
+            url = 'http://localhost:9090/static/testdocs/shared' #Local test
+        else:
+            url = ' https://demo.onmydisk.net/shared'
+        results, pods = score_pages.run(query, pears, url_filter=[url])
         print(results)
         r = app.make_response(jsonify(results))
         r.mimetype = "application/json"
@@ -104,12 +110,16 @@ def anonymous():
 def index():
     if Urls.query.count() == 0:
         init_podsum()
+    print("LOCAL",LOCAL_RUN)
     access_token = request.cookies.get('OMD_SESSION_ID')  
     if not access_token:
         return render_template('search/anonymous.html')
     else:
-        #url = 'http://localhost:9191/api' #TODO: change URL to OMD endpoint
-        url = ' https://demo.onmydisk.net/'
+        if LOCAL_RUN:
+            url = 'http://localhost:9191/api' #Local test
+        else:
+            url = ' https://demo.onmydisk.net/'
+        print("CONNECTING TO:",url)
         data = {'action': 'getUserInfo', 'session_id': access_token}
         resp = requests.post(url, json=data, headers={'accept':'application/json', 'Authorization': 'token:'+access_token})
         if resp.status_code == requests.codes.ok:
@@ -142,8 +152,10 @@ def login():
         username = request.form.get('username', '', type=str)
         password = request.form.get('password', '', type=str)
         # send authorization message to on my disk
-        #url = 'http://localhost:9191/api' #TODO: change URL to OMD endpoint
-        url = ' https://demo.onmydisk.net/signin/'
+        if LOCAL_RUN:
+            url = 'http://localhost:9191/api' #Local test
+        else:
+            url = ' https://demo.onmydisk.net/signin/'
         data = {'action': 'signin', 'username': username, 'password': password}
         user_info = requests.post(url, json=data) 
         if user_info == None:
@@ -169,9 +181,10 @@ def login():
 @search.route('/logout', methods=['GET','POST'])
 def logout():
     access_token = request.cookies.get('OMD_SESSION_ID')
-    print(access_token)
-    #url = 'http://localhost:9191/api' #TODO: change URL to OMD endpoint
-    url = ' https://demo.onmydisk.net/signout/'
+    if LOCAL_RUN:
+        url = 'http://localhost:9191/api' #Local test
+    else:
+        url = ' https://demo.onmydisk.net/signout/'
     data = {'action': 'signout', 'session_id': access_token}
     logout_confirmation = requests.post(url, json=data, headers={'accept':'application/json', 'Authorization': 'token:'+access_token})
     if logout_confirmation.status_code == requests.codes.ok:
