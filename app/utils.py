@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-only
 
+import joblib
 import logging
 import re
 import requests
@@ -14,7 +15,7 @@ from scipy.spatial import distance
 from scipy.sparse import csr_matrix, save_npz
 from os.path import dirname, join, realpath, isfile
 from pathlib import Path
-
+from app import VEC_SIZE
 
 def _extract_url_and_kwd(line):
     try:
@@ -94,17 +95,31 @@ def readPods(pod_file):
     f.close()
     return pods
 
+def init_pod(pod_name):
+    dir_path = dirname(dirname(realpath(__file__)))
+    pod_dir = join(dir_path,'app', 'static','pods')
+    if not isfile(join(pod_dir,pod_name)):
+        print("Making 0 CSR matrix for new pod")
+        pod = np.zeros((1,VEC_SIZE))
+        pod = csr_matrix(pod)
+        save_npz(join(pod_dir,pod_name), pod)
 
 def init_podsum():
     dir_path = dirname(dirname(realpath(__file__)))
     pod_dir = join(dir_path,'app','static','pods')
-    print("Create pods directory if needed")
     Path(pod_dir).mkdir(exist_ok=True, parents=True)
     print("Making 0 CSR matrix for pod summaries")
     print("POD DIR",pod_dir)
-    pod_summaries = np.zeros((1,10000))
+    pod_summaries = np.zeros((1,VEC_SIZE))
     pod_summaries = csr_matrix(pod_summaries)
     save_npz(join(pod_dir,"podsum.npz"), pod_summaries)
+
+def init_posix():
+    dir_path = dirname(dirname(realpath(__file__)))
+    posix_path = join(dir_path,'static','posix')
+    Path(posix_path).mkdir(exist_ok=True, parents=True)
+    posindex = [{} for _ in range(len(vocab))]
+    joblib.dump(posindex, join(posix_path,'posix.txt'))
 
 def normalise(v):
     norm = np.linalg.norm(v)

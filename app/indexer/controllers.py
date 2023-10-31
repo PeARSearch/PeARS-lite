@@ -14,11 +14,11 @@ from flask import (Blueprint,
                    request,
                    render_template,
                    Response)
-
+from app import VEC_SIZE
 from app.api.models import Urls
 from app.indexer.neighbours import neighbour_urls
 from app.indexer import mk_page_vector, spider
-from app.utils import readDocs, readUrls, readBookmarks, get_language, init_podsum
+from app.utils import readDocs, readUrls, readBookmarks, get_language, init_pod, init_podsum
 from app.utils_db import pod_from_file
 from app.indexer.htmlparser import extract_links
 from os.path import dirname, join, realpath, isfile
@@ -165,16 +165,10 @@ def progress_file():
             yield "data: 0 \n\n"
         kwd = keywords[0]
         pod_name = kwd+'.npz'
-        pod_dir = join(dir_path,'static','pods')
-        print("POD DIR",pod_dir)
-        if not isfile(join(pod_dir,pod_name)):
-            print("Making 0 CSR matrix")
-            pod = np.zeros((1,10000))
-            pod = sparse.csr_matrix(pod)
-            sparse.save_npz(join(pod_dir,pod_name), pod)
+        init_pod(pod_name)
         c = 0
         for url, kwd, lang in zip(urls, keywords, langs):
-            success, podsum = mk_page_vector.compute_vectors(url, kwd, lang)
+            success, podsum, text = mk_page_vector.compute_vectors(url, kwd, lang)
             if success:
                 pod_from_file(kwd, lang, podsum)
             else:
@@ -196,17 +190,12 @@ def progress_docs():
         for line in f:
             source, kwd, lang = line.rstrip('\n').split('::')
         pod_name = kwd+'.npz'
-        pod_dir = join(dir_path,'static','pods')
-        if not isfile(join(pod_dir,pod_name)):
-            print("Making 0 CSR matrix")
-            pod = np.zeros((1,10000))
-            pod = sparse.csr_matrix(pod)
-            sparse.save_npz(join(pod_dir,pod_name), pod)
+        init_pod(pod_name)
         c = 0
         for url, title, snippet in zip(urls, titles, snippets):
             print(url,title)
-            success, podsum = mk_page_vector.compute_vectors_local_docs(url, doctype, title, snippet, kwd, lang)
-            pod_from_file(kwd, 'en', podsum)
+            success, podsum, text = mk_page_vector.compute_vectors_local_docs(url, doctype, title, snippet, kwd, lang)
+            pod_from_file(kwd, lang, podsum)
             c += 1
             print('###', str(ceil(c / len(urls) * 100)))
             yield "data:" + str(ceil(c / len(urls) * 100)) + "\n\n"
@@ -225,12 +214,7 @@ def progress_csv():
         for line in f:
             source, kwd, lang = line.rstrip('\n').split('::')
         pod_name = kwd+'.npz'
-        pod_dir = join(dir_path,'static','pods')
-        if not isfile(join(pod_dir,pod_name)):
-            print("Making 0 CSR matrix")
-            pod = np.zeros((1,10000))
-            pod = sparse.csr_matrix(pod)
-            sparse.save_npz(join(pod_dir,pod_name), pod)
+        init_pod(pod_name)
         c = 0
         columns = list(df.columns)
         table = df.to_numpy()
@@ -246,7 +230,7 @@ def progress_csv():
                 value = str(row[i]).replace('/',' / ')
                 snippet+=str(columns[i])+': ' +value+' # '
             print(url,title)
-            success, podsum = mk_page_vector.compute_vectors_local_docs(url, doctype, title, snippet, kwd, lang)
+            success, podsum, text = mk_page_vector.compute_vectors_local_docs(url, doctype, title, snippet, kwd, lang)
             pod_from_file(kwd, lang, podsum)
             c += 1
             print('###', str(ceil(c / table.shape[0] * 100)))

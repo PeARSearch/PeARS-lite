@@ -5,7 +5,7 @@
 import re
 import numpy as np
 import string
-from app import db
+from app import db, VEC_SIZE
 from app.api.models import Urls, installed_languages, sp
 from app.indexer.htmlparser import extract_html
 from app.indexer.vectorizer import vectorize_scale
@@ -28,7 +28,7 @@ def tokenize_text(lang, text):
 
 
 def compute_vec(lang, text, pod_m):
-    v = vectorize_scale(lang, text, 5, 10000) #log prob power 5, top words 100
+    v = vectorize_scale(lang, text, 5, VEC_SIZE) #log prob power 5, top words 100
     pod_m = vstack((pod_m,csr_matrix(v)))
     return pod_m
 
@@ -57,15 +57,15 @@ def compute_vectors(target_url, keyword, lang):
             db.session.commit()
             save_npz(join(pod_dir,keyword+'.npz'),pod_m)
             podsum = np.sum(pod_m, axis=0)
-            return True, podsum
+            return True, podsum, text
         else:
             if snippet == '':
                 print("IGNORING URL: Snippet empty.")
             else:
                 print(error)
-            return False, None
+            return False, None, None
     else:
-        return True, None
+        return True, None, None
 
 
 def compute_vectors_local_docs(target_url, doctype, title, snippet, keyword, lang):
@@ -91,7 +91,7 @@ def compute_vectors_local_docs(target_url, doctype, title, snippet, keyword, lan
         db.session.commit()
         save_npz(join(pod_dir,keyword+'.npz'),pod_m)
     podsum = np.sum(pod_m, axis=0)
-    return True, podsum
+    return True, podsum, text
 
 
 

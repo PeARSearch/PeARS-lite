@@ -4,6 +4,7 @@
 
 import re
 import string
+from app import VEC_SIZE
 import numpy as np
 from scipy.spatial.distance import cdist
 
@@ -43,7 +44,7 @@ def dice_overlap(i1, i2):
     return dice(set(words1), set(words2))
 
 def completeness(v, m):
-    v = v.reshape(10000,)
+    v = v.reshape(VEC_SIZE,)
     idx = np.where(v != 0)
     v_nz = v[idx]
     numcols = v_nz.shape[0]

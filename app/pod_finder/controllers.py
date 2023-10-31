@@ -7,7 +7,7 @@ from flask import Blueprint, request, render_template, Response
 from werkzeug.utils import secure_filename
 import requests, csv, sys
 from os.path import dirname, join, realpath
-from app import db
+from app import db, VEC_SIZE
 from app.api.models import Pods, Urls
 from app.utils import readPods, get_pod_info, convert_to_string, get_language
 from app.utils_db import pod_from_json, url_from_json, pod_from_file
@@ -232,10 +232,10 @@ def unsubscribe():
             pod_entry.registered = False
             db.session.commit()
             print("Reverting CSR matrix to 0")
-            pod = np.zeros((1,10000))
+            pod = np.zeros((1,VEC_SIZE))
             pod = csr_matrix(pod)
             save_npz(join(pod_dir,pod_name+".npz"), pod)
             print("Reverting summary to 0")
-            pod_from_file(pod_name, lang, np.zeros(10000))
+            pod_from_file(pod_name, lang, np.zeros(VEC_SIZE))
     return render_template(
         'pod_finder/unsubscribe-success.html', pods=unsubscribed_pods)
