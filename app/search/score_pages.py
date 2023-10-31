@@ -160,7 +160,7 @@ def output(best_urls):
     return results, pods
 
 
-def run(query, pears, predefined_pods=None, overlap_setting="title_dice", use_inverted_index=False, use_normal_index=True, posindex_prefix="tester", posindex_prefix="all_subwords"):
+def run(query, pears, predefined_pods=None, overlap_setting="title_dice", use_inverted_index=False, use_normal_index=True, posindex_prefix="tester", posindex_scoring_method="all_subwords"):
 
     # refers to the changes in https://github.com/PeARSearch/PeARS-lite/commit/1ba99961ebe0704a4cff66b26c97f36d07911602
     # 'title_dice' refers to the setting *before* these changes, *snippet_generic* to the one after these changes
