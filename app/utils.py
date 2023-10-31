@@ -15,7 +15,7 @@ from scipy.spatial import distance
 from scipy.sparse import csr_matrix, save_npz
 from os.path import dirname, join, realpath, isfile
 from pathlib import Path
-from app import VEC_SIZE
+from app import VEC_SIZE, vocab
 
 def _extract_url_and_kwd(line):
     try:
@@ -116,7 +116,7 @@ def init_podsum():
 
 def init_posix():
     dir_path = dirname(dirname(realpath(__file__)))
-    posix_path = join(dir_path,'static','posix')
+    posix_path = join(dir_path,'app','static','posix')
     Path(posix_path).mkdir(exist_ok=True, parents=True)
     posindex = [{} for _ in range(len(vocab))]
     joblib.dump(posindex, join(posix_path,'posix.txt'))

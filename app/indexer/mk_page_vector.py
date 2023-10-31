@@ -57,15 +57,15 @@ def compute_vectors(target_url, keyword, lang):
             db.session.commit()
             save_npz(join(pod_dir,keyword+'.npz'),pod_m)
             podsum = np.sum(pod_m, axis=0)
-            return True, podsum, text
+            return True, podsum, text, u.vector
         else:
             if snippet == '':
                 print("IGNORING URL: Snippet empty.")
             else:
                 print(error)
-            return False, None, None
+            return False, None, None, None
     else:
-        return True, None, None
+        return True, None, None, None
 
 
 def compute_vectors_local_docs(target_url, doctype, title, snippet, keyword, lang):
@@ -90,8 +90,10 @@ def compute_vectors_local_docs(target_url, doctype, title, snippet, keyword, lan
         db.session.add(u)
         db.session.commit()
         save_npz(join(pod_dir,keyword+'.npz'),pod_m)
-    podsum = np.sum(pod_m, axis=0)
-    return True, podsum, text
+        podsum = np.sum(pod_m, axis=0)
+        return True, podsum, text, u.vector
+    else:
+        return True, None, None, None
 
 
 

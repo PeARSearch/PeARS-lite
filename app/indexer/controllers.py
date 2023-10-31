@@ -18,9 +18,10 @@ from app import VEC_SIZE
 from app.api.models import Urls
 from app.indexer.neighbours import neighbour_urls
 from app.indexer import mk_page_vector, spider
-from app.utils import readDocs, readUrls, readBookmarks, get_language, init_pod, init_podsum
+from app.utils import readDocs, readUrls, readBookmarks, get_language, init_pod, init_podsum, init_posix
 from app.utils_db import pod_from_file
 from app.indexer.htmlparser import extract_links
+from app.indexer.posix import posix_doc
 from os.path import dirname, join, realpath, isfile
 
 dir_path = dirname(dirname(realpath(__file__)))
@@ -48,6 +49,7 @@ def index():
 def from_docs():
     if Urls.query.count() == 0:
         init_podsum()
+        init_posix()
 
     filename = request.files['file_source'].filename
     print("DOC FILE:", filename)
@@ -67,6 +69,7 @@ def from_docs():
 def from_file():
     if Urls.query.count() == 0:
         init_podsum()
+        init_posix()
 
     print("FILE:", request.files['file_source'])
     if request.files['file_source'].filename[-4:] == ".txt":
@@ -80,6 +83,7 @@ def from_file():
 def from_bookmarks():
     if Urls.query.count() == 0:
         init_podsum()
+        init_posix()
 
     print("FILE:", request.files['file_source'])
     if "bookmarks" in request.files['file_source'].filename:
@@ -100,6 +104,7 @@ def from_bookmarks():
 def from_url():
     if Urls.query.count() == 0:
         init_podsum()
+        init_posix()
 
     if request.form['url'] != "":
         f = open(join(dir_path, "urls_to_index.txt"), 'w')
@@ -115,6 +120,7 @@ def from_url():
 def from_csv():
     if Urls.query.count() == 0:
         init_podsum()
+        init_posix()
     filename = request.files['file_source'].filename
     print("FILE:", filename)
     if filename[-4:] == ".csv":
@@ -132,6 +138,7 @@ def from_csv():
 def from_share():
     if Urls.query.count() == 0:
         init_podsum()
+        init_posix()
 
     print("FILE:", request.files['file_source'])
     if request.files['file_source'].filename[-6:] == ".share":
@@ -168,8 +175,9 @@ def progress_file():
         init_pod(pod_name)
         c = 0
         for url, kwd, lang in zip(urls, keywords, langs):
-            success, podsum, text = mk_page_vector.compute_vectors(url, kwd, lang)
+            success, podsum, text, doc_id = mk_page_vector.compute_vectors(url, kwd, lang)
             if success:
+                posix_doc(text, doc_id)
                 pod_from_file(kwd, lang, podsum)
             else:
                 logging.error("Error accessing the URL")
@@ -194,8 +202,10 @@ def progress_docs():
         c = 0
         for url, title, snippet in zip(urls, titles, snippets):
             print(url,title)
-            success, podsum, text = mk_page_vector.compute_vectors_local_docs(url, doctype, title, snippet, kwd, lang)
-            pod_from_file(kwd, lang, podsum)
+            success, podsum, text, doc_id = mk_page_vector.compute_vectors_local_docs(url, doctype, title, snippet, kwd, lang)
+            if success:
+                posix_doc(text, doc_id)
+                pod_from_file(kwd, lang, podsum)
             c += 1
             print('###', str(ceil(c / len(urls) * 100)))
             yield "data:" + str(ceil(c / len(urls) * 100)) + "\n\n"
@@ -230,8 +240,10 @@ def progress_csv():
                 value = str(row[i]).replace('/',' / ')
                 snippet+=str(columns[i])+': ' +value+' # '
             print(url,title)
-            success, podsum, text = mk_page_vector.compute_vectors_local_docs(url, doctype, title, snippet, kwd, lang)
-            pod_from_file(kwd, lang, podsum)
+            success, podsum, text, doc_id = mk_page_vector.compute_vectors_local_docs(url, doctype, title, snippet, kwd, lang)
+            if success:
+                posix_doc(text, doc_id)
+                pod_from_file(kwd, lang, podsum)
             c += 1
             print('###', str(ceil(c / table.shape[0] * 100)))
             yield "data:" + str(ceil(c / table.shape[0] * 100)) + "\n\n"
