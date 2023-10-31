@@ -116,5 +116,7 @@ urls_to_index.txt
 pods_to_index.txt
 
 app/static/webmap/
+app/static/posindex/*
+!app/static/posindex/tester.*
 evaluate/crawled_news/
 evaluate/crawled_news_archive/

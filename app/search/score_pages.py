@@ -7,14 +7,15 @@ from urllib.parse import urlparse
 import re
 import math
 from app.api.models import Urls, Pods
-from app import db, SNIPPET_OVERLAP_THRESHOLD, SNIPPET_COMPLETENESS_THRESHOLD, CACHE_PODS, pod_cache
+from app import db, SNIPPET_OVERLAP_THRESHOLD, SNIPPET_COMPLETENESS_THRESHOLD, CACHE_PODS, pod_cache, vocab, reverse_vocab, add_posttok_eof
 from app.utils_db import (
     get_db_url_snippet, get_db_url_title, get_db_url_cc, get_db_url_pod, get_db_url_notes)
 
 from .overlap_calculation import score_url_overlap, generic_overlap, dice_overlap, completeness
 from app.search import term_cosine
 from app.utils import cosine_similarity, hamming_similarity, convert_to_array, get_language
-from app.indexer.mk_page_vector import compute_query_vectors
+from app.indexer.mk_page_vector import compute_query_vectors, add_eofs
+from app.indexer.positional_index import run_posindex_search
 from scipy.sparse import csr_matrix, load_npz
 from scipy.spatial import distance
 from os.path import dirname, join, realpath, isfile
@@ -159,7 +160,7 @@ def output(best_urls):
     return results, pods
 
 
-def run(query, pears, predefined_pods=None, overlap_setting="title_dice"):
+def run(query, pears, predefined_pods=None, overlap_setting="title_dice", use_inverted_index=False, use_normal_index=True, posindex_prefix="tester", posindex_prefix="all_subwords"):
 
     # refers to the changes in https://github.com/PeARSearch/PeARS-lite/commit/1ba99961ebe0704a4cff66b26c97f36d07911602
     # 'title_dice' refers to the setting *before* these changes, *snippet_generic* to the one after these changes
@@ -168,13 +169,20 @@ def run(query, pears, predefined_pods=None, overlap_setting="title_dice"):
 
     document_scores = {}
     query, lang = get_language(query)
-    q_dist = compute_query_vectors(query, lang)
 
-    if predefined_pods is None:
-        best_pods = score_pods(query, q_dist, lang)
+    if use_inverted_index and not use_normal_index:
+        best_urls = run_posindex_search(query, f"app/static/posindex/{posindex_prefix}.str", vocab, reverse_vocab, add_posttok_eof, posindex_scoring_method)
+        best_urls_sorted = sorted([(url, score) for url, score in best_urls.items() if score > 0.9], key=lambda t: t[1], reverse=True)
+        best_urls_capped = best_urls_sorted[:100]
+        return {url: {} for url, _ in best_urls_capped}, [None]
+
     else:
-        best_pods = predefined_pods
-    for pod in best_pods:
-        document_scores.update(score_docs(query, q_dist, pod, overlap_setting=overlap_setting))
-    best_urls = bestURLs(document_scores)
+        q_dist = compute_query_vectors(query, lang)
+        if predefined_pods is None:
+            best_pods = score_pods(query, q_dist, lang)
+        else:
+            best_pods = predefined_pods
+        for pod in best_pods:
+            document_scores.update(score_docs(query, q_dist, pod, overlap_setting=overlap_setting))
+        best_urls = bestURLs(document_scores)
     return output(best_urls)

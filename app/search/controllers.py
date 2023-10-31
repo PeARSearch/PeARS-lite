@@ -7,7 +7,7 @@ from flask import Blueprint, request, render_template, send_from_directory
 from flask import current_app
 
 # Import the database object from the main app module
-from app import app, USE_SNIPPET_SCORES
+from app import app, USE_SNIPPET_SCORES, POSINDEX
 from app.api.models import Urls
 from app.search import score_pages
 
@@ -60,7 +60,11 @@ def index():
         results = []
         query = query.lower()
         pears = ['0.0.0.0']
-        results, pods = score_pages.run(query, pears, predefined_pods, overlap_setting="snippet_generic" if USE_SNIPPET_SCORES else "title_dice")
+        if POSINDEX is not None:
+            posindex_scoring_method = request.args.get("pixm", "all_subwords")
+            results, pods = score_pages.run(query, pears, predefined_pods, overlap_setting="snippet_generic" if USE_SNIPPET_SCORES else "title_dice", use_inverted_index=True, use_normal_index=False, posindex_prefix=POSINDEX, posindex_scoring_method=posindex_scoring_method)
+        else:
+            results, pods = score_pages.run(query, pears, predefined_pods, overlap_setting="snippet_generic" if USE_SNIPPET_SCORES else "title_dice", use_inverted_index=False, use_normal_index=True)
         print(results)
         r = app.make_response(jsonify(results))
         r.mimetype = "application/json"

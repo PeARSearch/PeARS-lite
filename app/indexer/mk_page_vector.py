@@ -84,8 +84,10 @@ def pretokenize(text, strategy="interpolate", min_subword_len=5, min_freq=50, bo
     return "\n".join(lines_out)
 
 
-def add_eofs(text):
-    tokens = text.split(" ")
+def add_eofs(text=None, tokens=None):
+    assert text or tokens
+    if text:
+        tokens = text.split(" ")
     tokens_mod = []
     
     for i, tok in enumerate(tokens):

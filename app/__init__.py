@@ -46,13 +46,17 @@ CACHE_PODS = os.environ.get("CACHE_PODS", "false").lower() == "true"
 pod_cache = {}
 print(f"CACHE_PODS={CACHE_PODS}")
 
+# Global variable: use inverse index
+POSINDEX = os.environ.get("POSINDEX")
+
 # Define vector size
 from app.indexer.vectorizer import read_vocab
 
 print(f"Loading SPM vocab from '{spm_vocab_path}' ...")
-vocab, _, _ = read_vocab(spm_vocab_path)
+vocab, reverse_vocab, _ = read_vocab(spm_vocab_path)
 if add_posttok_eof:
     vocab.update({f"{w}▁": v + len(vocab) for w, v in vocab.items()})
+    reverse_vocab = {v: w for w, v in vocab.items()}
 VEC_SIZE = len(vocab)
 
 def configure_logging():

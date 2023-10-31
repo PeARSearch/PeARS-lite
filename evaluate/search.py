@@ -19,10 +19,12 @@ def search_queries(query_file, pod="home"):
             "pods": pod
         }
         try:
-            response = json.loads(requests.get(url, params=params).text, object_pairs_hook=OrderedDict)
-        except json.decoder.JSONDecodeError:
+            response_text = requests.get(url, params=params).text
+            response = json.loads(response_text, object_pairs_hook=OrderedDict)
+        except json.decoder.JSONDecodeError as e:
             response = {'': ''}
-            print(url)
+            print(url, params, response_text)
+            raise e
         retrieve_urls = []
         for u in response.keys():
             if u:
