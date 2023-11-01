@@ -15,7 +15,7 @@ from scipy.spatial import distance
 from scipy.sparse import csr_matrix, save_npz
 from os.path import dirname, join, realpath, isfile
 from pathlib import Path
-from app import VEC_SIZE, vocab
+from app import VEC_SIZE, LANG, vocab
 
 def _extract_url_and_kwd(line):
     try:
@@ -24,7 +24,7 @@ def _extract_url_and_kwd(line):
         if kwd == '':
             kwd = 'home'
         if lang == '':
-            lang = 'en'
+            lang = LANG
         return url, kwd, lang
     except:
         print("ERROR: urls_to_index.txt does not have the right format.")
@@ -243,7 +243,7 @@ def get_pod_info(url):
 
 
 def get_language(query):
-    lang = 'en' #default
+    lang = LANG #default
     m = re.search('(.*) -(..\s*)$',query)
     if m:
         query = m.group(1)

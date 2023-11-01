@@ -10,6 +10,7 @@ from app.indexer import detect_open
 from bs4 import BeautifulSoup
 from langdetect import detect
 from app.api.models import installed_languages
+from app import LANG
 
 def remove_boilerplates(response):
     text = ""
@@ -72,7 +73,7 @@ def extract_html(url):
     body_str = ""
     snippet = ""
     cc = False
-    language = "en"
+    language = LANG
     error = None
     try:
         req = requests.head(url, timeout=10)

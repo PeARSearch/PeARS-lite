@@ -14,7 +14,7 @@ from flask import (Blueprint,
                    request,
                    render_template,
                    Response)
-from app import VEC_SIZE
+from app import VEC_SIZE, LANG
 from app.api.models import Urls
 from app.indexer.neighbours import neighbour_urls
 from app.indexer import mk_page_vector, spider
@@ -191,7 +191,7 @@ def progress_docs():
     logging.debug("Running progress local file")
     def generate():
         kwd = ''
-        lang = 'en'
+        lang = LANG
         doctype = 'doc'
         urls, titles, snippets = readDocs(join(dir_path, "docs_to_index.txt"))
         f = open(join(dir_path, "file_source_info.txt"), 'r')
@@ -217,7 +217,7 @@ def progress_csv():
     logging.debug("Running progress local csv")
     def generate():
         kwd = ''
-        lang = 'en'
+        lang = LANG
         doctype = 'csv'
         df = read_csv(join(dir_path, "spreadsheet_to_index.csv"))
         f = open(join(dir_path, "file_source_info.txt"), 'r')
