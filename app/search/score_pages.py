@@ -113,10 +113,15 @@ def bestURLs(doc_scores):
 
 def aggregate_csv(best_urls):
     urls = list([u for u in best_urls if '.csv#' not in u])
-    print(urls)
+    print("AGGREGATE CSV URLS:",urls)
     csvs = []
     csv_names = list([re.sub('#.*','',u) for u in best_urls if '.csv#' in u])
-    for csv_name in csv_names:
+    csv_names_set_preserved_order = []
+    for c in csv_names:
+        if c not in csv_names_set_preserved_order:
+            csv_names_set_preserved_order.append(c)
+    print("AGGREGATE CSV NAMES:",csv_names)
+    for csv_name in csv_names_set_preserved_order:
         rows = [re.sub('.*\[','',u)[:-1] for u in best_urls if csv_name in u]
         csvs.append([csv_name,rows])
         print(rows)
