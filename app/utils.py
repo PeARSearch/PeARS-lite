@@ -30,6 +30,7 @@ def _extract_url_and_kwd(line):
         print("ERROR: urls_to_index.txt does not have the right format.")
         return None
 
+
 def readUrls(url_file):
     urls = []
     keywords = []
