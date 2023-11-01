@@ -13,7 +13,9 @@ import pandas as pd
 
 def clean_texts(text, language):
     """ Function to perform preprocessing """
-    translator = str.maketrans(string.punctuation, ' ' * len(string.punctuation))
+    punctuation = string.punctuation + "’" # add missing apostrophe 
+
+    translator = str.maketrans(punctuation, ' ' * len(punctuation))
     lemmatizer = WordNetLemmatizer() if language == "english" else None
     stop_words = nltk.corpus.stopwords.words(language) if language in ["english", "french", "russian"] else []
 
