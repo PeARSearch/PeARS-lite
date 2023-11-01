@@ -1,0 +1,331 @@
+SENTENCE: très simple à préparer et très désaltérant, ce sirop d'une belle couleur fushia est une excellente alternative aux sirops industriels.
+{
+    "00.Difficulty": {
+        "Activity": "à préparer ce sirop d' une belle couleur fushia",
+        "Degree": "très",
+        "_TRIGGER": "simple"
+    },
+    "01.Cooking_creation": {
+        "_TRIGGER": "préparer"
+    },
+    "02.Stimulus_focus": {
+        "Degree": "très très",
+        "_TRIGGER": "désaltérant"
+    },
+    "03.Food": {
+        "_TRIGGER": "sirop"
+    },
+    "04.Aesthetics": {
+        "Attribute": "couleur fushia",
+        "_TRIGGER": "belle"
+    },
+    "05.Color": {
+        "Color": "couleur fushia",
+        "Descriptor": "belle",
+        "Entity": "ce sirop",
+        "_TRIGGER": "couleur"
+    },
+    "06.Desirability": {
+        "Evaluee": "alternative aux sirops industriels",
+        "_TRIGGER": "excellente"
+    },
+    "07.Similarity": {
+        "Degree": "excellente",
+        "Entity_1": "ce sirop d' une belle couleur fushia",
+        "Entity_2": "aux sirops industriels",
+        "_TRIGGER": "alternative"
+    },
+    "08.Food": {
+        "_TRIGGER": "sirops"
+    },
+    "09.Manufacturing": {
+        "Product": "sirops",
+        "_TRIGGER": "industriels"
+    }
+}
+
+SENTENCE: outre les propriétés du shiso, il contient également... du vinaigre de cidre, lui aussi réputé pour ses propriétés pour la santé.
+{
+    "00.Needing": {
+        "Cognizer": "du shiso",
+        "_TRIGGER": "propriétés"
+    },
+    "01.Inclusion": {
+        "Part": "du vinaigre de cidre , lui aussi réputé pour ses propriétés pour la santé",
+        "Total": "il",
+        "_TRIGGER": "contient"
+    },
+    "02.Food": {
+        "Type": "de cidre",
+        "_TRIGGER": "vinaigre"
+    },
+    "03.Food": {
+        "_TRIGGER": "cidre"
+    },
+    "04.Fame": {
+        "Entity": "du vinaigre de cidre lui",
+        "Reason": "pour ses propriétés pour la santé",
+        "_TRIGGER": "réputé"
+    },
+    "05.Commerce_scenario": {
+        "Purpose": "pour la santé",
+        "Seller": "ses",
+        "_TRIGGER": "propriétés"
+    },
+    "06.Medical_conditions": {
+        "_TRIGGER": "santé"
+    }
+}
+
+SENTENCE: une fois votre sirop prêt, ne jetez pas les feuilles de shiso : vous…
+{
+    "00.Temporal_collocation": {
+        "Landmark_event": "votre sirop prêt",
+        "Trajector_event": "ne jetez pas les feuilles de shiso",
+        "_TRIGGER": "une fois"
+    },
+    "01.Food": {
+        "_TRIGGER": "sirop"
+    },
+    "02.Cause_motion": {
+        "Theme": "pas les feuilles de shiso",
+        "_TRIGGER": "jetez pas"
+    },
+    "03.Part_piece": {
+        "Piece": "feuilles",
+        "Substance": "de shiso",
+        "_TRIGGER": "feuilles"
+    },
+    "04.Food": {
+        "_TRIGGER": "shiso"
+    }
+}
+
+SENTENCE: contrairement aux autres tartes, la linzertorte une fois cuite, est meilleure au bout de deux jours.
+{
+    "00.Similarity": {
+        "Entity_1": "la linzertorte une fois cuite",
+        "Entity_2": "aux autres tartes",
+        "_TRIGGER": "contrairement"
+    },
+    "01.Increment": {
+        "Class": "tartes",
+        "_TRIGGER": "autres"
+    },
+    "02.Food": {
+        "_TRIGGER": "tartes"
+    },
+    "03.Food": {
+        "Food": "linzertorte",
+        "_TRIGGER": "linzertorte"
+    },
+    "04.Apply_heat": {
+        "Food": "la linzertorte",
+        "_TRIGGER": "cuite"
+    },
+    "05.Desirability": {
+        "Circumstances": "une fois cuite au bout de deux jours",
+        "Evaluee": "la linzertorte",
+        "_TRIGGER": "meilleure"
+    },
+    "06.Cardinal_numbers": {
+        "Number": "deux",
+        "Unit": "jours",
+        "_TRIGGER": "deux"
+    },
+    "07.Measure_duration": {
+        "Count": "deux",
+        "Unit": "jours",
+        "_TRIGGER": "jours"
+    }
+}
+
+SENTENCE: elle peut se conserver une semaine et même se congeler.
+{
+    "00.Capability": {
+        "Entity": "elle",
+        "Event": "se conserver une semaine et même se congeler",
+        "_TRIGGER": "peut"
+    },
+    "01.Retaining": {
+        "Duration": "une semaine",
+        "Theme": "elle",
+        "_TRIGGER": "conserver"
+    },
+    "02.Measure_duration": {
+        "Count": "une",
+        "Unit": "semaine",
+        "_TRIGGER": "semaine"
+    },
+    "03.Recording": {
+        "Medium": "elle",
+        "_TRIGGER": "congeler"
+    }
+}
+
+SENTENCE: dans tous les cas, on la sert à température ambiante.
+{
+    "00.Instance": {
+        "Instance": "cas",
+        "_TRIGGER": "cas"
+    },
+    "01.Using": {
+        "Agent": "on la",
+        "Manner": "à température ambiante",
+        "_TRIGGER": "sert"
+    },
+    "02.Ambient_temperature": {
+        "Attribute": "température",
+        "Weather": "ambiante",
+        "_TRIGGER": "température"
+    },
+    "03.Prominence": {
+        "Entity": "température",
+        "_TRIGGER": "ambiante"
+    }
+}
+
+SENTENCE: la pâte, également, gagne à être préparée en amont.
+{
+    "00.Cooking_creation": {
+        "Produced_food": "la pâte",
+        "Time": "en amont",
+        "_TRIGGER": "préparée"
+    },
+    "01.Temporal_collocation": {
+        "Trajector_event": "la pâte , également , gagne à être préparée",
+        "_TRIGGER": "en amont"
+    }
+}
+
+SENTENCE: bref, on s'avance dans tous les sens.
+{
+    "00.Progression": {
+        "Entity": "on",
+        "Place": "dans tous les sens",
+        "_TRIGGER": "avance"
+    }
+}
+
+SENTENCE: ajouter le demi œuf battu en omelette et amalgamer.
+{
+    "00.Cause_to_be_included": {
+        "New_member": "le demi œuf battu en omelette et amalgamer",
+        "_TRIGGER": "ajouter"
+    },
+    "01.Ground_up": {
+        "Patient": "œuf",
+        "_TRIGGER": "demi"
+    },
+    "02.Food": {
+        "Descriptor": "demi",
+        "_TRIGGER": "œuf"
+    },
+    "03.Grinding": {
+        "Patient": "le demi œuf",
+        "Result": "en omelette",
+        "_TRIGGER": "battu"
+    },
+    "04.Food": {
+        "_TRIGGER": "omelette"
+    },
+    "05.Food": {
+        "_TRIGGER": "amalgamer"
+    }
+}
+
+SENTENCE: peut rester une nuit au frais à ce stade.
+{
+    "00.Capability": {
+        "Circumstances": "à ce stade",
+        "Event": "rester une nuit au frais",
+        "_TRIGGER": "peut"
+    },
+    "01.State_continue": {
+        "Duration": "une nuit",
+        "State": "au frais à ce stade",
+        "_TRIGGER": "rester"
+    },
+    "02.Calendric_unit": {
+        "Count": "une",
+        "Unit": "nuit",
+        "_TRIGGER": "nuit"
+    },
+    "03.Being_incarcerated": {
+        "Duration": "une nuit",
+        "_TRIGGER": "au frais"
+    },
+    "04.Progression": {
+        "Entity": "stade",
+        "_TRIGGER": "stade"
+    }
+}
+
+SENTENCE: cuire à four préchauffé à 180° pendant 40 min.
+{
+    "00.Apply_heat": {
+        "Duration": "pendant 40 min",
+        "Heating_instrument": "à four préchauffé à 180°",
+        "_TRIGGER": "cuire"
+    },
+    "01.Artifact": {
+        "Artifact": "four",
+        "_TRIGGER": "four"
+    },
+    "02.Cause_temperature_change": {
+        "Item": "four",
+        "Temperature_goal": "à 180°",
+        "_TRIGGER": "préchauffé"
+    },
+    "03.Measure_duration": {
+        "Count": "40",
+        "Unit": "min",
+        "_TRIGGER": "min"
+    }
+}
+
+SENTENCE: laisser tiédir avant d'ôter le cercle, sinon la tarte se craquelle.
+{
+    "00.Time_vector": {
+        "Direction": "avant d' ôter le cercle",
+        "Event": "tiédir",
+        "_TRIGGER": "laisser"
+    },
+    "01.Change_of_phase": {
+        "Time": "avant d' ôter le cercle",
+        "_TRIGGER": "tiédir"
+    },
+    "02.Time_vector": {
+        "Event": "laisser tiédir",
+        "Landmark_event": "d' ôter le cercle",
+        "_TRIGGER": "avant"
+    },
+    "03.Removing": {
+        "Theme": "le cercle",
+        "_TRIGGER": "ôter"
+    },
+    "04.Connectors": {
+        "Connector": "cercle",
+        "_TRIGGER": "cercle"
+    },
+    "05.Negative_conditional": {
+        "Anti_consequence": "laisser tiédir avant d' ôter le cercle la tarte se craquelle",
+        "_TRIGGER": "sinon"
+    },
+    "06.Food": {
+        "_TRIGGER": "tarte"
+    },
+    "07.Location_of_light": {
+        "Figure": "la tarte",
+        "_TRIGGER": "craquelle"
+    }
+}
+
+SENTENCE: démouler sur grille.
+{
+    "00.Grinding": {
+        "Place": "sur grille",
+        "_TRIGGER": "démouler"
+    }
+}
+
