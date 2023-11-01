@@ -14,9 +14,9 @@ from flask_sqlalchemy import SQLAlchemy
 
 # Get paths to SentencePiece model and vocab
 LANG = 'en' # hardcoded for now
-SPM_DEFAULT_VOCAB_PATH = f'app/api/models/{LANG}/{LANG}wiki.vocab'
+SPM_DEFAULT_VOCAB_PATH = f'app/api/models/{LANG}/{LANG}wiki.lite.16k.vocab'
 spm_vocab_path = os.environ.get("SPM_VOCAB", SPM_DEFAULT_VOCAB_PATH)
-SPM_DEFAULT_MODEL_PATH = f'app/api/models/{LANG}/{LANG}wiki.model'
+SPM_DEFAULT_MODEL_PATH = f'app/api/models/{LANG}/{LANG}wiki.lite.16k.model'
 spm_model_path = os.environ.get("SPM_MODEL", SPM_DEFAULT_MODEL_PATH)
 
 # Define vector size

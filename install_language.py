@@ -8,13 +8,13 @@ from pathlib import Path
 from os.path import dirname, realpath, join
 
 if len(sys.argv) != 2:
-    print("Please specify the language you want to install. English is pre-installed. The following other languages are supported: [fr]")
+    print("Please specify the language you want to install. English is pre-installed. The following other languages are supported: [de]")
     sys.exit()
 
 lang = sys.argv[1]
 
 if len(lang) != 2:
-    print("Your language code should just be a two-letter string. \nEXAMPLE USAGE: python install_language.py ml.")
+    print("Your language code should just be a two-letter string. \nEXAMPLE USAGE: python install_language.py de.")
     sys.exit()
 
 dir_path = dirname(realpath(__file__))
@@ -23,7 +23,7 @@ Path(local_dir).mkdir(exist_ok=True, parents=True)
 
 repo_path = 'https://github.com/PeARSearch/PeARS-public-pods-'+lang+'/blob/main/models/'
 
-paths = ['fly.m', lang+'.hyperparameters.cfg', lang+'wiki-latest-pages-articles.train.hacked.umap', lang+'wiki.expansion.m', lang+'wiki.model', lang+'wiki.vocab']
+paths = [lang+'wiki.lite.16k.model', lang+'wiki.lite.16k.vocab']
 
 for p in paths:
     path = join(repo_path, p+'?raw=true')
