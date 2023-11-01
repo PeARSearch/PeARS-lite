@@ -105,4 +105,4 @@ def compute_query_vectors(query, lang):
     print(text)
     v = vectorize_scale(lang, text, 5, len(text)) #log prob power 5
     #print(csr_matrix(v))
-    return v
+    return v, text

@@ -12,7 +12,7 @@ from app import db
 from app.utils_db import (
     get_db_url_snippet, get_db_url_title, get_db_url_doctype, get_db_url_pod, get_db_url_notes)
 
-from .overlap_calculation import score_url_overlap, generic_overlap, completeness
+from .overlap_calculation import score_url_overlap, generic_overlap, completeness, posix
 from app.search import term_cosine
 from app.utils import cosine_similarity, hamming_similarity, convert_to_array, get_language
 from app.indexer.mk_page_vector import compute_query_vectors
@@ -25,11 +25,13 @@ dir_path = dirname(dirname(realpath(__file__)))
 pod_dir = join(dir_path,'static','pods')
 raw_dir = join(dir_path,'static','toindex')
 
-def score(query, query_dist, kwd):
+def score(query, query_dist, tokenized, kwd):
     URL_scores = {}
     snippet_scores = {}
     DS_scores = {}
     completeness_scores = {}
+    posix_scores = posix(tokenized)
+
     pod_m = load_npz(join(pod_dir,kwd+'.npz'))
     m_cosines = 1 - distance.cdist(query_dist, pod_m.todense(), 'cosine')
     m_completeness = completeness(query_dist, pod_m.todense())
@@ -39,7 +41,7 @@ def score(query, query_dist, kwd):
         completeness_scores[u.url] = m_completeness[0][int(u.vector)]
         #URL_scores[u.url] = score_url_overlap(query, u.url)
         snippet_scores[u.url] = generic_overlap(query, u.title+' '+u.snippet)
-    return DS_scores, completeness_scores, snippet_scores
+    return DS_scores, completeness_scores, snippet_scores, posix_scores
 
 
 def score_pods(query, query_dist, lang):
@@ -72,17 +74,18 @@ def score_pods(query, query_dist, lang):
         return best_pods
 
 
-def score_docs(query, query_dist, kwd):
+def score_docs(query, query_dist, tokenized, kwd):
     '''Score documents for a query'''
     document_scores = {}  # Document scores
-    DS_scores, completeness_scores, snippet_scores = score(query, query_dist, kwd)
+    DS_scores, completeness_scores, snippet_scores, posix_scores = score(query, query_dist, tokenized, kwd)
+    print("POSIX SCORES",posix_scores)
     for url in list(DS_scores.keys()):
-        #print(url,completeness_scores[url], snippet_scores[url])
-        if completeness_scores[url] > 0 and snippet_scores[url] >0 and '.csv' not in url:
-            print(url,completeness_scores[url], snippet_scores[url])
-        #document_scores[url] = 0.5*DS_scores[url] + completeness_scores[url] + 0.1*snippet_scores[url]
+        idx = db.session.query(Urls).filter_by(url=url).first().vector
+        if idx in posix_scores:
+            print("Incrementing score for",idx)
+            completeness_scores[url]+=posix_scores[idx]
         document_scores[url] = completeness_scores[url] + snippet_scores[url]
-        if math.isnan(document_scores[url]) or completeness_scores[url] < 0.5 or snippet_scores[url] < 0.6:  # Check for potential NaN -- messes up with sorting in bestURLs.
+        if math.isnan(document_scores[url]) or completeness_scores[url] < 0.3 or snippet_scores[url] < 0.3:  # Check for potential NaN -- messes up with sorting in bestURLs.
             document_scores[url] = 0
     return document_scores
 
@@ -96,7 +99,7 @@ def bestURLs(doc_scores):
         if c < 10:
             if doc_scores[w] > 0:
                 #if netlocs_used.count(loc) < 10:
-                print(w,doc_scores[w])
+                print("DOC SCORE",w,doc_scores[w])
                 best_urls.append(w)
                 netlocs_used.append(loc)
                 c += 1
@@ -104,14 +107,15 @@ def bestURLs(doc_scores):
                 break
         else:
             break
+    print("BEST URLS",best_urls)
     return best_urls
 
 
 def aggregate_csv(best_urls):
-    urls = list(set([u for u in best_urls if '.csv#' not in u]))
+    urls = list([u for u in best_urls if '.csv#' not in u])
     print(urls)
     csvs = []
-    csv_names = list(set([re.sub('#.*','',u) for u in best_urls if '.csv#' in u]))
+    csv_names = list([re.sub('#.*','',u) for u in best_urls if '.csv#' in u])
     for csv_name in csv_names:
         rows = [re.sub('.*\[','',u)[:-1] for u in best_urls if csv_name in u]
         csvs.append([csv_name,rows])
@@ -164,17 +168,17 @@ def output(best_urls):
         pod = rec.pod
         if pod not in pods:
             pods.append(pod)
-        # print(results)
+        #print(results)
     return results, pods
 
 
 def run(query, pears):
     document_scores = {}
     query, lang = get_language(query)
-    q_dist = compute_query_vectors(query, lang)
+    q_dist, tokenized = compute_query_vectors(query, lang)
     best_pods = score_pods(query, q_dist, lang)
     print("BEST PODS:",best_pods)
     for pod in best_pods:
-        document_scores.update(score_docs(query, q_dist, pod))
+        document_scores.update(score_docs(query, q_dist, tokenized, pod))
     best_urls = bestURLs(document_scores)
     return output(best_urls)

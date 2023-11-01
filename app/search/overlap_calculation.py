@@ -4,7 +4,8 @@
 
 import re
 import string
-from app import VEC_SIZE
+from app import VEC_SIZE, vocab, inverted_vocab
+from app.indexer.posix import load_posix
 import numpy as np
 from scipy.spatial.distance import cdist
 
@@ -58,3 +59,93 @@ def completeness(v, m):
     completeness = 1 - cdist(v_nz, m_r, 'hamming')
     return completeness
 
+def posix_score_seq(posl, enforce_subwords=True):
+    # remove repeated words
+    posl = list(set(posl))
+
+    # only one subword word: perfect score
+    if len(posl) == 1 and len(posl[0]) == 1:
+        return 1.0
+    
+    scores = []
+
+    first_tok_pos = posl[0][0].split('|')  # first word -> first subword token -> split 'pos|pos|pos' to list 
+    prev_pos = [int(i) for i in first_tok_pos]
+
+    if enforce_subwords:
+        prev_subwords = prev_pos  # keep track of the positions of the previous subwords
+    else:
+        prev_subwords = None
+
+    for word_idx, word_posl in enumerate(posl): # loop over words
+        for p_idx, p_str in enumerate(word_posl):  # loop over subwords inside words
+            current_pos = [int(i) for i in p_str.split('|')]
+            if enforce_subwords:
+                if p_idx == 0:
+                    prev_subwords = current_pos  # first subword of a word: just get the positions, e.g. `_water` -> [19|55]
+                else:
+                    # non-initial subword, e.g. `melon` -> [53|56|99]
+                    conseq_subwords = []
+                    for p in current_pos:
+                        for prev_p in prev_subwords:  # compare distances: match 2nd `melon` instance (56-55 = 1), ignore the others 
+                            dist = p - prev_p
+                            if dist == 1:
+                                conseq_subwords.append(p)
+                                break
+                    if not conseq_subwords:  # none of the positions of current subword is consecutive
+                        scores.append(0.0)  # not the entire word is matched -> 0 score for this word
+                        break  # we can ignore the rest of the subwords
+                    prev_subwords = conseq_subwords
+
+                # if we made it to the last subword, it means the entire word was matched
+                if p_idx == len(word_posl) - 1:
+                    scores.append(1.0)  # assign a 1.0
+                    
+            else:
+                if word_idx == 0 and p_idx == 0:
+                    pass
+
+                pair_scores = _pair_score(prev_pos, current_pos)
+                #print("\nPAIR SCORES",scores)
+                if pair_scores:
+                    scores.extend(pair_scores)
+                else:
+                    scores.append(1.0)
+            prev_pos = current_pos
+
+    if enforce_subwords:
+        return np.mean(scores)  # meaning: the fraction of words that were completely matched (= all subwords consecutive)
+    else:
+        return np.max(scores)  # meaning: 1.0 if there is at least one pair of tokens that is consecutive both in the query and in the document. Otherwise a fraction of this. 
+
+def posix(q):
+    posindex = load_posix()
+    print(q.split())
+    query_vocab_ids = [vocab.get(wp) for wp in q.split()]
+    if any([i is None for i in query_vocab_ids]):
+        print("WARNING: there were unknown tokens in the query")
+        print(q.split(), query_vocab_ids)
+        query_vocab_ids = [i for i in query_vocab_ids if i is not None]
+
+    idx = []
+    for w in query_vocab_ids:
+        idx.append(set(posindex[w].keys()))        # get docs containing token
+
+    matching_docs = list(set.intersection(*idx))   # intersect doc lists to only retain the docs that contain *all* tokens
+    doc_scores = {}
+    for doc in matching_docs:
+        positions = []
+        for w in query_vocab_ids:
+            token_str = inverted_vocab[w]
+            token_positions = posindex[w][doc]
+            #print("TOKEN STR",token_str)
+            if token_str.startswith("▁"):
+                positions.append((token_positions,))
+            else:
+                positions[-1] += (token_positions,)
+            #print("DOC",doc,"Q WORD", token_str, token_positions)
+
+        final_score = posix_score_seq(positions)
+        doc_scores[doc] = final_score
+        #print("\nFINAL SCORE FOR DOC", doc, final_score)
+    return doc_scores

@@ -23,7 +23,7 @@ spm_model_path = os.environ.get("SPM_MODEL", SPM_DEFAULT_MODEL_PATH)
 from app.indexer.vectorizer import read_vocab
 
 print(f"Loading SPM vocab from '{spm_vocab_path}' ...")
-vocab, _, _ = read_vocab(spm_vocab_path)
+vocab, inverted_vocab, _ = read_vocab(spm_vocab_path)
 VEC_SIZE = len(vocab)
 
 
