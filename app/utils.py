@@ -260,7 +260,15 @@ def beautify_title(title, doctype):
     return title
 
 def beautify_snippet(snippet, query):
+    tmp_snippet = ""
+    img = re.search('<img[^>]*>',snippet)
+    if img:
+        tmp_snippet = re.sub('<img[^>]*>','',snippet)
+    else:
+        tmp_snippet = snippet
     for w in query.split():
-        snippet = snippet.replace(w,'<b>'+w+'</b>')
-        snippet = snippet.replace(w.title(),'<b>'+w.title()+'</b>')
-    return snippet
+        tmp_snippet = tmp_snippet.replace(w,'<b>'+w+'</b>')
+        tmp_snippet = tmp_snippet.replace(w.title(),'<b>'+w.title()+'</b>')
+    if img:
+        tmp_snippet = img.group()+tmp_snippet
+    return tmp_snippet
