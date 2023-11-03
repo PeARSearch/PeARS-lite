@@ -18,12 +18,12 @@ dir_path = dirname(dirname(realpath(__file__)))
 pod_dir = join(dir_path,'static','pods')
 
 def tokenize_text(lang, text):
-    sp.load(f'app/api/models/{lang}/{lang}wiki.model')
+    sp.load(f'app/api/models/{lang}/{lang}wiki.lite.16k.model')
     tokens = [wp for wp in sp.encode_as_pieces(text.lower())]
     if tokens[-1] == 's': #if plural marker (for English), remove 
         tokens = tokens[:-1]
     text = ' '.join([wp for wp in sp.encode_as_pieces(text.lower())])
-    print("TOKENIZED",text)
+    #print("TOKENIZED",text)
     return text
 
 
@@ -35,7 +35,7 @@ def compute_vec(lang, text, pod_m):
 
 def compute_vectors(target_url, keyword, lang):
     print("Computing vectors for", target_url, "(",keyword,")",lang)
-    print(pod_dir)
+    #print(pod_dir)
     pod_m = load_npz(join(pod_dir,keyword+'.npz'))
     if not db.session.query(Urls).filter_by(url=target_url).all():
         u = Urls(url=target_url)
@@ -44,7 +44,7 @@ def compute_vectors(target_url, keyword, lang):
         if error is None and snippet != '':
             text = title + " " + body_str
             text = tokenize_text(lang, text)
-            print(text)
+            #print(text)
             pod_m = compute_vec(lang, text, pod_m)
             u.title = str(title)
             u.vector = str(pod_m.shape[0]-1)
@@ -52,7 +52,7 @@ def compute_vectors(target_url, keyword, lang):
             u.pod = keyword
             u.snippet = str(snippet)
             u.doctype = 'url'
-            print(u.url,u.title,u.vector,u.snippet,u.pod)
+            #print(u.url,u.title,u.vector,u.snippet,u.pod)
             db.session.add(u)
             db.session.commit()
             save_npz(join(pod_dir,keyword+'.npz'),pod_m)
@@ -62,10 +62,10 @@ def compute_vectors(target_url, keyword, lang):
             if snippet == '':
                 print("IGNORING URL: Snippet empty.")
             else:
-                print(error)
+                print('ERROR DURING PARSING',error)
             return False, None, None, None
     else:
-        return True, None, None, None
+        return False, None, None, None
 
 
 def compute_vectors_local_docs(target_url, doctype, title, snippet, keyword, lang):
@@ -93,7 +93,7 @@ def compute_vectors_local_docs(target_url, doctype, title, snippet, keyword, lan
         podsum = np.sum(pod_m, axis=0)
         return True, podsum, text, u.vector
     else:
-        return True, None, None, None
+        return False, None, None, None
 
 
 

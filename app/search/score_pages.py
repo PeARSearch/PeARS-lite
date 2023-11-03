@@ -80,12 +80,16 @@ def score_docs(query, query_dist, tokenized, kwd):
     DS_scores, completeness_scores, snippet_scores, posix_scores = score(query, query_dist, tokenized, kwd)
     print("POSIX SCORES",posix_scores)
     for url in list(DS_scores.keys()):
+        document_scores[url] = 0.0
         idx = db.session.query(Urls).filter_by(url=url).first().vector
         if idx in posix_scores:
-            print("Incrementing score for",idx)
-            completeness_scores[url]+=posix_scores[idx]
-        document_scores[url] = completeness_scores[url] + snippet_scores[url]
-        if math.isnan(document_scores[url]) or completeness_scores[url] < 0.3 or snippet_scores[url] < 0.3:  # Check for potential NaN -- messes up with sorting in bestURLs.
+            document_scores[url]+=posix_scores[idx]
+            print("Incrementing score for",url,idx, posix_scores[idx])
+        document_scores[url]+=completeness_scores[url]
+        document_scores[url]+=snippet_scores[url]
+        #document_scores[url] = completeness_scores[url] + snippet_scores[url]
+        print(url, document_scores[url], completeness_scores[url], snippet_scores[url])
+        if math.isnan(document_scores[url]) or completeness_scores[url] < 0.3:  # Check for potential NaN -- messes up with sorting in bestURLs.
             document_scores[url] = 0
     return document_scores
 
@@ -96,7 +100,7 @@ def bestURLs(doc_scores):
     c = 0
     for w in sorted(doc_scores, key=doc_scores.get, reverse=True):
         loc = urlparse(w).netloc
-        if c < 10:
+        if c < 100:
             if doc_scores[w] > 0:
                 #if netlocs_used.count(loc) < 10:
                 print("DOC SCORE",w,doc_scores[w])
@@ -129,7 +133,10 @@ def aggregate_csv(best_urls):
 
 
 def assemble_csv_table(csv_name,rows):
-    df = read_csv(join(raw_dir,csv_name))
+    try:
+        df = read_csv(join(raw_dir,csv_name), delimiter=';', encoding='utf-8')
+    except:
+        df = read_csv(join(raw_dir,csv_name), delimiter=';', encoding='iso-8859-1')
     df_slice = df.iloc[rows].to_numpy()
     table = "<table class='table table-striped'><thead><tr>"
     for c in list(df.columns):
