@@ -138,14 +138,14 @@ def assemble_csv_table(csv_name,rows):
     except:
         df = read_csv(join(raw_dir,csv_name), delimiter=';', encoding='iso-8859-1')
     df_slice = df.iloc[rows].to_numpy()
-    table = "<table class='table table-striped'><thead><tr>"
+    table = "<table class='table table-striped w-100'><thead><tr>"
     for c in list(df.columns):
-        table+="<th scope='col'>"+c+"</th>"
+        table+="<th scope='col' style='word-wrap:break-word; max-width:500px'>"+c+"</th>"
     table+="</tr></thead>"
     for r in df_slice[:10]:
-        table+="<tr>"
+        table+="<tr class='w-100'>"
         for i in r:
-            table+="<td>"+str(i)+"</td>"
+            table+="<td style='word-wrap:break-word; max-width:500px'>"+str(i)+"</td>"
         table+="</tr>"
     table+="</table>"
     return table
