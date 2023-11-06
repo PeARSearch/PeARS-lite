@@ -7,7 +7,7 @@ app = Flask(__name__)
 def auth():
 
     cookies = {'OMD_SESSION_ID': '1234'}
-    data = {'username': 'omd', 
+    data = {'username': 'tester', 
     'password': 'pwd'}
     url = 'http://localhost:9090/'
     resp = requests.post(url, data=data, cookies=cookies) #unless you need to set a user agent or referrer address you may not need the header to be added.
@@ -19,14 +19,14 @@ def auth():
 def api():
     def getuserinfo():
         print("Running getuserinfo")
-        info = {'username':'kim', 'displayname':'kim', 'profileimage':'iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P48/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==', 'email':'test@pearsproject.org', 'valid':'true'}
+        info = {'username':'tester', 'displayname':'tester', 'profileimage':'iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P48/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==', 'email':'test@pearsproject.org', 'valid':'true'}
         r = app.make_response(jsonify(info))
         r.mimetype = "application/json"
         return r
    
     def signin():
         print("Running signin")
-        info = {'username':'kim', 'displayname':'kim', 'profileimage':'iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P48/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==', 'email':'test@pearsproject.org', 'valid':'true'}
+        info = {'username':'tester', 'displayname':'tester', 'profileimage':'iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P48/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==', 'email':'test@pearsproject.org', 'valid':'true'}
         r = app.make_response(jsonify(info))
         return r
 

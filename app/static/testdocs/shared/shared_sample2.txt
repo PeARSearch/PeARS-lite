@@ -1,0 +1,1 @@
+This library is in its early development stage. Currently it is a very simple kademlia DHT. Please come back when we are in beta! 
