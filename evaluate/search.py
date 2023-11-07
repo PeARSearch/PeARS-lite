@@ -43,12 +43,18 @@ if __name__ == '__main__':
 
     persona_name = args.persona
     query_dir = args.query_dir
+
     if args.filter_frequent_2_and_3_token_queries:
         query_file = f'{query_dir}/{persona_name}_ff23_query.json'
         results_file = f'{query_dir}/{persona_name}_wiki_search_results_ff23.json'
     else:
         query_file = f'{query_dir}/{persona_name}_query.json'
         results_file = f'{query_dir}/{persona_name}_wiki_search_results.json'
+    
+    if query_dir.strip("/").endswith("fn_queries"):
+        framenet_eval = True
+        query_file = query_file.replace("_query.json", "_q2g.json")
+    
     res = search_queries(query_file, pod=args.pod)
     with open(results_file, 'w') as f:
         for row in res:

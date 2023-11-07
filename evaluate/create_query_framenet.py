@@ -1,4 +1,5 @@
 import glob
+import os
 import json
 import argparse
 from collections import defaultdict
@@ -112,37 +113,54 @@ def make_queries(persona, language="english"):
     docs = glob.glob(f"../../../datasets/personas/personas_raw/{persona}/**/*.txt", recursive=True)
 
     out_file = f"../../../datasets/personas/personas_fn_queries/{persona}_query.json"
+    if os.path.isfile(out_file):
+        with open(out_file, encoding="utf-8") as f:
+            queries = json.load(f)
 
-    queries = []
+        queries_str = {q["query"] for q in queries}    
+        
+        entities = {q["query"] for q in queries if q["_category"] == "entities"}
+        entities_with_attrib = {q["query"] for q in queries if q["_category"] == "entities_with_attrib"}
+        places = {q["query"] for q in queries if q["_category"] == "places"}
+        undergo_action = {q["query"] for q in queries if q["_category"] == "undergo_action"}
+        perform_action = {q["query"] for q in queries if q["_category"] == "perform_action"}
 
-    entities = set()
-    entities_with_attrib = set()
-    places = set()
+    else:
+        queries = []
+        queries_str = set()
 
-    place_relations = set()
-    undergo_action = set()
-    perform_action = set()
+        entities = set()
+        entities_with_attrib = set()
+        places = set()
+
+        # place_relations = set()
+        undergo_action = set()
+        perform_action = set()
 
     def _thing_quotas_met():
-        return len(entities) + len(entities_with_attrib) + len(places) >= 1000
+        return len(entities.union(entities_with_attrib).union(places)) >= 1000
     
     def _rel_quotas_met():
-        return len(place_relations) + len(undergo_action) + len(perform_action) >= 1000
+        return len(undergo_action.union(perform_action)) >= 1000
 
     def _append_query(qry, cat, snt, doc, frm, rols, fsx):
-        queries.append({
-            "query": qry,
-            "_category": cat,
-            "_txt_meta": {
-                "sentence": snt,
-                "document": doc
-            },
-            "_fn_meta": {
-                "frame": frm,
-                "roles": rols,
-                "frame_structure": fsx
-            }
-        })
+        if qry not in queries_str:
+            queries_str.add(qry)
+            queries.append({
+                "query": qry,
+                "_category": cat,
+                "_txt_meta": {
+                    "sentence": snt,
+                    "document": doc
+                },
+                "_fn_meta": {
+                    "frame": frm,
+                    "roles": rols,
+                    "frame_structure": fsx
+                }
+            })
+            return True
+        return False
 
     sentence_stream = get_sentence_stream(docs, k=1_000_000, language=language)
     
@@ -167,9 +185,9 @@ def make_queries(persona, language="english"):
                 place_query, _ = try_make_frame_based_query(frame, fs, "Locale", "Locale", language=language)
                 if place_query:
                     places.add(place_query)
-                    _append_query(place_query, "places", sentence, document, frame, [], fs)
-                    print(f"[✔️] place query added ({frame}) -> new total {len(places)}")
-                    print("\t", place_query, "\n")
+                    if _append_query(place_query, "places", sentence, document, frame, [], fs):
+                        print(f"[✔️] place query added ({frame}) -> new total {len(places)}")
+                        print("\t", place_query, "\n")
                     continue                    
 
             if not _thing_quotas_met():
@@ -177,9 +195,9 @@ def make_queries(persona, language="english"):
                 entity_query, _ = try_make_frame_based_query(frame, fs, "Entity", "Entity", language=language)
                 if entity_query:
                     entities.add(entity_query)
-                    _append_query(entity_query, "entities", sentence, document, frame, [], fs)
-                    print(f"[✔️] entity query added ({frame}) -> new total {len(entities)}")
-                    print("\t", entity_query, "\n")                    
+                    if _append_query(entity_query, "entities", sentence, document, frame, [], fs):                        
+                        print(f"[✔️] entity query added ({frame}) -> new total {len(entities)}")
+                        print("\t", entity_query, "\n")                    
                     continue
 
             if not _thing_quotas_met():
@@ -187,9 +205,9 @@ def make_queries(persona, language="english"):
                 attrib_query, attrib_role = try_make_frame_based_query(frame, fs, "Attributes", "Entity", process_role=True, language=language)
                 if attrib_query:
                     entities_with_attrib.add(attrib_query)
-                    _append_query(attrib_query, "entities_with_attrib", sentence, document, frame, [attrib_role], fs)
-                    print(f"[✔️] entity with attribute added ({frame}, {attrib_role}) -> new total {len(entities_with_attrib)}")                    
-                    print("\t", attrib_query, "\n")                    
+                    if _append_query(attrib_query, "entities_with_attrib", sentence, document, frame, [attrib_role], fs):
+                        print(f"[✔️] entity with attribute added ({frame}, {attrib_role}) -> new total {len(entities_with_attrib)}")                    
+                        print("\t", attrib_query, "\n")                    
                     continue
 
             # --- searching for 'RELATIONS' ---
@@ -198,9 +216,9 @@ def make_queries(persona, language="english"):
                 u_action_query, undergoer_role = try_make_frame_based_query(frame, fs, "Transitive_action", "Patient", process_role=True, language=language)
                 if u_action_query:
                     undergo_action.add(u_action_query)
-                    _append_query(u_action_query, "undergo_action", sentence, document, frame, [undergoer_role], fs)
-                    print(f"[✔️] undergoing action added ({frame}, {undergoer_role}) -> new total {len(undergo_action)}")                    
-                    print("\t", u_action_query, "\n")                    
+                    if _append_query(u_action_query, "undergo_action", sentence, document, frame, [undergoer_role], fs):
+                        print(f"[✔️] undergoing action added ({frame}, {undergoer_role}) -> new total {len(undergo_action)}")                    
+                        print("\t", u_action_query, "\n")                    
                     continue
 
             if not _rel_quotas_met():
@@ -208,9 +226,9 @@ def make_queries(persona, language="english"):
                 p_action_query, agent_role = try_make_frame_based_query(frame, fs, "Transitive_action", "Agent", process_role=True, language=language)
                 if p_action_query:
                     perform_action.add(p_action_query)
-                    _append_query(p_action_query, "perform_action", sentence, document, frame, [agent_role], fs)
-                    print(f"[✔️] performing action added ({frame}, {agent_role}) -> new total {len(perform_action)}")                    
-                    print("\t", p_action_query, "\n")                    
+                    if _append_query(p_action_query, "perform_action", sentence, document, frame, [agent_role], fs):
+                        print(f"[✔️] performing action added ({frame}, {agent_role}) -> new total {len(perform_action)}")                    
+                        print("\t", p_action_query, "\n")                    
                     continue
 
             if not _rel_quotas_met():
@@ -218,46 +236,39 @@ def make_queries(persona, language="english"):
                 p_action_query, agent_role = try_make_frame_based_query(frame, fs, "Intentionally_act", "Agent", process_role=True, language=language)
                 if p_action_query:
                     perform_action.add(p_action_query)
-                    _append_query(p_action_query, "perform_action", sentence, document, frame, [agent_role], fs)
-                    print(f"[✔️] performing action added ({frame}, {agent_role}) -> new total {len(perform_action)}")                    
-                    print("\t", p_action_query, "\n")                    
+                    if _append_query(p_action_query, "perform_action", sentence, document, frame, [agent_role], fs):
+                        print(f"[✔️] performing action added ({frame}, {agent_role}) -> new total {len(perform_action)}")                    
+                        print("\t", p_action_query, "\n")                    
                     continue
 
-            if not _rel_quotas_met():
-                # Place relationships
-                loc_rel_figure, figure_role = try_make_frame_based_query(frame, fs, "Locative_relation", "Figure", process_role=True, ignore_trigger=True, language=language)
-                loc_rel_ground, ground_role = try_make_frame_based_query(frame, fs, "Locative_relation", "Ground", process_role=True, ignore_trigger=True, language=language)            
-                if loc_rel_figure and loc_rel_ground:
-                    query_str = " ".join(f"{loc_rel_figure} {loc_rel_ground}".split())
-                    place_relations.add(query_str)
-                    _append_query(query_str, "place_relations", sentence, document, frame, [figure_role, ground_role], fs)
-                    print(f"[✔️] place relationship added ({frame}, {figure_role}, {ground_role}) -> new total {len(place_relations)}")                    
-                    print("\t", f"{loc_rel_figure} {loc_rel_ground}", "\n")                    
-                    continue
+            # if not _rel_quotas_met():
+            #     # Place relationships
+            #     loc_rel_figure, figure_role = try_make_frame_based_query(frame, fs, "Locative_relation", "Figure", process_role=True, ignore_trigger=True, language=language)
+            #     loc_rel_ground, ground_role = try_make_frame_based_query(frame, fs, "Locative_relation", "Ground", process_role=True, ignore_trigger=True, language=language)            
+            #     if loc_rel_figure and loc_rel_ground:
+            #         query_str = " ".join(f"{loc_rel_figure} {loc_rel_ground}".split())
+            #         place_relations.add(query_str)
+            #         _append_query(query_str, "place_relations", sentence, document, frame, [figure_role, ground_role], fs)
+            #         print(f"[✔️] place relationship added ({frame}, {figure_role}, {ground_role}) -> new total {len(place_relations)}")                    
+            #         print("\t", f"{loc_rel_figure} {loc_rel_ground}", "\n")                    
+            #         continue
 
     with open(out_file, "w", encoding="utf-8") as f:
         json.dump(queries, f, ensure_ascii=False, indent=4, sort_keys=True)
         
 
     print("==================")
-    # entities = set()
-    # entities_with_attrib = set()
-    # places = set()
-
-    # place_relations = set()
-    # undergo_action = set()
-    # perform_action = set()
     print("Entity:\n\t" + "\n\t".join(entities))
     print("Entities with attributes:\n\t" + "\n\t".join(entities_with_attrib))
     print("Places:\n\t" + "\n\t".join(places))
     
-    print("Place relations:\n\t" + "\n\t".join(place_relations))
+    # print("Place relations:\n\t" + "\n\t".join(place_relations))
     print("Undergoing actions:\n\t" + "\n\t".join(undergo_action))
     print("Performing actions:\n\t" + "\n\t".join(perform_action))
 
 
 def get_frame_structures(s):
-    r = requests.get("http://localhost:2233/analyze", params={"text": s})
+    r = requests.get("http://localhost:2223/analyze", params={"text": s})
     data = r.json()
     frame_analyses = data["analyses"]
     frame_structures = defaultdict(lambda: defaultdict(str))
