@@ -43,6 +43,13 @@ a:hover {
   --bs-btn-hover-border-color: var(--secondary-color);
 }
 
+.btn-primary {
+  --bs-btn-bg: var(--primary-color);
+  --bs-btn-border-color: var(--primary-color);
+  --bs-btn-hover-bg: var(--secondary-color);
+  --bs-btn-hover-border-color: var(--secondary-color);
+}
+
 .submit-color-button {
   height: 30px;
   width: 30px;
