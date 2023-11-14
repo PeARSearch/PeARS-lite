@@ -18,7 +18,7 @@ from app import VEC_SIZE, LANG
 from app.api.models import Urls
 from app.indexer.neighbours import neighbour_urls
 from app.indexer import mk_page_vector, spider
-from app.utils import readDocs, readUrls, readBookmarks, get_language, init_pod, init_podsum, init_posix
+from app.utils import readDocs, readUrls, readBookmarks, get_language, init_pod, init_podsum
 from app.utils_db import pod_from_file
 from app.indexer.htmlparser import extract_links
 from app.indexer.posix import posix_doc
@@ -49,7 +49,6 @@ def index():
 def from_docs():
     if Urls.query.count() == 0:
         init_podsum()
-        init_posix()
 
     filename = request.files['file_source'].filename
     print("DOC FILE:", filename)
@@ -69,7 +68,6 @@ def from_docs():
 def from_file():
     if Urls.query.count() == 0:
         init_podsum()
-        init_posix()
 
     print("FILE:", request.files['file_source'])
     if request.files['file_source'].filename[-4:] == ".txt":
@@ -83,7 +81,6 @@ def from_file():
 def from_bookmarks():
     if Urls.query.count() == 0:
         init_podsum()
-        init_posix()
 
     print("FILE:", request.files['file_source'])
     if "bookmarks" in request.files['file_source'].filename:
@@ -104,7 +101,6 @@ def from_bookmarks():
 def from_url():
     if Urls.query.count() == 0:
         init_podsum()
-        init_posix()
 
     if request.form['url'] != "":
         f = open(join(dir_path, "urls_to_index.txt"), 'w')
@@ -138,7 +134,6 @@ def from_csv():
 def from_share():
     if Urls.query.count() == 0:
         init_podsum()
-        init_posix()
 
     print("FILE:", request.files['file_source'])
     if request.files['file_source'].filename[-6:] == ".share":
@@ -162,7 +157,7 @@ The URL indexing uses same progress as file.
 
 @indexer.route("/progress_file")
 def progress_file():
-    logging.debug("Running progress file")
+    print("Running progress file")
     def generate():
         urls, keywords, langs, errors = readUrls(join(dir_path, "urls_to_index.txt"))
         if errors:
@@ -171,19 +166,17 @@ def progress_file():
             logging.error('Invalid file format')
             yield "data: 0 \n\n"
         kwd = keywords[0]
-        pod_name = kwd+'.npz'
-        init_pod(pod_name)
+        init_pod(kwd)
         c = 0
         for url, kwd, lang in zip(urls, keywords, langs):
+            print("CONTROLLER",url)
             success, podsum, text, doc_id = mk_page_vector.compute_vectors(url, kwd, lang)
             if success:
-                posix_doc(text, doc_id)
+                posix_doc(text, doc_id, kwd)
                 pod_from_file(kwd, lang, podsum)
-            else:
-                logging.error("Error accessing the URL")
             c += 1
-            yield "data:" + str(int(c / len(urls) * 100)) + "\n\n"
-
+            yield "data:" + str(c) + "\n\n"
+        yield "data:" + "Finished!" + "\n\n"
     return Response(generate(), mimetype='text/event-stream')
 
 @indexer.route("/progress_docs")
@@ -197,14 +190,12 @@ def progress_docs():
         f = open(join(dir_path, "file_source_info.txt"), 'r')
         for line in f:
             source, kwd, lang = line.rstrip('\n').split('::')
-        pod_name = kwd+'.npz'
-        init_pod(pod_name)
+        init_pod(kwd)
         c = 0
         for url, title, snippet in zip(urls, titles, snippets):
-            print(url,title)
             success, podsum, text, doc_id = mk_page_vector.compute_vectors_local_docs(url, doctype, title, snippet, kwd, lang)
             if success:
-                posix_doc(text, doc_id)
+                posix_doc(text, doc_id, kwd)
                 pod_from_file(kwd, lang, podsum)
             c += 1
             print('###', str(ceil(c / len(urls) * 100)))
@@ -219,12 +210,16 @@ def progress_csv():
         kwd = ''
         lang = LANG
         doctype = 'csv'
-        df = read_csv(join(dir_path, "spreadsheet_to_index.csv"))
+        try:
+            df = read_csv(join(dir_path, "spreadsheet_to_index.csv"), delimiter=';', encoding="utf-8")
+        except:
+            print("CSV Encoding is not utf-8")
+            df = read_csv(join(dir_path, "spreadsheet_to_index.csv"), delimiter=';', encoding="iso-8859-1")
+
         f = open(join(dir_path, "file_source_info.txt"), 'r')
         for line in f:
             source, kwd, lang = line.rstrip('\n').split('::')
-        pod_name = kwd+'.npz'
-        init_pod(pod_name)
+        init_pod(kwd)
         c = 0
         columns = list(df.columns)
         table = df.to_numpy()
@@ -233,7 +228,7 @@ def progress_csv():
             print(row, type(row[0]))
             if isinstance(row[0],float) and isnan(row[0]):
                 continue
-            title = source.replace('.csv','').title()+': '+row[0]+' ['+str(i)+']'
+            title = source.replace('.csv','').title()+': '+str(row[0])+' ['+str(i)+']'
             url = source+'#'+title
             snippet = ''
             for i in range(len(columns)):
@@ -242,7 +237,7 @@ def progress_csv():
             print(url,title)
             success, podsum, text, doc_id = mk_page_vector.compute_vectors_local_docs(url, doctype, title, snippet, kwd, lang)
             if success:
-                posix_doc(text, doc_id)
+                posix_doc(text, doc_id, kwd)
                 pod_from_file(kwd, lang, podsum)
             c += 1
             print('###', str(ceil(c / table.shape[0] * 100)))

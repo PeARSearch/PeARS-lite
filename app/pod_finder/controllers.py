@@ -17,6 +17,7 @@ import joblib
 import re
 from scipy.sparse import load_npz, save_npz, csr_matrix
 import numpy as np
+from os import remove
 
 dir_path = dirname(dirname(dirname(realpath(__file__))))
 pod_dir = join(dir_path, 'app', 'static', 'pods')
@@ -231,10 +232,10 @@ def unsubscribe():
             lang = pod_entry.language
             pod_entry.registered = False
             db.session.commit()
-            print("Reverting CSR matrix to 0")
-            pod = np.zeros((1,VEC_SIZE))
-            pod = csr_matrix(pod)
-            save_npz(join(pod_dir,pod_name+".npz"), pod)
+            print("Removing CSR matrix")
+            remove(join(pod_dir,pod_name+'.npz'))
+            print("Removing positional index")
+            remove(join(pod_dir,pod_name+'.pos'))
             print("Reverting summary to 0")
             pod_from_file(pod_name, lang, np.zeros(VEC_SIZE))
     return render_template(

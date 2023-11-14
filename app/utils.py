@@ -96,14 +96,20 @@ def readPods(pod_file):
     f.close()
     return pods
 
+
 def init_pod(pod_name):
     dir_path = dirname(dirname(realpath(__file__)))
     pod_dir = join(dir_path,'app', 'static','pods')
-    if not isfile(join(pod_dir,pod_name)):
+    if not isfile(join(pod_dir,pod_name+'.npz')):
         print("Making 0 CSR matrix for new pod")
         pod = np.zeros((1,VEC_SIZE))
         pod = csr_matrix(pod)
-        save_npz(join(pod_dir,pod_name), pod)
+        save_npz(join(pod_dir,pod_name+'.npz'), pod)
+    
+    if not isfile(join(pod_dir,pod_name+'.pos')):
+        print("Making empty positional index for new pod")
+        posindex = [{} for _ in range(len(vocab))]
+        joblib.dump(posindex, join(pod_dir,pod_name+'.pos'))
 
 def init_podsum():
     dir_path = dirname(dirname(realpath(__file__)))
@@ -115,12 +121,6 @@ def init_podsum():
     pod_summaries = csr_matrix(pod_summaries)
     save_npz(join(pod_dir,"podsum.npz"), pod_summaries)
 
-def init_posix():
-    dir_path = dirname(dirname(realpath(__file__)))
-    posix_path = join(dir_path,'app','static','posix')
-    Path(posix_path).mkdir(exist_ok=True, parents=True)
-    posindex = [{} for _ in range(len(vocab))]
-    joblib.dump(posindex, join(posix_path,'posix.txt'))
 
 def normalise(v):
     norm = np.linalg.norm(v)

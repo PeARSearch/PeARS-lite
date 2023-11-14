@@ -43,7 +43,7 @@ SPDX-License-Identifier: AGPL-3.0-only
             record of a pod on your pear.</p>
 
             <form method="POST" accept-charset="UTF-8" enctype="multipart/form-data"
-                action="{{url_for('pod_finder.unsubscribe')}}">
+                action="{{url_for('pod_finder.unsubscribe')}}" onsubmit="return confirm('Are you sure you wish to delete this pod?');">
                 <div class="input-group p-2">
                     {% for pod in pods %}
                     <div class="form-check">

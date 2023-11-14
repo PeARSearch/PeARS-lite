@@ -1,6 +1,6 @@
 env/
 app/*.txt
 app/static/pods
-app/static/webmap
+app/static/toindex
 __pycache__/
 app.db

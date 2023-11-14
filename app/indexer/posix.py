@@ -2,22 +2,20 @@ import joblib
 from os.path import join, dirname, realpath
 from app import vocab
 
-def load_posix():
+def load_posix(pod_name):
     dir_path = dirname(dirname(realpath(__file__)))
-    posix_path = join(dir_path,'static','posix')
-    posix = joblib.load(join(posix_path,'posix.txt'))
+    posix_path = join(dir_path,'static','pods')
+    posix = joblib.load(join(posix_path,pod_name+'.pos'))
     return posix
 
-def dump_posix(posindex):
+def dump_posix(posindex, pod_name):
     dir_path = dirname(dirname(realpath(__file__)))
-    posix_path = join(dir_path,'static','posix')
-    joblib.dump(posindex, join(posix_path,'posix.txt'))
+    posix_path = join(dir_path,'static','pods')
+    joblib.dump(posindex, join(posix_path,pod_name+'.pos'))
 
 
-def posix_doc(text, doc_id):
-    posindex = load_posix()
-    print(text)
-    print(text.split())
+def posix_doc(text, doc_id, pod_name):
+    posindex = load_posix(pod_name)
     for pos, token in enumerate(text.split()):
         if token not in vocab:
             # tqdm.write(f"WARNING: token \"{token}\" not found in vocab")
@@ -27,4 +25,4 @@ def posix_doc(text, doc_id):
             posindex[token_id][doc_id] += f"|{pos}"
         else:
             posindex[token_id][doc_id] = f"{pos}"
-    dump_posix(posindex)
+    dump_posix(posindex, pod_name)

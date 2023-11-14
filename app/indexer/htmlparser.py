@@ -16,7 +16,7 @@ def remove_boilerplates(response):
     text = ""
     paragraphs = justext.justext(
         response.content,
-        justext.get_stoplist("English"), #FIX FOR MULTIPLE LANGUAGES
+        justext.get_stoplist("German"), #FIX FOR MULTIPLE LANGUAGES
         max_link_density=0.3,
         stopwords_low=0.1,
         stopwords_high=0.3,
@@ -93,7 +93,7 @@ def extract_html(url):
             if title is None:
                 title = ""
             body_str = remove_boilerplates(req)
-            print(body_str)
+            #print(body_str)
             try:
                 language = detect(title + " " + body_str)
                 print("Language for", url, ":", language)
@@ -106,12 +106,5 @@ def extract_html(url):
                 error = "ERROR extract_html: language is not supported."
                 title = ""
                 return title, body_str, snippet, cc, error
-            try:
-                cc = detect_open.is_cc(url, bs_obj)
-            except Exception:
-                error = "ERROR extract_html: Failed to get CC status for", url, "..."
-            if cc:
-                snippet = body_str[:400].replace(',', '-')
-            else:
-                snippet = body_str[:300].replace(',', '-')
+            snippet = body_str[:300].replace(',', '-')
     return title, body_str, snippet, cc, error

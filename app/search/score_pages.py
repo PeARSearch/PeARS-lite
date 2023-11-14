@@ -30,7 +30,7 @@ def score(query, query_dist, tokenized, kwd):
     snippet_scores = {}
     DS_scores = {}
     completeness_scores = {}
-    posix_scores = posix(tokenized)
+    posix_scores = posix(tokenized, kwd)
 
     pod_m = load_npz(join(pod_dir,kwd+'.npz'))
     m_cosines = 1 - distance.cdist(query_dist, pod_m.todense(), 'cosine')
