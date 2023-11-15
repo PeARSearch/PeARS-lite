@@ -54,7 +54,11 @@ def from_docs():
     print("DOC FILE:", filename)
     if filename[-4:] == ".txt":
         keyword = request.form['docs_keyword']
-        doctype = request.form['docs_type'].lower()
+        doctype = request.form['docs_type']
+        if doctype == '' or doctype.isspace():
+            doctype = 'doc'
+        else:
+            doctype = request.form['docs_type'].lower()
         keyword, lang = get_language(keyword)
         print("LANGUAGE:",lang)
         file = request.files['file_source']
@@ -63,6 +67,30 @@ def from_docs():
         f.write(filename+'::'+keyword+'::'+lang+'::'+doctype+'\n')
         f.close()
         return render_template('indexer/progress_docs.html')
+
+
+@indexer.route("/from_csv", methods=["POST"])
+def from_csv():
+    if Urls.query.count() == 0:
+        init_podsum()
+
+    filename = request.files['file_source'].filename
+    print("CSV FILE:", filename)
+    if filename[-4:] == ".csv":
+        keyword = request.form['csv_keyword']
+        doctype = request.form['docs_type']
+        if doctype == '' or doctype.isspace():
+            doctype = 'csv'
+        else:
+            doctype = request.form['docs_type'].lower()
+        keyword, lang = get_language(keyword)
+        print("LANGUAGE:",lang)
+        file = request.files['file_source']
+        file.save(join(dir_path, "spreadsheet_to_index.csv"))
+        f = open(join(dir_path, "file_source_info.txt"), 'w')
+        f.write(filename+'::'+keyword+'::'+lang+'::'+doctype+'\n')
+        f.close()
+        return render_template('indexer/progress_csv.html')
 
 
 @indexer.route("/from_file", methods=["POST"])
@@ -113,40 +141,6 @@ def from_url():
         f.close()
         return render_template('indexer/progress_url.html', url=u)
 
-@indexer.route("/from_csv", methods=["POST"])
-def from_csv():
-    if Urls.query.count() == 0:
-        init_podsum()
-        init_posix()
-    filename = request.files['file_source'].filename
-    print("FILE:", filename)
-    if filename[-4:] == ".csv":
-        keyword = request.form['csv_keyword']
-        keyword, lang = get_language(keyword)
-        print("LANGUAGE:",lang)
-        file = request.files['file_source']
-        file.save(join(dir_path, "spreadsheet_to_index.csv"))
-        f = open(join(dir_path, "file_source_info.txt"), 'w')
-        f.write(filename+'::'+keyword+'::'+lang+'::csv\n')
-        f.close()
-        return render_template('indexer/progress_csv.html')
-
-@indexer.route("/from_share", methods=["POST"])
-def from_share():
-    if Urls.query.count() == 0:
-        init_podsum()
-
-    print("FILE:", request.files['file_source'])
-    if request.files['file_source'].filename[-6:] == ".share":
-        file = request.files['file_source']
-        pod_name, main_lang, m, titles, urls = joblib.load(file)
-        sparse.save_npz(join(pod_dir,pod_name), m)
-        pod_from_file(pod_name, main_lang, np.sum(m,axis=0))
-        f = open(join(dir_path, "urls_to_index.txt"), 'w')
-        for u in urls:
-            f.write(u + ";" + pod_name + ";" + lang +"\n")
-        f.close()
-        return render_template('indexer/progress_file.html')
 
 
 '''
@@ -176,7 +170,8 @@ def progress_file():
                 posix_doc(text, doc_id, kwd)
                 pod_from_file(kwd, lang, podsum)
             c += 1
-            yield "data:" + str(c) + "\n\n"
+            data = ceil(c / len(urls) * 100)
+            yield "data:" + str(data) + "\n\n"
         yield "data:" + "Finished!" + "\n\n"
     return Response(generate(), mimetype='text/event-stream')
 
@@ -199,10 +194,11 @@ def progress_docs():
                 posix_doc(text, doc_id, kwd)
                 pod_from_file(kwd, lang, podsum)
             c += 1
-            print('###', str(ceil(c / len(urls) * 100)))
-            yield "data:" + str(ceil(c / len(urls) * 100)) + "\n\n"
+            data = ceil(c / len(urls) * 100)
+            yield "data:" + str(data) + "\n\n"
 
     return Response(generate(), mimetype='text/event-stream')
+
 
 @indexer.route("/progress_csv")
 def progress_csv():
@@ -234,15 +230,15 @@ def progress_csv():
             snippet = ''
             for i in range(len(columns)):
                 value = str(row[i]).replace('/',' / ')
-                snippet+=str(columns[i])+': ' +value+' # '
+                snippet+=str(columns[i])+': ' +value+'. '
             print(url,title)
             success, podsum, text, doc_id = mk_page_vector.compute_vectors_local_docs(url, doctype, title, snippet, kwd, lang)
             if success:
                 posix_doc(text, doc_id, kwd)
                 pod_from_file(kwd, lang, podsum)
             c += 1
-            print('###', str(ceil(c / table.shape[0] * 100)))
-            yield "data:" + str(ceil(c / table.shape[0] * 100)) + "\n\n"
+            data = ceil(c / table.shape[0] * 100)
+            yield "data:" + str(data) + "\n\n"
 
     return Response(generate(), mimetype='text/event-stream')
 

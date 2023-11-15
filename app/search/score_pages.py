@@ -118,17 +118,22 @@ def bestURLs(doc_scores):
 
 def aggregate_csv(best_urls):
     urls = list([u for u in best_urls if '.csv#' not in u])
-    print("AGGREGATE CSV URLS:",urls)
+    print("AGGREGATE URLS:",urls)
     csvs = []
     csv_names = list([re.sub('#.*','',u) for u in best_urls if '.csv#' in u])
     csv_names_set_preserved_order = []
     for c in csv_names:
         if c not in csv_names_set_preserved_order:
             csv_names_set_preserved_order.append(c)
-    print("AGGREGATE CSV NAMES:",csv_names)
+    print("AGGREGATE CSV NAMES:",csv_names_set_preserved_order)
     for csv_name in csv_names_set_preserved_order:
         rows = [re.sub('.*\[','',u)[:-1] for u in best_urls if csv_name in u]
-        csvs.append([csv_name,rows])
+        first_url = ''
+        for u in best_urls:
+            if csv_name in u:
+                first_url = u
+                break
+        csvs.append([csv_name, first_url, rows])
         print(rows)
     return urls, csvs
 
@@ -161,11 +166,12 @@ def output(best_urls):
     urls, csvs = aggregate_csv(best_urls)
 
     for csv in csvs:
+        rec = Urls.query.filter(Urls.url == csv[1]).first()
         result = {}
         result['url'] = csv[0]
         result['title'] = csv[0]
-        result['snippet'] = assemble_csv_table(csv[0],csv[1])
-        result['doctype'] = 'csv'
+        result['snippet'] = assemble_csv_table(csv[0],csv[2])
+        result['doctype'] = rec.doctype
         result['notes'] = None
         results.append(result)
 

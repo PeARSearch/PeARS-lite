@@ -259,6 +259,8 @@ def beautify_title(title, doctype):
         title = '🌏 URL: '+title
     if doctype == 'ind':
         title = '☺️  IND: '+title
+    if doctype == 'map':
+        title = '📍 MAP: '+title
     return title
 
 def beautify_snippet(snippet, query):
