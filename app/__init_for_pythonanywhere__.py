@@ -119,3 +119,59 @@ class UrlsModelView(ModelView):
             print(return_url_delete(model.url))
             self.session.commit()
         except Exception as ex:
+            if not self.handle_view_exception(ex):
+                flash(gettext('Failed to delete record. %(error)s', error=str(ex)), 'error')
+                log.exception('Failed to delete record.')
+
+            self.session.rollback()
+
+            return False
+        else:
+            self.after_model_delete(model)
+
+        return True
+
+class PodsModelView(ModelView):
+    list_template = 'admin/pears_list.html'
+    column_exclude_list = ['DS_vector','word_vector']
+    column_searchable_list = ['url', 'name', 'description', 'language']
+    can_edit = False
+    page_size = 50
+    form_widget_args = {
+        'DS_vector': {
+            'readonly': True
+        },
+        'word_vector': {
+            'readonly': True
+        },
+        'date_created': {
+            'readonly': True
+        },
+        'date_modified': {
+            'readonly': True
+        },
+    }
+    def delete_model(self, model):
+        try:
+            self.on_model_delete(model)
+            print("DELETING",model.name)
+            # Add your custom logic here and don't forget to commit any changes e.g.
+            print(return_pod_delete(model.name))
+            self.session.commit()
+        except Exception as ex:
+        except Exception as ex:
+            if not self.handle_view_exception(ex):
+                flash(gettext('Failed to delete record. %(error)s', error=str(ex)), 'error')
+                log.exception('Failed to delete record.')
+
+            self.session.rollback()
+
+            return False
+        else:
+            self.after_model_delete(model)
+
+        return True
+
+
+admin.add_view(PodsModelView(Pods, db.session))
+admin.add_view(UrlsModelView(Urls, db.session))
