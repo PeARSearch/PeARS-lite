@@ -5,7 +5,7 @@
 import re
 import numpy as np
 import string
-from app import db, VEC_SIZE
+from app import db, VEC_SIZE, SPM_DEFAULT_MODEL_PATH
 from app.api.models import Urls, installed_languages, sp
 from app.indexer.htmlparser import extract_html
 from app.indexer.vectorizer import vectorize_scale
@@ -18,7 +18,7 @@ dir_path = dirname(dirname(realpath(__file__)))
 pod_dir = join(dir_path,'static','pods')
 
 def tokenize_text(lang, text):
-    sp.load(f'app/api/models/{lang}/{lang}wiki.lite.16k.model')
+    sp.load(SPM_DEFAULT_MODEL_PATH)
     tokens = [wp for wp in sp.encode_as_pieces(text.lower())]
     if tokens[-1] == 's': #if plural marker (for English), remove 
         tokens = tokens[:-1]
