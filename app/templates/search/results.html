@@ -10,10 +10,14 @@ SPDX-License-Identifier: AGPL-3.0-only
 {%block navbar_links %}
 {% endblock %}
 {% block searchbox %}
-<form class="form-inline my-2 my-lg-0 mx-2" action="{{url_for('.index')}}">
+<form class="form-inline my-2 my-lg-0 mx-2" action="{{url_for('.index')}}" id="searchform">
   <div class="input-group group">
-    <input required class="form-control" type="search" placeholder="Search" aria-label="Search" name="q">
-    <button class="btn btn-outline-success" type="submit">Search</button>
+    <input required class="form-control" type="search" value={{query}} aria-label="Search" name="q">
+    <button class="btn btn-outline-success" type="submit" id="searchbutton">Search</button>
+    <button class="btn btn-outline-success" type="button" id="loadingbutton" style='display:none'>
+      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        Searching...
+    </button>
   </div>
 </form>
 {% endblock %}
@@ -71,4 +75,5 @@ SPDX-License-Identifier: AGPL-3.0-only
   </div>
 </div>
 <!-- /#page-content-wrapper -->
+<script src="{{ url_for('static', filename='js/loading.js')}}"></script>
 {% endblock %}
