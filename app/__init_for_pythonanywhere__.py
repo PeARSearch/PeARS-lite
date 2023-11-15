@@ -159,7 +159,6 @@ class PodsModelView(ModelView):
             print(return_pod_delete(model.name))
             self.session.commit()
         except Exception as ex:
-        except Exception as ex:
             if not self.handle_view_exception(ex):
                 flash(gettext('Failed to delete record. %(error)s', error=str(ex)), 'error')
                 log.exception('Failed to delete record.')
