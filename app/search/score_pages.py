@@ -2,7 +2,8 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-only
 
-import webbrowser
+import multiprocessing
+from joblib import Parallel, delayed
 from urllib.parse import urlparse
 import re
 import math
@@ -185,12 +186,16 @@ def output(best_urls):
 
 
 def run(query, pears):
+    max_thread = int(multiprocessing.cpu_count() * 0.5)
     document_scores = {}
     query, lang = get_language(query)
     q_dist, tokenized = compute_query_vectors(query, lang)
     best_pods = score_pods(query, q_dist, lang)
     print("BEST PODS:",best_pods)
-    for pod in best_pods:
-        document_scores.update(score_docs(query, q_dist, tokenized, pod))
+    with Parallel(n_jobs=max_thread, prefer="threads") as parallel:
+        delayed_funcs = [delayed(score_docs)(query, q_dist, tokenized, pod) for pod in best_pods]
+        scores = parallel(delayed_funcs)
+    for dic in scores:
+        document_scores.update(dic)
     best_urls = bestURLs(document_scores)
     return output(best_urls)
