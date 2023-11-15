@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-only
 
-from app import spm_vocab_path, add_posttok_eof
+from app import spm_vocab_path, add_posttok_eof, PROJ_MAT
 from collections import OrderedDict
 import numpy as np
 from scipy.sparse import csr_matrix, vstack
@@ -89,12 +89,24 @@ def encode_docs(doc_list, vectorizer, logprobs, power, top_words):
     X = csr_matrix(X)
     return X
 
+
+def encode_docs_with_projection(doc_list, vectorizer, logprobs, power, top_words):
+    logprobs = np.array([logprob ** power for logprob in logprobs])
+    X = vectorizer.fit_transform(doc_list)
+    X = X.multiply(logprobs)
+    X = X.toarray().dot(PROJ_MAT) # global variable
+    X = wta_vectorized(X, top_words, False)
+    X = csr_matrix(X)
+    return X
+
+
 def read_n_encode_dataset(doc=None, vectorizer=None, logprobs=None, power=None, top_words=None, verbose=False):
     # read
     doc_list = [doc]
 
     # encode
     X = encode_docs(doc_list, vectorizer, logprobs, power, top_words)
+    # X = encode_docs_with_projection(doc_list, vectorizer, logprobs, power, top_words)
     if verbose:
         k = 10
         inds = np.argpartition(X.todense(), -k, axis=1)[:, -k:]
