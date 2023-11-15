@@ -8,7 +8,7 @@ from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer, SnowballStemmer
 import sys
 from tqdm import tqdm
-import pandas as pd
+import numpy as np
 
 
 def clean_texts(text, language):
@@ -63,6 +63,54 @@ def preprocess_dataset(in_dir, out_dir, persona_name, language, remove_unk_filen
             f.write(text)
 
 
+def create_proj_mat(seed=111, output_dim=128, input_dim=16000, proj_type='float', fruitfly_proj_size=5, extra_info=None):
+    """
+    Create a projection matrix to transform document representation.
+    Args:
+        seed (int, optional): Random seed.
+        output_dim (int, optional): Output dimension.
+        input_dim (int, optional): Input dimension.
+        proj_type (str, optional): The type of projection method to use. Options:
+            - 'float': Random float values between 0 and 1.
+            - 'ach': Achlioptas's method, using -1, 0, and 1 values with proportion and scaling.
+            - 'fruitfly': Binary 0 and 1, with full vocab coverage.
+        fruitfly_proj_size (int, optional): The number of 1 connection for each output neuron in 'fruitfly' method.
+        extra_info (Any, optional): for future extensions.
+    Returns:
+        numpy.ndarray or None: The generated projection matrix or None.
+    """
+
+    rng = np.random.default_rng(seed)
+    if proj_type == 'float':
+        proj_mat = rng.random(size=(output_dim, input_dim))
+
+    elif proj_type == 'ach': # Achlioptas's method
+        scale = output_dim
+        proportion = [1 / (2 * scale), 1 - 1 / scale, 1 / (2 * scale)]
+        proj_mat = rng.choice([-1, 0, 1], size=(output_dim, input_dim), p=proportion)
+        proj_mat = proj_mat * np.sqrt(scale / output_dim)
+
+    elif proj_type == 'fruitfly':
+        proj_mat = np.zeros((output_dim, input_dim))
+        idx = list(range(input_dim))
+        rng.shuffle(idx)
+        used_idx = idx.copy()
+        c = 0
+        while c < output_dim:
+            for i in range(0, len(idx), fruitfly_proj_size):
+                p = idx[i:i + fruitfly_proj_size]
+                for j in p:
+                    proj_mat[c][j] = 1
+                c += 1
+                if c >= output_dim:
+                    break
+            rng.shuffle(idx)  # reshuffle if needed -- if all output neurons are not filled
+            used_idx.extend(idx)
+    else:
+        proj_mat = None
+    return proj_mat.T
+
+
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument("persona")
@@ -74,7 +122,7 @@ if __name__ == '__main__':
 
     preprocess_dataset(in_dir=args.data_in, out_dir=args.data_out, persona_name=args.persona, language=args.language, remove_unk_filename_chars=args.remove_unk_filename_chars)
 
-
-
-
+    # for seed in range(111, 666, 111):
+    #     proj_mat = create_proj_mat(seed=seed, proj_type='float')
+    #     np.save(f'../../datasets/projection_experiments/proj_mat/128/float/{seed}.npy', proj_mat)
 
