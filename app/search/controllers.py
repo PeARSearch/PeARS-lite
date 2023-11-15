@@ -49,19 +49,17 @@ def index():
         displayresults = []
         query = query.lower()
         pears = ['0.0.0.0']
-        #results, pods = score_pages.run(query, pears, 'Black writers')
         results, pods = score_pages.run(query, pears)
         if not results:
             pears = ['no pear found :(']
-            #score_pages.ddg_redirect(query)
             results = [{'url':None, 'title':None, 'snippet':'No pages found', 'doctype':None, 'notes':None}]
         for r in results:
             r['title'] = beautify_title(r['title'], r['doctype'])
             r['snippet'] = beautify_snippet(r['snippet'], query)
             displayresults.append(list(r.values()))
 
-        return render_template(
-            'search/results.html', pears=pods, query=query, results=displayresults)
+        #return render_template('search/results.html', pears=pods, query=query, results=displayresults)
+        return render_template('search/results.html', pears=[], query=query, results=displayresults)
 
 
 @search.route('/html_cache/<path:filename>')

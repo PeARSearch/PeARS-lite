@@ -16,7 +16,7 @@ SPDX-License-Identifier: AGPL-3.0-only
   </div>
 
   <div class="row p-3">
-    <div class="col-md-6">
+    <div class="card-group">
       <div class="card">
         <div class="card-header text-center"><b>Index from a URL list</b></div>
         <div class="card-body">
@@ -43,10 +43,8 @@ SPDX-License-Identifier: AGPL-3.0-only
           </span>
         </div>
         </form>
-      </div>
     </div>
 
-    <div class="col-md-6">
       <div class="card">
         <div class="card-header text-center"><b>Index from browser bookmarks</b></div>
         <div class="card-body">
@@ -86,7 +84,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 </div>
 
   <div class="row p-3">
-    <div class="col-md-6">
+    <div class="card-group">
       <div class="card">
         <div class="card-header text-center"><b>Index a document collection</b></div>
         <div class="card-body">
@@ -110,6 +108,11 @@ SPDX-License-Identifier: AGPL-3.0-only
               <input class="form-control input-s" title="Enter a keyword." placeholder="Enter a keyword" type="text"
                 name='docs_keyword' id='docs_keyword' required>
             </div>
+            <div class="input-group p-2">
+              <span class="input-group-text">Optional doctype</span>
+              <input class="form-control input-s" title="Enter a document type." placeholder="Enter a document type" type="text"
+                name='docs_type' id='docs_type'>
+            </div>
         </div>
 
         <div class="card-footer clearfix">
@@ -118,10 +121,8 @@ SPDX-License-Identifier: AGPL-3.0-only
           </span>
         </div>
         </form>
-      </div>
     </div>
 
-    <div class="col-md-6">
       <div class="card">
         <div class="card-header text-center"><b>Index a CSV file</b></div>
         <div class="card-body">

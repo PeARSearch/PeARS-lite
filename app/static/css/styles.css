@@ -8,6 +8,7 @@
 :root {
     --primary-color: #73b4eb;
     --secondary-color: black;
+    --hover-color: blue;
  } 
 
 a {
@@ -39,6 +40,13 @@ a:hover {
 .btn-success {
   --bs-btn-bg: var(--primary-color);
   --bs-btn-border-color: var(--primary-color);
+  --bs-btn-hover-bg: var(--secondary-color);
+  --bs-btn-hover-border-color: var(--secondary-color);
+}
+
+.btn-outline-success {
+  --bs-btn-color: var(--secondary-color);
+  --bs-btn-border-color: var(--secondary-color);
   --bs-btn-hover-bg: var(--secondary-color);
   --bs-btn-hover-border-color: var(--secondary-color);
 }

@@ -6,7 +6,7 @@
 from flask import Blueprint, request, render_template
 from app.api.models import Urls
 from app import db
-from app.orchard.mk_urls_file import make_shareable_pod, del_pod
+from app.orchard.mk_urls_file import make_shareable_pod
 
 # Define the blueprint:
 orchard = Blueprint('orchard', __name__, url_prefix='/my-orchard')
@@ -20,7 +20,7 @@ def index():
     print(keywords)
     pears = []
     for keyword in keywords:
-        if keyword and '.share' not in keyword:
+        if keyword and '.pears.txt' not in keyword:
             pear_urls = []
             for u in db.session.query(Urls).filter_by(pod=keyword).all():
                 pear_urls.append(u)

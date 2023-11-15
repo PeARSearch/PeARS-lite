@@ -76,7 +76,7 @@ with app.app_context():
 
 from flask_admin.contrib.sqla import ModelView
 from app.api.models import Pods, Urls
-from app.api.controllers import return_delete
+from app.api.controllers import return_url_delete, return_pod_delete
 
 from flask_admin import expose
 from flask_admin.contrib.sqla.view import ModelView
@@ -88,13 +88,19 @@ admin = Admin(app, name='PeARS DB', template_mode='bootstrap3')
 
 class UrlsModelView(ModelView):
     list_template = 'admin/pears_list.html'
-    column_exclude_list = ['vector']
+    column_exclude_list = ['vector','snippet']
     column_searchable_list = ['url', 'title', 'doctype', 'notes', 'pod']
     column_editable_list = ['notes']
     can_edit = True
     page_size = 100
     form_widget_args = {
         'vector': {
+            'readonly': True
+        },
+        'url': {
+            'readonly': True
+        },
+        'pod': {
             'readonly': True
         },
         'date_created': {
@@ -109,7 +115,7 @@ class UrlsModelView(ModelView):
             self.on_model_delete(model)
             print("DELETING",model.url,model.vector)
             # Add your custom logic here and don't forget to commit any changes e.g.
-            print(return_delete(model.vector))
+            print(return_url_delete(model.url))
             self.session.commit()
         except Exception as ex:
             if not self.handle_view_exception(ex):
@@ -128,7 +134,7 @@ class PodsModelView(ModelView):
     list_template = 'admin/pears_list.html'
     column_exclude_list = ['DS_vector','word_vector']
     column_searchable_list = ['url', 'name', 'description', 'language']
-    can_edit = True
+    can_edit = False
     page_size = 50
     form_widget_args = {
         'DS_vector': {
@@ -144,6 +150,26 @@ class PodsModelView(ModelView):
             'readonly': True
         },
     }
+    def delete_model(self, model):
+        try:
+            self.on_model_delete(model)
+            print("DELETING",model.name)
+            # Add your custom logic here and don't forget to commit any changes e.g.
+            print(return_pod_delete(model.name))
+            self.session.commit()
+        except Exception as ex:
+            if not self.handle_view_exception(ex):
+                flash(gettext('Failed to delete record. %(error)s', error=str(ex)), 'error')
+                log.exception('Failed to delete record.')
+
+            self.session.rollback()
+
+            return False
+        else:
+            self.after_model_delete(model)
+
+        return True
+
 
 admin.add_view(PodsModelView(Pods, db.session))
 admin.add_view(UrlsModelView(Urls, db.session))

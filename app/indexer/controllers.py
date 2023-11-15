@@ -54,12 +54,13 @@ def from_docs():
     print("DOC FILE:", filename)
     if filename[-4:] == ".txt":
         keyword = request.form['docs_keyword']
+        doctype = request.form['docs_type'].lower()
         keyword, lang = get_language(keyword)
         print("LANGUAGE:",lang)
         file = request.files['file_source']
         file.save(join(dir_path, "docs_to_index.txt"))
         f = open(join(dir_path, "file_source_info.txt"), 'w')
-        f.write(filename+'::'+keyword+'::'+lang+'\n')
+        f.write(filename+'::'+keyword+'::'+lang+'::'+doctype+'\n')
         f.close()
         return render_template('indexer/progress_docs.html')
 
@@ -126,7 +127,7 @@ def from_csv():
         file = request.files['file_source']
         file.save(join(dir_path, "spreadsheet_to_index.csv"))
         f = open(join(dir_path, "file_source_info.txt"), 'w')
-        f.write(filename+'::'+keyword+'::'+lang+'\n')
+        f.write(filename+'::'+keyword+'::'+lang+'::csv\n')
         f.close()
         return render_template('indexer/progress_csv.html')
 
@@ -189,7 +190,7 @@ def progress_docs():
         urls, titles, snippets = readDocs(join(dir_path, "docs_to_index.txt"))
         f = open(join(dir_path, "file_source_info.txt"), 'r')
         for line in f:
-            source, kwd, lang = line.rstrip('\n').split('::')
+            source, kwd, lang, doctype = line.rstrip('\n').split('::')
         init_pod(kwd)
         c = 0
         for url, title, snippet in zip(urls, titles, snippets):
@@ -218,7 +219,7 @@ def progress_csv():
 
         f = open(join(dir_path, "file_source_info.txt"), 'r')
         for line in f:
-            source, kwd, lang = line.rstrip('\n').split('::')
+            source, kwd, lang, doctype = line.rstrip('\n').split('::')
         init_pod(kwd)
         c = 0
         columns = list(df.columns)

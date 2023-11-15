@@ -84,11 +84,11 @@ def score_docs(query, query_dist, tokenized, kwd):
         idx = db.session.query(Urls).filter_by(url=url).first().vector
         if idx in posix_scores:
             document_scores[url]+=posix_scores[idx]
-            print("Incrementing score for",url,idx, posix_scores[idx])
+            #print("Incrementing score for",url,idx, posix_scores[idx])
         document_scores[url]+=completeness_scores[url]
         document_scores[url]+=snippet_scores[url]
         #document_scores[url] = completeness_scores[url] + snippet_scores[url]
-        print(url, document_scores[url], completeness_scores[url], snippet_scores[url])
+        #print(url, document_scores[url], completeness_scores[url], snippet_scores[url])
         if math.isnan(document_scores[url]) or completeness_scores[url] < 0.3:  # Check for potential NaN -- messes up with sorting in bestURLs.
             document_scores[url] = 0
     return document_scores
@@ -100,7 +100,7 @@ def bestURLs(doc_scores):
     c = 0
     for w in sorted(doc_scores, key=doc_scores.get, reverse=True):
         loc = urlparse(w).netloc
-        if c < 100:
+        if c < 50:
             if doc_scores[w] > 0:
                 #if netlocs_used.count(loc) < 10:
                 print("DOC SCORE",w,doc_scores[w])
@@ -111,7 +111,7 @@ def bestURLs(doc_scores):
                 break
         else:
             break
-    print("BEST URLS",best_urls)
+    #print("BEST URLS",best_urls)
     return best_urls
 
 
