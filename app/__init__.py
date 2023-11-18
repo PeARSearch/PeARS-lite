@@ -13,7 +13,7 @@ from flask_admin import Admin
 from flask_sqlalchemy import SQLAlchemy
 
 # Get paths to SentencePiece model and vocab
-LANG = 'de' # hardcoded for now
+LANG = 'en' # hardcoded for now
 SPM_DEFAULT_VOCAB_PATH = f'app/api/models/{LANG}/{LANG}wiki.lite.16k.vocab'
 spm_vocab_path = os.environ.get("SPM_VOCAB", SPM_DEFAULT_VOCAB_PATH)
 SPM_DEFAULT_MODEL_PATH = f'app/api/models/{LANG}/{LANG}wiki.lite.16k.model'
