@@ -49,23 +49,17 @@ def readUrls(url_file):
 
 def readDocs(doc_file):
     urls = []
-    titles = []
-    snippets = []
     with open(doc_file) as df:
         for l in df:
             l=l.rstrip('\n')
             if l[:4] == "<doc":
                 m = re.search('url=\"([^\"]*)\"',l)
                 url = m.group(1)
-                m = re.search('title=\"([^\"]*)\"',l)
-                title = m.group(1)
             elif "</doc" not in l:
-                snippet = l
+                continue
             else:
                 urls.append(url)
-                titles.append(title)
-                snippets.append(snippet)
-    return urls, titles, snippets
+    return urls
 
 
 def readBookmarks(bookmark_file, keyword):

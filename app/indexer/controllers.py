@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 
 # Import flask dependencies
+import re
 import logging
 import joblib
 import numpy as np
@@ -182,20 +183,33 @@ def progress_docs():
         kwd = ''
         lang = LANG
         doctype = 'doc'
-        urls, titles, snippets = readDocs(join(dir_path, "docs_to_index.txt"))
+        docfile = join(dir_path, "docs_to_index.txt")
+        urls = readDocs(docfile)
         f = open(join(dir_path, "file_source_info.txt"), 'r')
         for line in f:
             source, kwd, lang, doctype = line.rstrip('\n').split('::')
         init_pod(kwd)
         c = 0
-        for url, title, snippet in zip(urls, titles, snippets):
-            success, podsum, text, doc_id = mk_page_vector.compute_vectors_local_docs(url, doctype, title, snippet, kwd, lang)
-            if success:
-                posix_doc(text, doc_id, kwd)
-                pod_from_file(kwd, lang, podsum)
-            c += 1
-            data = ceil(c / len(urls) * 100)
-            yield "data:" + str(data) + "\n\n"
+        #for url, title, snippet in zip(urls, titles, snippets):
+        with open(docfile) as df:
+            for l in df:
+                l=l.rstrip('\n')
+                if l[:4] == "<doc":
+                    m = re.search('url=\"([^\"]*)\"',l)
+                    url = m.group(1)
+                    m = re.search('title=\"([^\"]*)\"',l)
+                    title = m.group(1)
+                    doc = ""
+                elif "</doc" not in l:
+                    doc+=l+' '
+                else:
+                    success, podsum, text, doc_id = mk_page_vector.compute_vectors_local_docs(url, doctype, title, doc, kwd, lang)
+                    if success:
+                        posix_doc(text, doc_id, kwd)
+                        pod_from_file(kwd, lang, podsum)
+                    c += 1
+                    data = ceil(c / len(urls) * 100)
+                    yield "data:" + str(data) + "\n\n"
 
     return Response(generate(), mimetype='text/event-stream')
 
