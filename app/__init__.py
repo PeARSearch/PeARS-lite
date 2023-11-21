@@ -4,6 +4,7 @@
 
 import os
 import logging
+import numpy as np
 
 # Import flask and template operators
 from flask import Flask, render_template
@@ -48,6 +49,10 @@ print(f"CACHE_PODS={CACHE_PODS}")
 
 # Global variable: use inverse index
 POSINDEX = os.environ.get("POSINDEX")
+
+# Global variable: projection matrix
+PROJ_MAT = np.load(os.environ.get("PROJ_PATH"))
+POD_DIM = PROJ_MAT.shape[1]
 
 # Define vector size
 from app.indexer.vectorizer import read_vocab
