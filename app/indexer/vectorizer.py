@@ -96,6 +96,7 @@ def encode_docs_with_projection(doc_list, vectorizer, logprobs, power, top_words
     X = X.multiply(logprobs)
     X = X.toarray().dot(PROJ_MAT) # global variable
     X = wta_vectorized(X, top_words, False)
+    # X = (X > 0).astype(np.int_)
     X = csr_matrix(X)
     return X
 
@@ -105,8 +106,8 @@ def read_n_encode_dataset(doc=None, vectorizer=None, logprobs=None, power=None, 
     doc_list = [doc]
 
     # encode
-    X = encode_docs(doc_list, vectorizer, logprobs, power, top_words)
-    # X = encode_docs_with_projection(doc_list, vectorizer, logprobs, power, top_words)
+    # X = encode_docs(doc_list, vectorizer, logprobs, power, top_words)
+    X = encode_docs_with_projection(doc_list, vectorizer, logprobs, power, top_words)
     if verbose:
         k = 10
         inds = np.argpartition(X.todense(), -k, axis=1)[:, -k:]
