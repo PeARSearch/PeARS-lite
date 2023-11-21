@@ -198,7 +198,6 @@ def compute_vectors_local_docs(target_url, title, snippet, description, doc, key
     return True, podsum
 
 
-
 def compute_query_vectors(query, lang):
     """ Make distribution for query """
     #query = query.rstrip('\n')
