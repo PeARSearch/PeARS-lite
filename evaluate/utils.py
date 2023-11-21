@@ -123,6 +123,6 @@ if __name__ == '__main__':
     preprocess_dataset(in_dir=args.data_in, out_dir=args.data_out, persona_name=args.persona, language=args.language, remove_unk_filename_chars=args.remove_unk_filename_chars)
 
     # for seed in range(111, 666, 111):
-    #     proj_mat = create_proj_mat(seed=seed, proj_type='float')
-    #     np.save(f'../../datasets/projection_experiments/proj_mat/128/float/{seed}.npy', proj_mat)
+    #     proj_mat = create_proj_mat(seed=seed, output_dim=128, proj_type='ach')
+    #     np.save(f'../../datasets/projection_experiments/proj_mat/128/ach/{seed}.npy', proj_mat)
 
