@@ -10,7 +10,11 @@ export SPM_MODEL="./app/api/models/en/enwiki.model"
 
 PROJECTION_OPTIONS=(
 
-    ../datasets/projection_experiments/proj_mat/128/float/111.npy
+    ../datasets/projection_experiments/proj_mat/256/ach/111.npy
+    ../datasets/projection_experiments/proj_mat/256/ach/222.npy
+    ../datasets/projection_experiments/proj_mat/256/ach/333.npy
+    ../datasets/projection_experiments/proj_mat/256/ach/444.npy
+    ../datasets/projection_experiments/proj_mat/256/ach/555.npy
 )
 
 for option in "${PROJECTION_OPTIONS[@]}"
@@ -21,7 +25,7 @@ do
 
     # start the server, wait until it's running
     export PROJ_PATH=$option
-    { python run.py & } &> _tmp_pears_logs.txt
+    { python run.py & } &> _run_logs_hr.txt
     sleep 5
 
     pushd evaluate/
@@ -29,29 +33,43 @@ do
     echo "-------------"
     echo "projection path: $option"
 
-    # echo "indexing: 0-hr"
-    curl -# "localhost:9090/indexer/from_crawl?url=http://localhost:9090/static/testdocs/0-hr/index.html&keyword=0-hr" > /dev/null
+    echo "indexing: 0-hr"
+    curl -# "localhost:9090/indexer/from_crawl?url=http://localhost:9090/static/testdocs/0_hr/index.html&keyword=0_hr" > /dev/null
 
-    # echo "evaluating: 0-hr"
-     python eval.py 0_hr --pod 0-hr --query_dir $PERSONAS_DIR/personas_queries/
+    echo "evaluating: 0-hr"
+    python eval.py 0_hr --pod 0_hr --query_dir $PERSONAS_DIR/personas_queries/
 
-    # echo "indexing: 1-accountant"
-    # curl -# "localhost:9090/indexer/from_crawl?url=http://localhost:9090/static/testdocs/1-accountant/index.html&keyword=1-accountant" > /dev/null
+    echo "-------------"
+    echo
 
-    # echo "evaluating: 1-accountant"
-    # python eval.py 1_accountant --pod 1-accountant --query_dir $PERSONAS_DIR/personas_queries/
+    popd
 
-    # echo "indexing: 2-news"
-    # curl -# "localhost:9090/indexer/from_crawl?url=http://localhost:9090/static/testdocs/2-news/index.html&keyword=2-news" > /dev/null
+    # stop the server
+    kill %1  # kill last process
 
-    # echo "evaluating: 2-news"
-    # python eval.py 2_news --pod 2-news --query_dir $PERSONAS_DIR/personas_queries/
+done
 
-    # echo "indexing: 3-moviesummary"
-    # curl -# "localhost:9090/indexer/from_crawl?url=http://localhost:9090/static/testdocs/3-moviesummary/index.html&keyword=3-moviesummary" > /dev/null
+for option in "${PROJECTION_OPTIONS[@]}"
+do
+    # clear up index and db
+    rm -f app/static/db/app.db
+    rm -fr app/static/pods/*npz
 
-    # echo "evaluating: 3-moviesummary"
-    # python eval.py 3_moviesummary --pod 3-moviesummary --query_dir $PERSONAS_DIR/personas_queries/
+    # start the server, wait until it's running
+    export PROJ_PATH=$option
+    { python run.py & } &> _run_logs_accountant.txt
+    sleep 5
+
+    pushd evaluate/
+
+    echo "-------------"
+    echo "projection path: $option"
+
+    echo "indexing: 1-accountant"
+    curl -# "localhost:9090/indexer/from_crawl?url=http://localhost:9090/static/testdocs/1_accountant/index.html&keyword=1_accountant" > /dev/null
+
+    echo "evaluating: 1-accountant"
+    python eval.py 1_accountant --pod 1_accountant --query_dir $PERSONAS_DIR/personas_queries/
 
     echo "-------------"
     echo
