@@ -1,5 +1,7 @@
+import os
 import argparse
 import pathlib
+import glob
 import random
 import string
 import nltk
@@ -52,15 +54,15 @@ def preprocess_dataset(in_dir, out_dir, persona_name, language, remove_unk_filen
     #         pathlib.Path(os.path.join(root, dir).replace('persona', 'persona_preprocess')).mkdir(parents=True, exist_ok=True)
 
     pathlib.Path(f'{out_dir}/{persona_name}').mkdir(parents=True, exist_ok=True)
-    path_list = pathlib.Path(f'{in_dir}/{persona_name}/').glob('*.txt')
+    path_list = glob.glob(f'{in_dir}/{persona_name}/**/*.txt', recursive=True)
     for path in tqdm(path_list):
-        text = clean_texts(str(path).split('/')[-1].replace('.txt', '').replace('_', ' ').replace('-', ' '), language) + ' '
+        text = clean_texts(path.split('/')[-1].replace('.txt', '').replace('_', ' ').replace('-', ' '), language) + ' '
         with open(path) as f:
             text += clean_texts(f.read(), language)
         if remove_unk_filename_chars:
-            new_file_name = re.sub(r'[^a-zA-Z0-9-_.]', '', path.name)
+            new_file_name = re.sub(r'[^a-zA-Z0-9-_.]', '', os.path.basename(path))
         else:
-            new_file_name = path.name
+            new_file_name = os.path.basename(path)
         with open(f'{out_dir}/{persona_name}/' + new_file_name, 'w') as f:
             f.write(text)
 
