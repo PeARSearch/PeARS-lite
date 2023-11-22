@@ -9,7 +9,7 @@ import re
 import math
 from pandas import read_csv
 from app.api.models import Urls, Pods
-from app import db
+from app import db, VEC_SIZE
 from app.utils_db import (
     get_db_url_snippet, get_db_url_title, get_db_url_doctype, get_db_url_pod, get_db_url_notes)
 
@@ -25,6 +25,22 @@ import numpy as np
 dir_path = dirname(dirname(realpath(__file__)))
 pod_dir = join(dir_path,'static','pods')
 raw_dir = join(dir_path,'static','toindex')
+
+
+def score_experts(doc_idx,kwd):
+    DS_scores = {}
+    query_pod_m = load_npz(join(pod_dir,kwd+'.npz'))
+    query_vec = query_pod_m[int(doc_idx)].todense().reshape(1,VEC_SIZE)
+    ind_pod_m = load_npz(join(pod_dir,'Individuals.npz'))
+    m_cosines = 1 - distance.cdist(query_vec, ind_pod_m.todense(), 'cosine')
+    
+    for u in db.session.query(Urls).filter_by(pod='Individuals').all():
+        score = m_cosines[0][int(u.vector)]
+        if score >= 0.05:
+            DS_scores[u.url] = m_cosines[0][int(u.vector)]
+            print("EXPERT",u.url,score)
+    urls = bestURLs(DS_scores)
+    return output(urls)
 
 def score(query, query_dist, tokenized, kwd):
     URL_scores = {}
@@ -112,7 +128,7 @@ def bestURLs(doc_scores):
                 break
         else:
             break
-    #print("BEST URLS",best_urls)
+    print("BEST URLS",best_urls)
     return best_urls
 
 
@@ -149,6 +165,7 @@ def assemble_csv_table(csv_name,rows):
         table+="<th scope='col' style='word-wrap:break-word; max-width:500px'>"+c+"</th>"
     table+="</tr></thead>"
     for r in df_slice[:10]:
+        #table+="""<tr class='w-100' onclick='document.location="https://en.wikipedia.org"' style='cursor: pointer'>"""
         table+="<tr class='w-100'>"
         for i in r:
             table+="<td style='word-wrap:break-word; max-width:500px'>"+str(i)+"</td>"
@@ -183,11 +200,12 @@ def output(best_urls):
         result['snippet'] = rec.snippet
         result['doctype'] = rec.doctype
         result['notes'] = rec.notes
+        result['idx'] = rec.vector
+        result['pod'] = rec.pod
         results.append(result)
         pod = rec.pod
         if pod not in pods:
             pods.append(pod)
-        #print(results)
     return results, pods
 
 
