@@ -19,7 +19,7 @@ from app import VEC_SIZE, LANG
 from app.api.models import Urls
 from app.indexer.neighbours import neighbour_urls
 from app.indexer import mk_page_vector, spider
-from app.utils import readDocs, readUrls, readBookmarks, get_language, init_pod, init_podsum
+from app.utils import readDocs, readUrls, readBookmarks, get_language, init_pod, init_podsum, request_url
 from app.utils_db import pod_from_file
 from app.indexer.htmlparser import extract_links
 from app.indexer.posix import posix_doc
@@ -140,7 +140,7 @@ def from_url():
         print(u, keyword, lang)
         f.write(u + ";" + keyword + ";" + lang +"\n")
         f.close()
-        return render_template('indexer/progress_url.html', url=u)
+        return render_template('indexer/progress_file.html')
 
 
 
@@ -165,11 +165,13 @@ def progress_file():
         init_pod(kwd)
         c = 0
         for url, kwd, lang in zip(urls, keywords, langs):
-            print("CONTROLLER",url)
-            success, podsum, text, doc_id = mk_page_vector.compute_vectors(url, kwd, lang)
-            if success:
-                posix_doc(text, doc_id, kwd)
-                pod_from_file(kwd, lang, podsum)
+            access, req = request_url(url)
+            if access:
+                url_type = req.headers['Content-Type']
+                success, podsum, text, doc_id = mk_page_vector.compute_vectors(url, kwd, lang, url_type)
+                if success:
+                    posix_doc(text, doc_id, kwd)
+                    pod_from_file(kwd, lang, podsum)
             c += 1
             data = ceil(c / len(urls) * 100)
             yield "data:" + str(data) + "\n\n"

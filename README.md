@@ -49,13 +49,23 @@ From the PeARS-orchard directory, run:
     pip install -r requirements.txt
 
 
+##### 4. **Optional step** Install further languages
+
+
+If you want to search and index in several languages at the same time, you can add multilingual support to your English install. To do this:
+
+    python3 install_language.py lc
+
+where you should replace lc with a language code of your choice. For now, we are only supporting English (en) and German (de), but more languages are coming!
+
 
 ##### 5. Run your pear!
 
 In the root of the repo, run:
 
-    python3 run.py
+    python3 run.py en
 
+(The argument to *run.py* should be the code of your installation's default language. E.g. *en* for English, *de* for German, etc.)
 
 
 ## Usage
