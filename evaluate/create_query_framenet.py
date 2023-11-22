@@ -52,7 +52,7 @@ def get_sentence_stream(docs, k=20, language="english"):
             line = random.choice(lines)
             if len(line) > 25:
                 break
-        line_sents = nltk.sent_tokenize(line, language=language)
+        line_sents = nltk.sent_tokenize(line, language="english" if language == "slovenian" else language)
         for s in line_sents:
             if len(s) > 10 and len(s) < 250:
                 yield s, doc
@@ -111,6 +111,7 @@ def try_make_frame_based_query(
 
 def make_queries(persona, language="english"):
     docs = glob.glob(f"../../../datasets/personas/personas_raw/{persona}/**/*.txt", recursive=True)
+    docs = [d for d in docs if os.path.isfile(f"../../../datasets/personas/personas_preprocessed/{persona}/{os.path.basename(d)}")]
 
     out_file = f"../../../datasets/personas/personas_fn_queries/{persona}_query.json"
     if os.path.isfile(out_file):

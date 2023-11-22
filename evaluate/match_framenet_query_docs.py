@@ -1,5 +1,7 @@
 import os
+import sys
 import nltk
+import time
 from collections import defaultdict
 import json
 import math
@@ -10,6 +12,24 @@ from tqdm import tqdm
 from utils import clean_texts
 from create_query_framenet import get_frame_structures
 
+
+LOME_CACHE_FILE = "_lome_cache.json"
+LOME_CACHE_LOCK = "_lome_cache.lock"
+_lome_cache = {}
+
+print("INITIALIZING LOME CACHE")
+# another instance is writing? don't read until it's done
+while os.path.exists(LOME_CACHE_LOCK):
+    print("\tWaiting for cache to unlock...")
+    time.sleep(0.25)
+if os.path.exists(LOME_CACHE_FILE):
+        with open(LOME_CACHE_FILE, encoding="utf-8") as f:
+            _lome_cache = json.load(f)
+else:
+        with open(LOME_CACHE_FILE, "w", encoding="utf-8") as f:
+            json.dump({}, f)
+print(f"Current cache size: {len(_lome_cache)}")
+print("==========================================")
 
 def _get_raw_doc_name(preproc_doc_name, persona, persona_):
     # todo: make sure datasets have the same names between the raw & preprocessed corpora
@@ -23,12 +43,38 @@ def _get_raw_doc_name(preproc_doc_name, persona, persona_):
     return raw_doc
 
 
-def main():
+def _read_write_lome_cache():
+    global _lome_cache            
+    tqdm.write("\n\n==========================================")
+    tqdm.write("\n\n\n---Updating LOME cache from disk---")
+    # check for updates in cached file
+    tqdm.write(f"Length before update: {len(_lome_cache)}")
+    
+    # another instance is writing? don't read until it's done
+    while os.path.exists(LOME_CACHE_LOCK):
+        print("\tWaiting for cache to unlock...")
+        time.sleep(0.25)
+    with open(LOME_CACHE_FILE, encoding="utf-8") as f:
+        cache_from_file = json.load(f)
+        _lome_cache.update(cache_from_file)
+    tqdm.write(f"Length after update: {len(_lome_cache)}")
 
-    # query_files = glob.glob("../../../datasets/personas/personas_fn_queries/*_query.json")
-    query_files = [
-        ("/home/gosse/Documents/PossibleWorlds/NGI-search/datasets/personas/personas_fn_queries/news-dataset_query.json", 9)
-    ]
+    # another instance is writing? don't read until it's done
+    while os.path.exists(LOME_CACHE_LOCK):
+        print("\tWaiting for cache to unlock...")
+        time.sleep(0.25)
+    with open(LOME_CACHE_LOCK, "w") as f:
+        f.write(os.linesep)
+    with open(LOME_CACHE_FILE, "w", encoding="utf-8") as f:
+        json.dump(_lome_cache, f)
+    os.remove(LOME_CACHE_LOCK)
+    tqdm.write("==========================================\n\n")
+
+
+
+def main(query_files):
+
+    global _lome_cache
 
     for qf, chunk in query_files:
         
@@ -39,8 +85,8 @@ def main():
             q2g_file = qf.replace("_query.json", f"_q2g.c{chunk:02}.json")
             q2g_plus_file = qf.replace("_query.json", f"_q2g_plus.c{chunk:02}.json")
 
-        if os.path.exists(q2g_plus_file):
-            continue
+        # if os.path.exists(q2g_plus_file):
+        #     continue
 
         persona = os.path.basename(qf).replace("_query.json", "")
         if persona == "news-dataset":
@@ -50,7 +96,7 @@ def main():
         print(persona)
         language = "french" if "_fr_" in persona else "russian" if "_ru_" in persona else "english"
         print(language)
-        fulltext_files = glob.glob(f"../../../datasets/personas/personas_preprocessed/{persona_}/**/*.txt", recursive=True)
+        fulltext_files = sorted(glob.glob(f"../../../datasets/personas/personas_preprocessed/{persona_}/**/*.txt", recursive=True))
 
         if chunk is not None:
             num_docs = len(fulltext_files)
@@ -89,7 +135,7 @@ def main():
 
         print(len(document_matches))
 
-        for doc in tqdm(fulltext_files):
+        for i, doc in enumerate(tqdm(fulltext_files)):
             raw_doc = _get_raw_doc_name(doc, persona, persona_)
 
             with open(doc, encoding="utf-8") as f:
@@ -134,7 +180,10 @@ def main():
                             # in the sentence that all of the query words occur in
                             # (indicating that they are somehow semantically connected)
                             if raw_s not in doc_frames:
-                                doc_frames[raw_s] = get_frame_structures(raw_s)
+                                if raw_s in _lome_cache:
+                                    doc_frames[raw_s] = _lome_cache[raw_s]
+                                else:
+                                    doc_frames[raw_s] = get_frame_structures(raw_s)
                             for fs_id, fs in doc_frames[raw_s].items():
                                 fs_words = set()
                                 for role, span in fs.items():
@@ -149,6 +198,10 @@ def main():
                                     })
                                     tqdm.write(f"\t\t\tFRAME MATCH {fs_id}")
 
+            _lome_cache_len = len(_lome_cache)
+            _lome_cache.update(doc_frames)
+            if len(_lome_cache) > _lome_cache_len:  # if nothing was added to the cache in this round, we're probably recovering an interrupted run. let's not slow it down by reloading the cache for every document
+                _read_write_lome_cache()
 
         with open(q2g_file, "w", encoding="utf-8") as f:
             for qry, docs in document_matches.items():
@@ -225,5 +278,7 @@ def merge_partial_files(plus_files, plus_out_name):
 
 
 if __name__ == "__main__":
-    # main()
-    merge_partial_files(sorted(glob.glob("/home/gosse/Documents/PossibleWorlds/NGI-search/datasets/personas/personas_fn_queries/news-dataset_q2g_plus.c*.json")), "/home/gosse/Documents/PossibleWorlds/NGI-search/datasets/personas/personas_fn_queries/news-dataset_q2g_plus.json")
+    main([
+        (sys.argv[1], int(sys.argv[2]) if sys.argv[2] != "-" else None)
+    ])
+    # merge_partial_files(sorted(glob.glob("/home/gosse/Documents/PossibleWorlds/NGI-search/datasets/personas/personas_fn_queries/news-dataset_q2g_plus.c*.json")), "/home/gosse/Documents/PossibleWorlds/NGI-search/datasets/personas/personas_fn_queries/news-dataset_q2g_plus.json")
