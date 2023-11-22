@@ -17,6 +17,31 @@ from os.path import dirname, join, realpath, isfile
 from pathlib import Path
 from app import VEC_SIZE, LANG, vocab
 
+
+def read_language_codes():
+    dir_path = dirname(dirname(realpath(__file__)))
+    ling_dir = join(dir_path,'app','static','ling')
+    LANGUAGE_CODES = {}
+    with open(join(ling_dir,'language_codes.txt'),'r') as f:
+        for l in f:
+            fields = l.rstrip('\n').split(';')
+            LANGUAGE_CODES[fields[0]] = fields[1]
+    return LANGUAGE_CODES
+
+def request_url(url):
+    req = None
+    try:
+        req = requests.head(url, allow_redirects=True, timeout=30)
+    except Exception:
+        print("ERROR: Request failed when trying to access", url, "...")
+        return False, req
+    if req.status_code != 200:
+        print("Warning: " + str(req.url) + ' has a status code of: ' +str(req.status_code)+'.\n')
+        return False, req
+    else:
+        return True, req
+
+
 def _extract_url_and_kwd(line):
     try:
         url, kwd, lang = line.rstrip('\n').split(';')

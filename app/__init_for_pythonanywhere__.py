@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-only
 
+import sys
 import os
 import logging
 
@@ -12,8 +13,11 @@ from flask_admin import Admin
 # Import SQLAlchemy
 from flask_sqlalchemy import SQLAlchemy
 
+# Global variables
+EXPERT_ADD_ON = False
+
 # Get paths to SentencePiece model and vocab
-LANG = 'en' # hardcoded for now
+LANG = sys.argv[1] #default language for your installation
 SPM_DEFAULT_VOCAB_PATH = f'/home/<your_username>/PeARS-lite/app/api/models/{LANG}/{LANG}wiki.lite.16k.vocab'
 spm_vocab_path = os.environ.get("SPM_VOCAB", SPM_DEFAULT_VOCAB_PATH)
 SPM_DEFAULT_MODEL_PATH = f'/home/<your_username>/PeARS-lite/app/api/models/{LANG}/{LANG}wiki.lite.16k.model'
@@ -48,6 +52,12 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////home/<your_username>/PeARS-l
 # Define the database object which is imported
 # by modules and controllers
 db = SQLAlchemy(app)
+
+# Load static multilingual info
+from app.utils import read_language_codes
+
+LANGUAGE_CODES = read_language_codes()
+print(LANGUAGE_CODES)
 
 
 # Import a module / component using its blueprint handler variable (mod_auth)
