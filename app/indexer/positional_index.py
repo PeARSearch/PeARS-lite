@@ -99,34 +99,47 @@ def generate_artificial_index():
     joblib.dump(posindex,'posindex.str')        # dump the index to check size
 
 
-def _pair_score(prev_pos, current_pos):
+def _pair_score(prev_pos, current_pos, max_score=1, min_score=0, power=10):
     pair_scores = []
     pairs = list(product(prev_pos, current_pos))
     for pair in pairs:
         dist = abs(pair[1]-pair[0])
         if dist == 0:
             continue
-        dist_score = max(1-log(dist,10), 0)
+        dist_score = float(max(max_score-log(dist, power), min_score))
         pair_scores.append(dist_score) #the score is 1 for a distance of 1, and 0 for a distance of 10 or greater
     return pair_scores
 
 
-def score(posl, enforce_subwords=True):
+def _dedup_posl(posl):
+    posl_dedup = []
+    posl_items = set()
+    for p in posl:
+        if p not in posl_items:
+            posl_dedup.append(p)
+        posl_items.add(p)
+    return posl_dedup
+
+def score(posl, enforce_subwords=True, score_distance=False):
     '''Just one way out of a million to compute
     a score based on the distance between query tokens.'''
     print("\nPOSITIONS IN DOC",posl)
     
+    assert score_distance or enforce_subwords
+
     # remove repeated words
-    posl = list(set(posl))
+    posl = _dedup_posl(posl)
 
     # only one subword word: perfect score
     if len(posl) == 1 and len(posl[0]) == 1:
-        return 1.0
+        return 3.0 if enforce_subwords and score_distance else 1.0
     
     scores = []
 
     first_tok_pos = posl[0][0].split('|')  # first word -> first subword token -> split 'pos|pos|pos' to list 
     prev_pos = [int(i) for i in first_tok_pos]
+    prev_word_last_tok_pos = None  # positions of the last subword of the previous word
+    cur_word_first_tok_pos = None  # positions of the first subword of the current word
 
     if enforce_subwords:
         prev_subwords = prev_pos  # keep track of the positions of the previous subwords
@@ -139,6 +152,7 @@ def score(posl, enforce_subwords=True):
             if enforce_subwords:
                 if p_idx == 0:
                     prev_subwords = current_pos  # first subword of a word: just get the positions, e.g. `_water` -> [19|55]
+                    cur_word_first_tok_pos = current_pos
                 else:
                     # non-initial subword, e.g. `melon` -> [53|56|99]
                     conseq_subwords = []
@@ -150,12 +164,24 @@ def score(posl, enforce_subwords=True):
                                 break
                     if not conseq_subwords:  # none of the positions of current subword is consecutive
                         scores.append(0.0)  # not the entire word is matched -> 0 score for this word
+                        prev_word_last_tok_pos = None
                         break  # we can ignore the rest of the subwords
                     prev_subwords = conseq_subwords
 
                 # if we made it to the last subword, it means the entire word was matched
                 if p_idx == len(word_posl) - 1:
-                    scores.append(1.0)  # assign a 1.0
+                    if score_distance:
+                        # assign score for word boundary
+                        if prev_word_last_tok_pos is not None:
+                            # scores.append(max(_pair_score(prev_word_last_tok_pos, cur_word_first_tok_pos, max_score=1, power=10)))
+                            scores.append(max(_pair_score(prev_word_last_tok_pos, cur_word_first_tok_pos, max_score=3, min_score=1, power=1.5)))
+                        # last word was incomplete? give 1.0 (minimum word transition score)
+                        elif prev_word_last_tok_pos is None and word_idx > 0:
+                            scores.append(3.0)
+
+                        prev_word_last_tok_pos = current_pos
+                    else:
+                        scores.append(1.0)  # assign a 1.0
                     
             else:
                 if word_idx == 0 and p_idx == 0:
@@ -170,17 +196,27 @@ def score(posl, enforce_subwords=True):
             prev_pos = current_pos
 
     if enforce_subwords:
-        return np.mean(scores)  # meaning: the fraction of words that were completely matched (= all subwords consecutive)
+        if score_distance and len(scores) == 0:
+            return 3.0  # single-word queries --> no word transitions to score, assign the maximum
+        elif score_distance:
+            return np.min(scores)
+        else:
+            return np.mean(scores)  # meaning: the fraction of words that were completely matched (= all subwords consecutive)
     else:
         return np.max(scores)  # meaning: 1.0 if there is at least one pair of tokens that is consecutive both in the query and in the document. Otherwise a fraction of this. 
 
 def _search(query, posindex, doc_to_index, index_to_doc, vocab, inverted_vocab, add_posttok_eof, scoring_method="all_subwords"):
     
-    assert scoring_method in ["all_subwords", "token_distance"]
+    assert scoring_method in ["all_subwords", "token_distance", "subwords_and_distance"]
     if scoring_method == "all_subwords":
         enforce_subwords = True
+        score_distance = False
+    elif scoring_method == "subwords_and_distance":
+        enforce_subwords = True
+        score_distance = True
     else:
         enforce_subwords = False
+        score_distance = True
 
     query_tokens = [wp for wp in sp.encode_as_pieces(query)]
     if add_posttok_eof:
@@ -215,7 +251,7 @@ def _search(query, posindex, doc_to_index, index_to_doc, vocab, inverted_vocab, 
             print("DOC",doc,"Q WORD", token_str, token_positions)
 
         print(positions)
-        final_score = score(positions, enforce_subwords=enforce_subwords)
+        final_score = score(positions, enforce_subwords=enforce_subwords, score_distance=score_distance)
         doc_scores[filename] = final_score
         print("\nFINAL SCORE FOR DOC", doc, final_score)
         print("=======================\n\n")
