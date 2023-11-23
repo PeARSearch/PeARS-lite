@@ -202,6 +202,7 @@ def output(best_urls):
         result['notes'] = rec.notes
         result['idx'] = rec.vector
         result['pod'] = rec.pod
+        result['img'] = rec.img
         results.append(result)
         pod = rec.pod
         if pod not in pods:

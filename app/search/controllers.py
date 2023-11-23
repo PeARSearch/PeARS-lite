@@ -59,7 +59,7 @@ def index():
             results = [{'url':None, 'title':None, 'snippet':'No pages found', 'doctype':None, 'notes':None}]
         for r in results:
             r['title'] = beautify_title(r['title'], r['doctype'])
-            r['snippet'] = beautify_snippet(r['snippet'], query)
+            r['snippet'] = beautify_snippet(r['snippet'], r['img'], query)
             displayresults.append(list(r.values()))
 
         #return render_template('search/results.html', pears=pods, query=query, results=displayresults)

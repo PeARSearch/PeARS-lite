@@ -47,6 +47,7 @@ class Urls(Base):
     doctype = db.Column(db.String(1000))
     pod = db.Column(db.String(1000))
     notes = db.Column(db.String(1000))
+    img = db.Column(db.String(1000))
 
     def __init__(self,
                  url=None,
@@ -55,7 +56,8 @@ class Urls(Base):
                  snippet=None,
                  doctype=None,
                  pod=None,
-                 notes=None):
+                 notes=None,
+                 img=None):
         self.url = url
         self.title = title
         self.vector = vector
@@ -63,6 +65,7 @@ class Urls(Base):
         self.doctype = doctype
         self.pod = pod
         self.notes = notes
+        self.img = img
 
     def __repr__(self):
         return self.url
@@ -77,7 +80,8 @@ class Urls(Base):
             'snippet': self.snippet,
             'doctype': self.doctype,
             'pod': self.pod,
-            'notes': self.notes
+            'notes': self.notes,
+            'img': self.img
         }
 
 
