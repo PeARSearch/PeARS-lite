@@ -5,6 +5,7 @@
 
 # Import flask dependencies
 import logging
+from app import OWN_BRAND
 
 from flask import (Blueprint,
                    flash,
@@ -15,6 +16,10 @@ from flask import (Blueprint,
 
 # Define the blueprint:
 settings = Blueprint('settings', __name__, url_prefix='/settings')
+
+@settings.context_processor
+def inject_brand():
+    return dict(own_brand=OWN_BRAND)
 
 
 # Set the route and accepted methods

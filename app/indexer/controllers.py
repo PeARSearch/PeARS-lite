@@ -15,7 +15,7 @@ from flask import (Blueprint,
                    request,
                    render_template,
                    Response)
-from app import VEC_SIZE, LANG
+from app import VEC_SIZE, LANG, OWN_BRAND
 from app.api.models import Urls
 from app.indexer.neighbours import neighbour_urls
 from app.indexer import mk_page_vector, spider
@@ -29,6 +29,10 @@ dir_path = dirname(dirname(realpath(__file__)))
 
 # Define the blueprint:
 indexer = Blueprint('indexer', __name__, url_prefix='/indexer')
+
+@indexer.context_processor
+def inject_brand():
+    return dict(own_brand=OWN_BRAND)
 
 
 # Set the route and accepted methods

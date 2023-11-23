@@ -19,7 +19,7 @@ import re
 import logging
 from os.path import dirname, join, realpath, isfile
 from app.utils import init_podsum, beautify_title, beautify_snippet
-from app import EXPERT_ADD_ON
+from app import EXPERT_ADD_ON, OWN_BRAND
 
 LOG = logging.getLogger(__name__)
 
@@ -28,6 +28,11 @@ search = Blueprint('search', __name__, url_prefix='')
 
 dir_path = dirname(dirname(dirname(realpath(__file__))))
 pod_dir = join(dir_path,'app','static','pods')
+
+
+@search.context_processor
+def inject_brand():
+    return dict(own_brand=OWN_BRAND)
 
 @search.route('/')
 @search.route('/index')
@@ -43,7 +48,7 @@ def index():
     query = request.args.get('q')
     if not query:
         LOG.info("No query")
-        return render_template("search/index.html", internal_message=internal_message)
+        return render_template("search/index.html", internal_message=internal_message, own_brand=OWN_BRAND)
     else:
         displayresults = []
         query = query.lower()
@@ -58,7 +63,7 @@ def index():
             displayresults.append(list(r.values()))
 
         #return render_template('search/results.html', pears=pods, query=query, results=displayresults)
-        return render_template('search/results.html', pears=[], query=query, results=displayresults, expert=EXPERT_ADD_ON)
+        return render_template('search/results.html', pears=[], query=query, results=displayresults, expert=EXPERT_ADD_ON, own_brand=OWN_BRAND)
 
 @search.route('/experts/<kwd>/<idx>/')
 def experts(kwd,idx):  
@@ -71,7 +76,7 @@ def experts(kwd,idx):
     for r in results:
         r['title'] = beautify_title(r['title'], r['doctype'])
         displayresults.append(list(r.values()))
-    return render_template('search/results.html', pears=[], query="-", results=displayresults)
+    return render_template('search/results.html', pears=[], query="-", results=displayresults, expert=EXPERT_ADD_ON, own_brand=OWN_BRAND)
 
 @search.route('/html_cache/<path:filename>')
 def custom_static(filename):

@@ -6,9 +6,14 @@
 from flask import Blueprint, render_template
 
 from app.api.models import Pods
+from app import OWN_BRAND
 
 # Define the blueprint:
 pages = Blueprint('pages', __name__, url_prefix='')
+
+@pages.context_processor
+def inject_brand():
+    return dict(own_brand=OWN_BRAND)
 
 
 @pages.route('/faq/')

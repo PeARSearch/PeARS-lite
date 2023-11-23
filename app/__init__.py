@@ -15,6 +15,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 # Global variables
 EXPERT_ADD_ON = False
+OWN_BRAND = False
 
 # Get paths to SentencePiece model and vocab
 LANG = sys.argv[1] #default language for the installation

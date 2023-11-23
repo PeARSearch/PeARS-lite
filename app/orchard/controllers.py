@@ -5,11 +5,15 @@
 # Import flask dependencies
 from flask import Blueprint, request, render_template
 from app.api.models import Urls
-from app import db
+from app import db, OWN_BRAND
 from app.orchard.mk_urls_file import make_shareable_pod
 
 # Define the blueprint:
 orchard = Blueprint('orchard', __name__, url_prefix='/my-orchard')
+
+@orchard.context_processor
+def inject_brand():
+    return dict(own_brand=OWN_BRAND)
 
 
 @orchard.route('/')
