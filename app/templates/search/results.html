@@ -59,24 +59,14 @@ SPDX-License-Identifier: AGPL-3.0-only
         {% endfor %}
       </div>
       <div class="col-sm-2 d-none d-md-block">
+        {% if internal_message %}
         <div id="sidebar-wrapper">
-
-		<!--<h3 class="text-center">Pods</h3>-->
-
-          <div class="list-group list-group-flush mx-3 mt-4">
-            {% for p in pears %}
-            <span>
-              <center>
-                <img src="{{ url_for('static', filename='pi-pic.png')}}" class='hover' width="50px" />
-                <p class="text"><b>{{p}}</b></p>
-              </center>
-              <hr />
-            </span>
-            {% endfor %}
-
+          <div class="alert alert-info alert-dismissible">
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            {{internal_message|safe}}
           </div>
-
         </div>
+        {% endif %}
       </div>
     </div>
   </div>

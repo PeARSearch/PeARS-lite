@@ -19,7 +19,7 @@ import re
 import logging
 from os.path import dirname, join, realpath, isfile
 from app.utils import init_podsum, beautify_title, beautify_snippet
-from app import EXPERT_ADD_ON, OWN_BRAND
+from app import EXPERT_ADD_ON, OWN_BRAND, WALKTHROUGH
 
 LOG = logging.getLogger(__name__)
 
@@ -27,6 +27,7 @@ LOG = logging.getLogger(__name__)
 search = Blueprint('search', __name__, url_prefix='')
 
 dir_path = dirname(dirname(dirname(realpath(__file__))))
+static_dir = join(dir_path,'app','static')
 pod_dir = join(dir_path,'app','static','pods')
 
 
@@ -40,33 +41,31 @@ def index():
     results = []
     internal_message = ""
     if Urls.query.count() == 0:
-        internal_message = "Hey there! It looks like you're here\
-         for the first time :) To understand how to use PeARS,\
-         go to the FAQ (link at the top of the page)."
         init_podsum()
 
     query = request.args.get('q')
     if not query:
-        LOG.info("No query")
+        if WALKTHROUGH:
+            with open(join(static_dir,'walkthrough1.txt'), 'r') as file:
+                internal_message = file.read().replace('\n', '<br>')
         return render_template("search/index.html", internal_message=internal_message, own_brand=OWN_BRAND)
     else:
+        pears = ['0.0.0.0']
         displayresults = []
         query = query.lower()
-        pears = ['0.0.0.0']
+        if WALKTHROUGH:
+            with open(join(static_dir,'walkthrough2.txt'), 'r') as file:
+                internal_message = file.read().replace('\n', '<br>')
         results, pods = score_pages.run(query, pears)
         if not results:
-            pears = ['no pear found :(']
+            pears = ['no results found :(']
             results = [{'url':None, 'title':None, 'snippet':'No pages found', 'doctype':None, 'notes':None, 'img':None}]
         for r in results:
             r['title'] = beautify_title(r['title'], r['doctype'])
             r['snippet'] = beautify_snippet(r['snippet'], r['img'], query, EXPERT_ADD_ON)
             displayresults.append(list(r.values()))
-            print(displayresults[-1])
-            print(displayresults[-1][6])
-            print(displayresults[-1][7])
 
-        #return render_template('search/results.html', pears=pods, query=query, results=displayresults)
-        return render_template('search/results.html', pears=[], query=query, results=displayresults, expert=EXPERT_ADD_ON, own_brand=OWN_BRAND)
+        return render_template('search/results.html', pears=[], query=query, results=displayresults, internal_message=internal_message, expert=EXPERT_ADD_ON, own_brand=OWN_BRAND)
 
 @search.route('/experts/<kwd>/<idx>/')
 def experts(kwd,idx):  

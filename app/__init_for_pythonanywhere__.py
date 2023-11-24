@@ -16,6 +16,7 @@ from flask_sqlalchemy import SQLAlchemy
 # Global variables
 EXPERT_ADD_ON = False
 OWN_BRAND = False
+WALKTHROUGH = False
 
 # Get paths to SentencePiece model and vocab
 LANG = sys.argv[1] #default language for your installation
@@ -113,6 +114,9 @@ class UrlsModelView(ModelView):
             'readonly': True
         },
         'pod': {
+            'readonly': True
+        },
+        'snippet': {
             'readonly': True
         },
         'date_created': {

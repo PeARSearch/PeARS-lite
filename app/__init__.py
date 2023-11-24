@@ -16,6 +16,7 @@ from flask_sqlalchemy import SQLAlchemy
 # Global variables
 EXPERT_ADD_ON = False
 OWN_BRAND = False
+WALKTHROUGH = False
 
 # Get paths to SentencePiece model and vocab
 LANG = sys.argv[1] #default language for the installation
@@ -98,7 +99,7 @@ admin = Admin(app, name='PeARS DB', template_mode='bootstrap3')
 
 class UrlsModelView(ModelView):
     list_template = 'admin/pears_list.html'
-    column_exclude_list = ['vector','snippet']
+    column_exclude_list = ['vector','snippet','date_created','date_modified']
     column_searchable_list = ['url', 'title', 'doctype', 'notes', 'pod']
     column_editable_list = ['notes']
     can_edit = True
@@ -111,6 +112,9 @@ class UrlsModelView(ModelView):
             'readonly': True
         },
         'pod': {
+            'readonly': True
+        },
+        'snippet': {
             'readonly': True
         },
         'date_created': {

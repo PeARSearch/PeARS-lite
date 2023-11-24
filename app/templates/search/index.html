@@ -28,10 +28,10 @@ SPDX-License-Identifier: AGPL-3.0-only
   </div> 
   {% if internal_message %}
   <div class="row">
-    <div class="col-lg-10 text-center mt-5 mx-auto">
+    <div class="col-lg-8 mt-5 mx-auto">
       <div class="alert alert-info alert-dismissible">
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        {{internal_message}}
+        {{internal_message|safe}}
       </div>
     </div>
   </div>

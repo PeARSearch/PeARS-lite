@@ -33,6 +33,12 @@ a:hover {
     --bs-alert-border-color: #636464;
 }
 
+.alert-info {
+    --bs-alert-color: #636464;
+    --bs-alert-bg: #e9ecef;
+    --bs-alert-border-color: #636464;
+}
+
 .navbar {
   background-color: var(--primary-color);
 }
