@@ -56,11 +56,14 @@ def index():
         results, pods = score_pages.run(query, pears)
         if not results:
             pears = ['no pear found :(']
-            results = [{'url':None, 'title':None, 'snippet':'No pages found', 'doctype':None, 'notes':None}]
+            results = [{'url':None, 'title':None, 'snippet':'No pages found', 'doctype':None, 'notes':None, 'img':None}]
         for r in results:
             r['title'] = beautify_title(r['title'], r['doctype'])
-            r['snippet'] = beautify_snippet(r['snippet'], r['img'], query)
+            r['snippet'] = beautify_snippet(r['snippet'], r['img'], query, EXPERT_ADD_ON)
             displayresults.append(list(r.values()))
+            print(displayresults[-1])
+            print(displayresults[-1][6])
+            print(displayresults[-1][7])
 
         #return render_template('search/results.html', pears=pods, query=query, results=displayresults)
         return render_template('search/results.html', pears=[], query=query, results=displayresults, expert=EXPERT_ADD_ON, own_brand=OWN_BRAND)
@@ -72,9 +75,10 @@ def experts(kwd,idx):
     results, pods = score_pages.score_experts(idx,kwd)
     if not results:
         pears = ['no pear found :(']
-        results = [{'url':None, 'title':None, 'snippet':'No pages found', 'doctype':None, 'notes':None}]
+        results = [{'url':None, 'title':None, 'snippet':'No pages found', 'doctype':None, 'notes':None, 'img':None}]
     for r in results:
         r['title'] = beautify_title(r['title'], r['doctype'])
+        r['snippet'] = beautify_snippet(r['snippet'], r['img'], 'ind', EXPERT_ADD_ON)
         displayresults.append(list(r.values()))
     return render_template('search/results.html', pears=[], query="-", results=displayresults, expert=EXPERT_ADD_ON, own_brand=OWN_BRAND)
 

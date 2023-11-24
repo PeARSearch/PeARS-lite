@@ -17,6 +17,7 @@ from os.path import dirname, join, realpath, isfile
 from pathlib import Path
 from app import VEC_SIZE, LANG, vocab
 
+dir_path = dirname(realpath(__file__))
 
 def read_language_codes():
     dir_path = dirname(dirname(realpath(__file__)))
@@ -282,11 +283,15 @@ def beautify_title(title, doctype):
         title = '📍 MAP: '+title
     return title
 
-def beautify_snippet(snippet, img, query):
+def beautify_snippet(snippet, img, query, expert):
     tmp_snippet = snippet
     for w in query.split():
         tmp_snippet = tmp_snippet.replace(w,'<b>'+w+'</b>')
         tmp_snippet = tmp_snippet.replace(w.title(),'<b>'+w.title()+'</b>')
     if img:
-        tmp_snippet = "<img src='static/assets/"+img+"' style='float:left; width:150px; margin-right: 10px'/>"+tmp_snippet
+        if expert:
+            img = join('..','..','..','static','assets',img)
+        else:
+            img = join('static','assets',img)
+        tmp_snippet = "<img src='"+img+"' style='float:left; width:150px; margin-right: 10px'/>"+tmp_snippet
     return tmp_snippet

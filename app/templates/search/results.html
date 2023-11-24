@@ -30,26 +30,29 @@ SPDX-License-Identifier: AGPL-3.0-only
         {% for result in results %}
         <div class="card mt-2">
           <div class="card-body">
-	  <!--<h4 class="card-title"><a href="{{result[0]}}">{{result[1]}}</a></h4>-->
+	  <!--<h4 class="card-title"><a href="{{result[1]}}">{{result[2]}}</a></h4>-->
 
 	    {% if result[3] == 'doc' %}
-              <a class="btn btn-secondary" href="{{result[0]}}">{{result[1]}}</a>
+              <a class="btn btn-secondary" href="{{result[1]}}">{{result[2]}}</a>
 	    {% elif result[3] == 'csv' %}
-              <a class="btn btn-warning" href="{{result[0]}}">{{result[1]}}</a>
+              <a class="btn btn-warning" href="{{result[1]}}">{{result[2]}}</a>
 	    {% else %}
-              <a class="btn btn-primary" href="{{result[0]}}">{{result[1]}}</a>
+              <a class="btn btn-primary" href="{{result[1]}}">{{result[2]}}</a>
 	    {% endif %}
+	    <a href='../../admin/urls/edit/?id={{result[0]}}'><img src="{{ url_for('static', filename='annot.png')}}" width='30px' /></a>
 
-	    <p class="card-text"><br>{{result[2]|safe}} ...</p>
-	    <a href="{{result[0]}}" class="card-link">{{result[0]}}</a>
+	    <p class="card-text"><br>{{result[3]|safe}} ...</p>
+	    <a href="{{result[1]}}" class="card-link">{{result[1]}}</a>
 	    {% if expert %}
-	    <a href="{{url_for('.experts', kwd=result[6], idx=result[5])}}" style="text-decoration:none">😎</a>
+	      {% if result[4] == 'doc' %}
+	        <a href="{{url_for('.experts', kwd=result[7], idx=result[6])}}" style="text-decoration:none; color:black;"><b> >> </b></a>
+	      {% endif %}
 	    {% endif %}
 	    <br>
           </div>
-          {% if result[4] != None %}
+          {% if result[5] != None %}
           <div class="card-footer">
-            <img src="{{ url_for('static', filename='annot.png')}}" width='40px' />{{result[4]}}
+              <img src="{{ url_for('static', filename='note.png')}}" width='40px' />{{result[5]}}
           </div>
           {% endif %}
         </div>

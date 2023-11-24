@@ -185,16 +185,21 @@ def output(best_urls):
     for csv in csvs:
         rec = Urls.query.filter(Urls.url == csv[1]).first()
         result = {}
+        result['id'] = rec.id
         result['url'] = csv[0]
         result['title'] = csv[0]
         result['snippet'] = assemble_csv_table(csv[0],csv[2])
         result['doctype'] = rec.doctype
         result['notes'] = None
+        result['idx'] = rec.vector
+        result['pod'] = rec.pod
+        result['img'] = None
         results.append(result)
 
     for u in urls:
         rec = Urls.query.filter(Urls.url == u).first()
         result = {}
+        result['id'] = rec.id
         result['url'] = rec.url
         result['title'] = rec.title
         result['snippet'] = rec.snippet
