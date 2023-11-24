@@ -15,7 +15,7 @@ from app.utils_db import (
 
 from .overlap_calculation import score_url_overlap, generic_overlap, completeness, posix
 from app.search import term_cosine
-from app.utils import cosine_similarity, hamming_similarity, convert_to_array, get_language
+from app.utils import cosine_similarity, hamming_similarity, convert_to_array, parse_query
 from app.indexer.mk_page_vector import compute_query_vectors
 from scipy.sparse import csr_matrix, load_npz
 from scipy.spatial import distance
@@ -120,7 +120,7 @@ def bestURLs(doc_scores):
         if c < 50:
             if doc_scores[w] > 0:
                 #if netlocs_used.count(loc) < 10:
-                print("DOC SCORE",w,doc_scores[w])
+                #print("DOC SCORE",w,doc_scores[w])
                 best_urls.append(w)
                 netlocs_used.append(loc)
                 c += 1
@@ -175,7 +175,8 @@ def assemble_csv_table(csv_name,rows):
 
 
 
-def output(best_urls):
+def output(best_urls, doctype):
+    print("DOCTYPE",doctype)
     results = []
     pods = []
     if len(best_urls) == 0:
@@ -184,6 +185,8 @@ def output(best_urls):
 
     for csv in csvs:
         rec = Urls.query.filter(Urls.url == csv[1]).first()
+        if doctype != None and rec.doctype != doctype:
+            continue
         result = {}
         result['id'] = rec.id
         result['url'] = csv[0]
@@ -198,6 +201,8 @@ def output(best_urls):
 
     for u in urls:
         rec = Urls.query.filter(Urls.url == u).first()
+        if doctype != None and rec.doctype != doctype:
+            continue
         result = {}
         result['id'] = rec.id
         result['url'] = rec.url
@@ -215,10 +220,10 @@ def output(best_urls):
     return results, pods
 
 
-def run(query, pears):
+def run(q, pears):
     max_thread = int(multiprocessing.cpu_count() * 0.5)
     document_scores = {}
-    query, lang = get_language(query)
+    query, doctype, lang = parse_query(q)
     q_dist, tokenized = compute_query_vectors(query, lang)
     best_pods = score_pods(query, q_dist, lang)
     print("BEST PODS:",best_pods)
@@ -228,4 +233,4 @@ def run(query, pears):
     for dic in scores:
         document_scores.update(dic)
     best_urls = bestURLs(document_scores)
-    return output(best_urls)
+    return output(best_urls, doctype)

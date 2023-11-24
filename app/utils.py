@@ -262,17 +262,31 @@ def get_pod_info(url):
     return pod
 
 
-def get_language(query):
+def parse_query(query):
     lang = LANG #default
+    doctype = None
+    clean_query = ""
     m = re.search('(.*) -(..\s*)$',query)
     if m:
         query = m.group(1)
         lang = m.group(2)
-    return query, lang
+    words = query.split()
+    for w in words:
+        if w[0] == '?':
+            doctype = 'ind'
+            clean_query+=w[1:]+' '
+        elif w[0] == '!':
+            doctype = w[1:]
+        else:
+            clean_query+=w+' '
+    clean_query = clean_query[:-1]
+    if query.strip() == '/': #FIX
+        doctype = 'doc'
+    return clean_query, doctype, lang
 
 def beautify_title(title, doctype):
-    if doctype == 'csv':
-        title = '📈 CSV: '+title
+    if doctype == 'stat':
+        title = '📈 STAT: '+title
     if doctype == 'doc':
         title = '📝 DOC: '+title
     if doctype == 'url':

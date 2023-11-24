@@ -10,7 +10,7 @@ from app.utils_db import (
     get_db_pod_name, get_db_pod_description, get_db_pod_language)
 
 from app.search import term_cosine
-from app.utils import cosine_similarity, convert_to_array, get_language
+from app.utils import cosine_similarity, convert_to_array, parse_query
 from app.indexer.mk_page_vector import compute_query_vectors
 
 def score(query, query_dist):
@@ -62,7 +62,7 @@ def output(best_pods):
 def run(query):
     print("Looking for pods for query", query)
     best_pods = []
-    query, lang = get_language(query)
+    query, doctype, lang = parse_query(query)
     if query != "":
         q_dist = compute_query_vectors(query, lang)
         pod_scores = score_pods(query, q_dist)

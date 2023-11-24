@@ -19,7 +19,7 @@ from app import VEC_SIZE, LANG, OWN_BRAND
 from app.api.models import Urls
 from app.indexer.neighbours import neighbour_urls
 from app.indexer import mk_page_vector, spider
-from app.utils import readDocs, readUrls, readBookmarks, get_language, init_pod, init_podsum, request_url
+from app.utils import readDocs, readUrls, readBookmarks, parse_query, init_pod, init_podsum, request_url
 from app.utils_db import pod_from_file
 from app.indexer.htmlparser import extract_links
 from app.indexer.posix import posix_doc
@@ -64,7 +64,7 @@ def from_docs():
             doctype = 'doc'
         else:
             doctype = request.form['docs_type'].lower()
-        keyword, lang = get_language(keyword)
+        keyword, _, lang = parse_query(keyword)
         print("LANGUAGE:",lang)
         file = request.files['file_source']
         file.save(join(dir_path, "docs_to_index.txt"))
@@ -88,7 +88,7 @@ def from_csv():
             doctype = 'csv'
         else:
             doctype = request.form['docs_type'].lower()
-        keyword, lang = get_language(keyword)
+        keyword, _, lang = parse_query(keyword)
         print("LANGUAGE:",lang)
         file = request.files['file_source']
         file.save(join(dir_path, "spreadsheet_to_index.csv"))
@@ -119,7 +119,7 @@ def from_bookmarks():
     print("FILE:", request.files['file_source'])
     if "bookmarks" in request.files['file_source'].filename:
         keyword = request.form['bookmark_keyword']
-        keyword, lang = get_language(keyword)
+        keyword, _, lang = parse_query(keyword)
         file = request.files['file_source']
         file.save(join(dir_path, "bookmarks.html"))
         urls = readBookmarks(join(dir_path,"bookmarks.html"), keyword)
@@ -140,7 +140,7 @@ def from_url():
         f = open(join(dir_path, "urls_to_index.txt"), 'w')
         u = request.form['url']
         keyword = request.form['url_keyword']
-        keyword, lang = get_language(keyword)
+        keyword, _, lang = parse_query(keyword)
         print(u, keyword, lang)
         f.write(u + ";" + keyword + ";" + lang +"\n")
         f.close()

@@ -9,7 +9,7 @@ import requests, csv, sys
 from os.path import dirname, join, realpath
 from app import db, VEC_SIZE
 from app.api.models import Pods, Urls
-from app.utils import readPods, get_pod_info, convert_to_string, get_language
+from app.utils import readPods, get_pod_info, convert_to_string, parse_query
 from app.utils_db import pod_from_json, url_from_json, pod_from_file
 from app.pod_finder import score_pods, index_pod_file
 from app.pod_finder.download_pod_list import download_pod_centroids
@@ -43,7 +43,7 @@ def index():
 def find_a_pod():
     print("Running progress pod update")
     query = request.args.get('search-pod')
-    _, lang = get_language(query)
+    _, _, lang = parse_query(query)
     download_pod_centroids(lang)
     #print(request, request.args, query)
     pods = score_pods.run(query)
