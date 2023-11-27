@@ -40,7 +40,7 @@ def score_experts(doc_idx,kwd):
             DS_scores[u.url] = m_cosines[0][int(u.vector)]
             print("EXPERT",u.url,score)
     urls = bestURLs(DS_scores)
-    return output(urls)
+    return output(urls, 'ind')
 
 def score(query, query_dist, tokenized, kwd):
     URL_scores = {}
@@ -154,19 +154,25 @@ def aggregate_csv(best_urls):
     return urls, csvs
 
 
-def assemble_csv_table(csv_name,rows):
+def assemble_csv_table(csv_name,rows,doctype):
     try:
         df = read_csv(join(raw_dir,csv_name), delimiter=';', encoding='utf-8')
     except:
         df = read_csv(join(raw_dir,csv_name), delimiter=';', encoding='iso-8859-1')
     df_slice = df.iloc[rows].to_numpy()
     table = "<table class='table table-striped w-100'><thead><tr>"
+    if doctype == 'map':
+        table+="<th scope='col' style='word-wrap:break-word; max-width:500px'>www</th>"
     for c in list(df.columns):
         table+="<th scope='col' style='word-wrap:break-word; max-width:500px'>"+c+"</th>"
     table+="</tr></thead>"
     for r in df_slice[:10]:
         #table+="""<tr class='w-100' onclick='document.location="https://en.wikipedia.org"' style='cursor: pointer'>"""
         table+="<tr class='w-100'>"
+        if doctype == 'map':
+            link="https://www.openstreetmap.org/#map=19/"+str(r[0])+"/"+str(r[1])
+            #table+="<td><a href='https://www.openstreetmap.org/#map=19/"+str(r[0])+"/"+str(r[1])+"'>📍</a></td>"
+            table+="""<td><a href="#" onClick="console.log('"""+link+"""'); window.open('"""+link+"""', 'pagename', 'resizable,height=560,width=560,top=200,left=800');return false;">📍</a><noscript>You need Javascript to use the previous link or use <a href='"""+link+"""' target="_blank">📍</a></noscript></td>"""
         for i in r:
             table+="<td style='word-wrap:break-word; max-width:500px'>"+str(i)+"</td>"
         table+="</tr>"
@@ -191,7 +197,7 @@ def output(best_urls, doctype):
         result['id'] = rec.id
         result['url'] = csv[0]
         result['title'] = csv[0]
-        result['snippet'] = assemble_csv_table(csv[0],csv[2])
+        result['snippet'] = assemble_csv_table(csv[0],csv[2],rec.doctype)
         result['doctype'] = rec.doctype
         result['notes'] = None
         result['idx'] = rec.vector

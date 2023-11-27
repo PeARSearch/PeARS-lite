@@ -78,7 +78,7 @@ def compute_vectors(target_url, keyword, lang, url_type):
 def compute_vectors_local_docs(target_url, doctype, title, doc, keyword, lang):
     cc = False
     pod_m = load_npz(join(pod_dir,keyword+'.npz'))
-    if not db.session.query(Urls).filter_by(title=title).all():
+    if not db.session.query(Urls).filter_by(url=target_url).all():
         print("Computing vectors for", target_url, "(",keyword,")",lang)
         u = Urls(url=target_url)
         text = title + " " + doc
