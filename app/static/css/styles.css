@@ -6,9 +6,9 @@
 
 
 :root {
-    --primary-color: #73b4eb;
-    --secondary-color: black;
-    --hover-color: blue;
+    --primary-color: orange;
+    --secondary-color: green;
+    --hover-color: black;
  } 
 
 a {
@@ -17,6 +17,10 @@ a {
 a:hover {
   color: var(--secondary-color);
 }
+
+.walkthrough a {
+  color: black;
+ }
 
 .navbar-light {
   background-color: var(--primary-color);

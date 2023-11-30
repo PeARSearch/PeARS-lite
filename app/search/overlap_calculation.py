@@ -30,10 +30,13 @@ def score_url_overlap(query, url):
 
 def generic_overlap(q, s):
     '''Overlap between query and another string'''
-    q = "".join(l for l in q if l not in string.punctuation)
-    s = "".join(l for l in s if l not in string.punctuation)
-    q_words = [w[:-1] if w[-1] == 's' else w for w in q.lower().split()] #dealing with English plurals
-    s_words = [w[:-1] if w[-1] == 's' else w for w in s.lower().split()]
+    q = "".join(l if l not in string.punctuation else ' ' for l in q.lower())
+    s = "".join(l if l not in string.punctuation else ' ' for l in s.lower())
+    q_words = q.split()
+    s_words = s.split()
+    #print("SET Q",q_words)
+    #print("SET S",s_words)
+    #print(list(set(q_words) & set(s_words)))
     return len(list(set(q_words) & set(s_words))) / len(set(q_words))
 
 def dice_overlap(i1, i2):

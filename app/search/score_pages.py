@@ -58,6 +58,7 @@ def score(query, query_dist, tokenized, kwd):
         completeness_scores[u.url] = m_completeness[0][int(u.vector)]
         #URL_scores[u.url] = score_url_overlap(query, u.url)
         snippet_scores[u.url] = generic_overlap(query, u.title+' '+u.snippet)
+        #print("SNIPPET SCORE",u.url,snippet_scores[u.url])
     return DS_scores, completeness_scores, snippet_scores, posix_scores
 
 
@@ -71,6 +72,7 @@ def score_pods(query, query_dist, lang):
     pods = db.session.query(Pods).filter_by(language=lang).filter_by(registered=True).all()
     for p in pods:
         score = m_cosines[0][int(p.DS_vector)]
+        print(p.name,score)
         if math.isnan(score):
             score = 0
         pod_scores[p.name] = score
@@ -101,13 +103,14 @@ def score_docs(query, query_dist, tokenized, kwd):
         idx = db.session.query(Urls).filter_by(url=url).first().vector
         if idx in posix_scores:
             document_scores[url]+=posix_scores[idx]
-            #print("Incrementing score for",url,idx, posix_scores[idx])
         document_scores[url]+=completeness_scores[url]
         document_scores[url]+=snippet_scores[url]
-        #document_scores[url] = completeness_scores[url] + snippet_scores[url]
-        #print(url, document_scores[url], completeness_scores[url], snippet_scores[url])
+        if snippet_scores[url] == 1:
+            document_scores[url]+=1 #bonus points
         if math.isnan(document_scores[url]) or completeness_scores[url] < 0.3:  # Check for potential NaN -- messes up with sorting in bestURLs.
             document_scores[url] = 0
+        else:
+            print(url, document_scores[url], completeness_scores[url], snippet_scores[url])
     return document_scores
 
 
@@ -128,7 +131,7 @@ def bestURLs(doc_scores):
                 break
         else:
             break
-    print("BEST URLS",best_urls)
+    #print("BEST URLS",best_urls)
     return best_urls
 
 
@@ -156,9 +159,9 @@ def aggregate_csv(best_urls):
 
 def assemble_csv_table(csv_name,rows,doctype):
     try:
-        df = read_csv(join(raw_dir,csv_name), delimiter=';', encoding='utf-8')
+        df = read_csv(join(raw_dir,'csv',csv_name), delimiter=';', encoding='utf-8')
     except:
-        df = read_csv(join(raw_dir,csv_name), delimiter=';', encoding='iso-8859-1')
+        df = read_csv(join(raw_dir,'csv',csv_name), delimiter=';', encoding='iso-8859-1')
     df_slice = df.iloc[rows].to_numpy()
     table = "<table class='table table-striped w-100'><thead><tr>"
     if doctype == 'map':
@@ -230,13 +233,18 @@ def run(q, pears):
     max_thread = int(multiprocessing.cpu_count() * 0.5)
     document_scores = {}
     query, doctype, lang = parse_query(q)
-    q_dist, tokenized = compute_query_vectors(query, lang)
-    best_pods = score_pods(query, q_dist, lang)
-    print("BEST PODS:",best_pods)
-    with Parallel(n_jobs=max_thread, prefer="threads") as parallel:
-        delayed_funcs = [delayed(score_docs)(query, q_dist, tokenized, pod) for pod in best_pods]
-        scores = parallel(delayed_funcs)
-    for dic in scores:
-        document_scores.update(dic)
-    best_urls = bestURLs(document_scores)
-    return output(best_urls, doctype)
+    if query == '' and doctype == 'doc':
+        urls = db.session.query(Urls).filter_by(pod='Desktop').all()
+        best_urls = [u.url for u in urls]
+        return output(best_urls, doctype)
+    else:
+        q_dist, tokenized = compute_query_vectors(query, lang)
+        best_pods = score_pods(query, q_dist, lang)
+        print("Q:",query,"BEST PODS:",best_pods)
+        with Parallel(n_jobs=max_thread, prefer="threads") as parallel:
+            delayed_funcs = [delayed(score_docs)(query, q_dist, tokenized, pod) for pod in best_pods]
+            scores = parallel(delayed_funcs)
+        for dic in scores:
+            document_scores.update(dic)
+        best_urls = bestURLs(document_scores)
+        return output(best_urls, doctype)

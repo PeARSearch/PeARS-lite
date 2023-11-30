@@ -19,7 +19,7 @@ import re
 import logging
 from os.path import dirname, join, realpath, isfile
 from app.utils import init_podsum, beautify_title, beautify_snippet
-from app import EXPERT_ADD_ON, OWN_BRAND, WALKTHROUGH
+from app import EXPERT_ADD_ON, OWN_BRAND, WALKTHROUGH, STOPWORDS
 
 LOG = logging.getLogger(__name__)
 
@@ -52,7 +52,7 @@ def index():
     else:
         pears = ['0.0.0.0']
         displayresults = []
-        query = query.lower()
+        query = ' '.join([w for w in query.split() if w not in STOPWORDS])
         if WALKTHROUGH:
             with open(join(static_dir,'walkthrough2.txt'), 'r') as file:
                 internal_message = file.read().replace('\n', '<br>')
@@ -64,7 +64,7 @@ def index():
             r['title'] = beautify_title(r['title'], r['doctype'])
             r['snippet'] = beautify_snippet(r['snippet'], r['img'], query, EXPERT_ADD_ON)
             displayresults.append(list(r.values()))
-
+        query = query.replace(' ','&nbsp;')
         return render_template('search/results.html', pears=[], query=query, results=displayresults, internal_message=internal_message, expert=EXPERT_ADD_ON, own_brand=OWN_BRAND)
 
 @search.route('/experts/<kwd>/<idx>/')

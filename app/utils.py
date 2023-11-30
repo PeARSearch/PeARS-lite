@@ -29,6 +29,15 @@ def read_language_codes():
             LANGUAGE_CODES[fields[0]] = fields[1]
     return LANGUAGE_CODES
 
+def read_stopwords(lang):
+    dir_path = dirname(dirname(realpath(__file__)))
+    ling_dir = join(dir_path,'app','static','ling','stopwords')
+    STOPWORDS = []
+    with open(join(ling_dir,lang),'r') as f:
+        STOPWORDS = f.read().splitlines()
+    return STOPWORDS
+
+
 def request_url(url):
     req = None
     try:
@@ -282,7 +291,10 @@ def parse_query(query):
     clean_query = clean_query[:-1]
     if query.strip() == '/': #FIX
         doctype = 'doc'
+    print(clean_query, doctype)
     return clean_query, doctype, lang
+
+
 
 def beautify_title(title, doctype):
     if doctype == 'stat':

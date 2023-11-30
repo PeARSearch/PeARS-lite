@@ -21,8 +21,6 @@ pod_dir = join(dir_path,'static','pods')
 def tokenize_text(lang, text):
     sp.load(SPM_DEFAULT_MODEL_PATH)
     tokens = [wp for wp in sp.encode_as_pieces(text.lower())]
-    if tokens[-1] == 's': #if plural marker (for English), remove 
-        tokens = tokens[:-1]
     text = ' '.join([wp for wp in sp.encode_as_pieces(text.lower())])
     #print("TOKENIZED",text)
     return text

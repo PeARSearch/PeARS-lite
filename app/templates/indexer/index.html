@@ -14,6 +14,37 @@ SPDX-License-Identifier: AGPL-3.0-only
       </div>
     </div>
   </div>
+  
+  <div class="row p-3">
+    <div class="card-group">
+      <div class="card">
+        <div class="card-header text-center"><b>Index a single URL</b></div>
+        <div class="card-body">
+          <p>Think you should index your favourite webpage? Enter its URL here! 
+          </p>
+
+          <form method="POST" accept-charset="UTF-8" enctype="multipart/form-data"
+            action="{{url_for('indexer.from_url')}}">
+            <div class="input-group p-2">
+              <span class="input-group-text">URL</span>
+              <input required type="text" class="form-control" placeholder="Enter a URL" name='url' id='url'>
+            </div>
+            <div class="input-group p-2">
+              <span class="input-group-text">Keyword</span>
+              <input class="form-control input-s" title="Enter a keyword." placeholder="Enter a keyword" type="text"
+                name='url_keyword' id='url_keyword' required>
+            </div>
+        </div>
+        <div class="card-footer clearfix">
+          <span class="input-group-btn float-end">
+            <input id="submit_button" type="submit" class="btn btn-success" value="Index URL">
+          </span>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
 
   <div class="row p-3">
     <div class="card-group">
@@ -156,38 +187,6 @@ SPDX-License-Identifier: AGPL-3.0-only
         <div class="card-footer clearfix">
           <span class="input-group-btn float-end">
             <input id="submit_button" type="submit" class="btn btn-success" value="Index CSV">
-          </span>
-        </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <div class="row p-3">
-    <div class="card-group">
-      <div class="card">
-        <div class="card-header text-center"><b>Index a single URL</b></div>
-        <div class="card-body">
-          <p>Think you should index your favourite webpage? Enter its URL here! If you like, you can also enter a
-            keyword
-            describing the page (essential if you're planning on building a pod).
-          </p>
-
-          <form method="POST" accept-charset="UTF-8" enctype="multipart/form-data"
-            action="{{url_for('indexer.from_url')}}">
-            <div class="input-group p-2">
-              <span class="input-group-text">URL</span>
-              <input required type="text" class="form-control" placeholder="Enter a URL" name='url' id='url'>
-            </div>
-            <div class="input-group p-2">
-              <span class="input-group-text">Keyword</span>
-              <input class="form-control input-s" title="Enter a keyword." placeholder="Enter a keyword" type="text"
-                name='url_keyword' id='url_keyword' required>
-            </div>
-        </div>
-        <div class="card-footer clearfix">
-          <span class="input-group-btn float-end">
-            <input id="submit_button" type="submit" class="btn btn-success" value="Index URL">
           </span>
         </div>
         </form>
