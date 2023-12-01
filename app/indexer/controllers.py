@@ -14,7 +14,7 @@ from flask import (Blueprint,
                    render_template,
                    Response)
 
-from app import VEC_SIZE
+from app import LANG, VEC_SIZE
 from app.api.models import Urls
 from app.indexer.neighbours import neighbour_urls
 from app.indexer import mk_page_vector, spider
@@ -47,7 +47,7 @@ def index():
 @indexer.route("/from_crawl", methods=["GET","POST"])
 def from_crawl():
     keyword = "home" #hard-coded
-    lang = "en" #hard-coded
+    lang = LANG
    
     def process_start_url(u):
         print("Now crawling", u)
@@ -103,7 +103,7 @@ def progress_crawl():
 
     def generate():
         kwd = 'home' #hard-coded - change if needed
-        lang='en' #hard-coded - change in multilingual version
+        lang = LANG
         print("\n\n>>> CONTROLLER: READING DOCS")
         urls, titles, snippets, descriptions, docs = readDocs(join(dir_path, "docs_to_index.txt"))
         print("DOCS",docs)
