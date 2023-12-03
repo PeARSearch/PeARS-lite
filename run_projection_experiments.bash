@@ -1,7 +1,7 @@
 # Script for running the evaluation pipeline with different projection settings
 
 # replace path by appropriate dirs
-export PERSONAS_DIR=$(realpath "../datasets/personas")
+export PERSONAS_DIR=$(realpath "../datasets/personas") # TODO be careful with the paths on your machine
 export MODEL_DIR=$(realpath "../datasets/projection_experiments/output")
 
 # spm model
@@ -33,7 +33,7 @@ do
     echo "-------------"
     echo "projection path: $option"
 
-    echo "indexing: 0-hr"
+    echo "indexing: 0-hr" # TODO check if the persona name on your machine is matched or not
     curl -# "localhost:9090/indexer/from_crawl?url=http://localhost:9090/static/testdocs/0_hr/index.html&keyword=0_hr" > /dev/null
 
     echo "evaluating: 0-hr"
