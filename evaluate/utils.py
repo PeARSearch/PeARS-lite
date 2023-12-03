@@ -9,6 +9,10 @@ from nltk.stem import WordNetLemmatizer, SnowballStemmer
 import sys
 from tqdm import tqdm
 import numpy as np
+from gensim.models import FastText
+from sklearn.cluster import KMeans
+from k_means_constrained import KMeansConstrained
+import faiss
 
 
 def clean_texts(text, language):
@@ -108,7 +112,48 @@ def create_proj_mat(seed=111, output_dim=128, input_dim=16000, proj_type='float'
             used_idx.extend(idx)
     else:
         proj_mat = None
-    return proj_mat.T
+    return proj_mat.T  # transpose to vocab_shape x output_shape
+
+
+def group_tokens():
+    """
+    Create projection matrices by grouping similar tokens together. Semantic vectors for tokens
+    are extracted from a pretrained distributional semantic model, e.g. in this case FastText.
+    """
+
+    vocab = []
+    with open('../app/api/models/en/enwiki.vocab') as f:
+        for line in f:
+            vocab.append(line.split()[0])
+    vocab = np.array(vocab)
+
+    # # read fasttext model and extract the word vectors for every words in the vocab
+    # model = FastText.load("../../datasets/projection_experiments/dist_vec/en.fasttext")
+    # tok_vec = []
+    # for v in vocab:
+    #     tok_vec.append(model.wv.get_vector(v))
+    # np.save("../../datasets/projection_experiments/dist_vec/en_tok_vec", np.array(tok_vec))
+
+    tok_vec = np.load("../../datasets/projection_experiments/dist_vec/en_tok_vec.npy").astype(float)
+    for seed in range(111, 666, 111):
+        # kmeans = KMeans(n_clusters=256, random_state=seed, n_init="auto").fit(tok_vec)  # kmean scikit learn
+        # kmeans from facebook faiss lib, which has more balanced number of members per class
+        kmeans = faiss.Kmeans(d=tok_vec.shape[1], k=256, seed=seed,
+                              min_points_per_centroid=10, max_points_per_centroid=63, # min max points does not work
+                              niter=200, verbose=True)
+        kmeans.train(tok_vec)
+        labels = kmeans.index.search(tok_vec, 1)[1].flatten()
+        # # print the clusters with their members
+        # labels = kmeans.labels_
+        # group = dict()
+        # for label in set(labels):
+        #     group[label] = list(vocab[np.where(labels == label)])
+
+        # crate a projection matrix
+        proj_mat = np.zeros((256, 16000))
+        for label in set(labels):
+            proj_mat[label][np.where(labels == label)] = 1
+        np.save(f"../../datasets/projection_experiments/proj_mat/256/fasttext_min10/{seed}", proj_mat.T)
 
 
 if __name__ == '__main__':
@@ -123,6 +168,7 @@ if __name__ == '__main__':
     preprocess_dataset(in_dir=args.data_in, out_dir=args.data_out, persona_name=args.persona, language=args.language, remove_unk_filename_chars=args.remove_unk_filename_chars)
 
     # for seed in range(111, 666, 111):
-    #     proj_mat = create_proj_mat(seed=seed, output_dim=128, proj_type='ach')
-    #     np.save(f'../../datasets/projection_experiments/proj_mat/128/ach/{seed}.npy', proj_mat)
+    #     proj_mat = create_proj_mat(seed=seed, output_dim=256, proj_type='fruitfly', fruitfly_proj_size=63)
+    #     np.save(f'../../datasets/projection_experiments/proj_mat/256/fruitfly_63/{seed}.npy', proj_mat)
 
+    # group_tokens()
