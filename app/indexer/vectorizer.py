@@ -8,6 +8,9 @@ import numpy as np
 from scipy.sparse import csr_matrix, vstack
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn import preprocessing
+from sklearn.decomposition import PCA
+import joblib
+
 
 def read_vocab(vocab_file):
     c = 0
@@ -91,14 +94,35 @@ def encode_docs(doc_list, vectorizer, logprobs, power, top_words):
 
 
 def encode_docs_with_projection(doc_list, vectorizer, logprobs, power, top_words):
+    """
+    Transform a list of documents into vectors using a projection matrix.
+    Returns:
+        scipy.sparse.csr_matrix: The encoded document representations.
+    Note:
+        - The global variable PROJ_MAT should be imported from app.
+        - The binarization step can be adjusted if a binary vector is needed.
+    """
+
     logprobs = np.array([logprob ** power for logprob in logprobs])
     X = vectorizer.fit_transform(doc_list)
     X = X.multiply(logprobs)
     X = X.toarray().dot(PROJ_MAT) # global variable
     X = wta_vectorized(X, top_words, False)
-    # X = (X > 0).astype(np.int_)
+    # X = (X > 0).astype(np.int_)  # if you need to acquire binary vector
     X = csr_matrix(X)
     return X
+
+
+def encode_docs_with_pca(doc_list, vectorizer, logprobs, power, top_words):
+    """
+    Another way to design projection matrix is: run PCA on the vocab embedding matrix first,
+    for example, to reduce the dimension to 2000, then plug the random projection matrix on this reduced
+    matrix to further project it into 256 dim.
+    Since this function is read when encoding both the whole dataset and one query, it is possible to cause
+    an error when doing PCA on one datapoint only. You may need to save the PCA model after running it
+    through the whole dataset, then load it and apply PCA projection on one datapoint of the query.
+    """
+    pass
 
 
 def read_n_encode_dataset(doc=None, vectorizer=None, logprobs=None, power=None, top_words=None, verbose=False):
@@ -107,7 +131,7 @@ def read_n_encode_dataset(doc=None, vectorizer=None, logprobs=None, power=None, 
 
     # encode
     # X = encode_docs(doc_list, vectorizer, logprobs, power, top_words)
-    X = encode_docs_with_projection(doc_list, vectorizer, logprobs, power, top_words)
+    X = encode_docs_with_projection(doc_list, vectorizer, logprobs, power, top_words) # TODO change the projection func here
     if verbose:
         k = 10
         inds = np.argpartition(X.todense(), -k, axis=1)[:, -k:]
