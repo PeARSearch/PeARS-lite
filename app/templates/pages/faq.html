@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2022 PeARS Project, <community@pearsproject.org>, 
+SPDX-FileCopyrightText: 2023 PeARS Project, <community@pearsproject.org>, 
 
 SPDX-License-Identifier: AGPL-3.0-only
 -->
@@ -11,9 +11,9 @@ SPDX-License-Identifier: AGPL-3.0-only
   <div class="row">
        <div class="col-md-6">
        <h3>F.A.Q.</h3>
-       <p><a href="#firsttime">So I'm here now and I don't have any pages to search. What do I do?</a><br>
-       <a href="#newpods">What is a pod? And how do I find new pods?</a><br>
-       <a href="#createpod">Can I create my own pod?</a><br>
+       <p><a href="#firsttime">So I'm here now. What do I do?</a><br>
+       <a href="#indexurl">How do I index?</a><br>
+       <a href="#newpods">What is a pod?</a><br>
        <a href="#indexfile">How do I use 'index from a URL list'?</a><br>
        <a href="#indexdocs">How do I use 'index a document collection'?</a><br>
        <a href="#indexbookmarks">How do I use 'index from bookmarks'?</a><br>
@@ -23,20 +23,20 @@ SPDX-License-Identifier: AGPL-3.0-only
        <a href="#chat">Where can I chat to the PeARS community?</a></p>
        <br><br>
 
-       <p id="#firsttime"><b>So I'm here now and I don't have any pages to search. What do I do?</b></p>
-       <p>First, welcome! Really nice to see you here!</p>
-       <p>Now, head over to your <a href="{{url_for('pod_finder.index')}}">Pod management</a> page and click on 'Find a pod' (you don't need to enter anything in the keywords text box). A new page will open, which will let you start subscribing to pods which might be of interest to you... Carry on reading the question below: <i>What is a pod? And how do I find new pods?</i>...</p>
+       <p id="firsttime"><b>So I'm here now. What do I do?</b></p>
+       <p>First, welcome! Really nice to see you here!</p> 
+       <p>PeARS Lite is a local search solution. It is meant to help you create a little private search engine on your own machine, recording the documents you care about. Like all search engines, it is made of two components: an indexer, which lets you transform Web pages and other documents into a searchable representation, and the actual search module, which finds documents in response to a query. In order to search, you will need to index first. So grab a few URLs and let's get started...<p>
 
        <br><br>
-       <p id="newpods"><b>What is a pod? And how do I find new pods?</b></p>
-       <p>A PeARS pod is a web page index (like a mini-Google, Bing, Yahoo or DuckDuckGo) that some nice people have made available online for you to use. A pod is usually on a particular topic: for instance, a Star Wars pod might record Web pages on Star Wars. Any pod can be subscribed to from your <a href="{{url_for('pod_finder.index')}}">Pod management</a> page. You should learn about the different kinds of pods available to manage your pods as best as you can. We provide some definitions below.</p>
-       <p><b>Community pods</b> Of course, the strength of PeARS is that <i>anybody</i> can become a search engine. If a friend sends you a pod of their making, you also can simply save the file locally and add it to your pear by feeding it to the 'Record from file' option in your Pod management page. <i>Please note that PeARS cannot be held responsible for the content of pods hosted on the WWW. Don't accept sweets and don't index pods from people you don't trust.</i></p>
-       <p>Once  you've subscribed to one or several pods, you're good to go! Go back to the <a href="{{url_for('search.index')}}">PeARS home page</a>, and search!</p>
+       <p id="indexurl"><b>How do I index?</b></p>
+       <p>Your PeARS installation includes an <a href="{{url_for('indexer.index')}}">indexing page</a> which helps you with the hard work of converting documents into searchable representations. You can index in several ways but we will start with the simplest one, which consists in typing a single URL in the 'Index a single URL' box -- this will index just that page. You should also enter a keyword under the URL, telling your PeARS install the topic of the page you want to index. Over time, this will contribute to the creation of <a href="#newpods">pods</a>, which you can manage individually.</p>
+       <p><b>Important:</b>There are various things to consider when crawling. First, please check the laws of your country before indexing: there might be rules on crawling that you want to be aware of. Second, be a good netizen. Some websites impose restrictions on crawling and might block you if you don't respect their rules. Check their <a href="https://www.cloudflare.com/learning/bots/what-is-robots-txt/">robots.txt file</a> to understand whether they consent to being crawled, and do not index too many pages from a single site in a short period of time: you might overload their server.</p>
 
        <br><br>
-       <p id="createpod"><b>Can I create my own pod?</b></p>
-       <p>Yes! The revolution needs you, and your appetite for Web pages on bungee-jumping, creepy-crawlies, the perfect cup of tea, and extinct languages. Whatever you're into, be your own search engine and start indexing pages like the pros. Your pear includes an <a href="{{url_for('indexer.index')}}">indexing page</a> which helps you with the hard work of converting Web pages into searchable representations. You can index in three ways. The simplest one is to type a single URL in the 'Index a single URL' box -- this will index just that page. If you have a favourite website (or part of a website), you can also type in its address in 'Crawl a website' to get all indexable pages from that site (but first check our <a href="#crawlsite">advice on indexing websites</a>). Finally, you can prepare a file of different URLs you would like to record and feed that in to your pear (see <a href="#indexfile"><i>How do I use 'index from file?'</i></a>). When you index things, it is <b>very important</b> to also provide a keyword describing the page(s) you're indexing. You can choose whatever you like, but make sure it's descriptive for you, and that you will <b>keep using the same keyword</b> when you index more pages on the topic.</p>
-       <p>Once in a while, you can go and check how many pages you've indexed on a particular topic. Head over to <a href="{{url_for('indexer.index')}}">My orchard</a>. There, you will find a beautiful orchard growing a pod for each keyword you have used in the indexer. Each pod in the making shows you its current size. Once a pod has grown enough, you may want to share it on the Internet. To do this, click on the pod of your choice. After a moment, a new page will be displayed, giving you instructions about where to find your pod's information. We are currently updating the way that PeARS outputs shareable pods. So check back in soon.</p>
+
+       <p id="newpods"><b>What is a pod?</b></p>
+       <p>A pod is an index dedicated to a particular topic. Imagine your document collection is a library, and you are the librarian labelling different sections of your bookshelves. Having labelled sections help you direct visitors to the right book more easily. It also helps you managing your collection.</p>
+       <p>Once in a while, you can go and check how many pages you've indexed on a particular topic. Head over to <a href="{{url_for('indexer.index')}}">My orchard</a>. There, you will find a beautiful orchard growing a pod for each keyword you have used in the indexer. Each pod in the making shows you its current size. Once a pod has grown enough, you may want to share it with other PeARS users. To do this, click on the pod of your choice. After a moment, a new page will be displayed, giving you instructions about where to find your pod's information. Please note that for copyright reasons, you will only be sharing the URLs you have indexed in that pod. Your friend still has to do their own indexing of that list, using the <a href="#indexfile">URL list</a> indexing function.</p>
 
 
        <br><br>
