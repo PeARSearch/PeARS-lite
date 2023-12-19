@@ -14,7 +14,15 @@ from scipy.spatial import distance
 from scipy.sparse import csr_matrix, save_npz
 from os.path import dirname, join, realpath, isfile
 from pathlib import Path
-from app import VEC_SIZE, LOCAL_RUN, LANG
+from datetime import datetime
+from app import VEC_SIZE, LOCAL_RUN, LANG, CARBON_DIR
+
+
+def carbon_print(tracker_results, task_name):
+    date = datetime.today().strftime('%Y-%m-%d')
+    filename = 'carbon.'+date+'.txt'
+    with open(join(CARBON_DIR,filename),'a') as f:
+        f.write(task_name+': '+str(tracker_results)+'\n')
 
 def _extract_url_and_kwd(line):
     try:

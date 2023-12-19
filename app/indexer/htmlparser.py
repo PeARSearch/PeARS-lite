@@ -10,6 +10,7 @@ from app.indexer import detect_open
 from bs4 import BeautifulSoup
 from langdetect import detect
 from app.api.models import installed_languages
+from app import LANG
 
 auth_token = "TOK:1234"
 
@@ -24,8 +25,8 @@ def remove_boilerplates(response):
         length_low=30,
         length_high=100)
     for paragraph in paragraphs:
-        if not paragraph.is_boilerplate:
-            text += paragraph.text + " "
+        #if not paragraph.is_boilerplate:
+        text += paragraph.text + " "
     return text
 
 
@@ -75,7 +76,7 @@ def extract_html(url):
     snippet = ""
     cc = False
     error = None
-    language = "en"
+    language = LANG
     try:
         req = requests.head(url, timeout=10)
         if "text/html" not in req.headers["content-type"]:
@@ -126,7 +127,7 @@ def extract_txt(url):
     body_str = ""
     snippet = ""
     cc = False
-    language = "en"
+    language = LANG
     print("EXTRACT",url)
     print("TITLE",title)
     try:

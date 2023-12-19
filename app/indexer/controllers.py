@@ -14,11 +14,11 @@ from flask import (Blueprint,
                    render_template,
                    Response)
 
-from app import LANG, VEC_SIZE
+from app import LANG, VEC_SIZE, tracker
 from app.api.models import Urls
 from app.indexer.neighbours import neighbour_urls
 from app.indexer import mk_page_vector, spider
-from app.utils import readDocs, readUrls, get_language, init_podsum
+from app.utils import readDocs, readUrls, get_language, init_podsum, carbon_print
 from app.utils_db import pod_from_file
 from app.indexer.htmlparser import extract_links, extract_html
 from os.path import dirname, join, realpath, isfile
@@ -102,6 +102,7 @@ def progress_crawl():
 
 
     def generate():
+        
         kwd = 'home' #hard-coded - change if needed
         lang = LANG
         print("\n\n>>> CONTROLLER: READING DOCS")
@@ -120,6 +121,9 @@ def progress_crawl():
             sparse.save_npz(join(pod_dir,pod_name), pod)
 
         c = 0
+        if tracker != None:
+            task_name = "run indexing for "+str(len(urls))+" files"
+            tracker.start_task(task_name)
         for url, title, snippet, description, doc in zip(urls, titles, snippets, descriptions, docs):
             print(url,title)
             success, podsum = mk_page_vector.compute_vectors_local_docs(url, title, snippet, description, doc, kwd, lang)
@@ -127,6 +131,9 @@ def progress_crawl():
             c += 1
             print('###', str(ceil(c / len(urls) * 100)))
             yield "data:" + str(ceil(c / len(urls) * 100)) + "\n\n"
+        if tracker != None:
+            search_emissions = tracker.stop_task()
+            carbon_print(search_emissions, task_name)
 
     return Response(generate(), mimetype='text/event-stream')
 

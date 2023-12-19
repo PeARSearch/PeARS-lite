@@ -7,13 +7,13 @@ from urllib.parse import urlparse
 import re
 import math
 from app.api.models import Urls, Pods
-from app import db
+from app import db, tracker
 from app.utils_db import (
     get_db_url_snippet, get_db_url_title, get_db_url_cc, get_db_url_pod, get_db_url_notes)
 
 from .overlap_calculation import score_url_overlap, generic_overlap, completeness
 from app.search import term_cosine
-from app.utils import cosine_similarity, hamming_similarity, convert_to_array, get_language
+from app.utils import cosine_similarity, hamming_similarity, convert_to_array, get_language, carbon_print
 from app.indexer.mk_page_vector import compute_query_vectors
 from scipy.sparse import csr_matrix, load_npz
 from scipy.spatial import distance
@@ -118,6 +118,9 @@ def output(best_urls):
 
 
 def run(query, pears, url_filter=None):
+    if tracker != None:
+        task_name = "run search"
+        tracker.start_task(task_name)
     document_scores = {}
     query, lang = get_language(query)
     q_dist = compute_query_vectors(query, lang)
@@ -125,4 +128,8 @@ def run(query, pears, url_filter=None):
     for pod in best_pods:
         document_scores.update(score_docs(query, q_dist, pod))
     best_urls = bestURLs(document_scores, url_filter)
-    return output(best_urls)
+    results = output(best_urls)
+    if tracker != None:
+        search_emissions = tracker.stop_task()
+        carbon_print(search_emissions, task_name)
+    return results

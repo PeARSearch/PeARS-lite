@@ -70,8 +70,7 @@ def user():
         results = []
         query = query.lower()
         pears = ['0.0.0.0']
-        #results, pods = score_pages.run(query, pears, url_filter=['http://localhost:9090/static/']) #TODO: replace filter with correct OMD endpoint
-        results, pods = score_pages.run(query, pears, url_filter=[ join('https://demo.onmydisk.net/',username), 'http://localhost:9090/static/']) #TODO: replace filter with correct OMD endpoint
+        results, pods = score_pages.run(query, pears, url_filter=[ join(url,username), 'http://localhost:9090/static/']) #TODO: replace filter with correct OMD endpoint
         print(results)
         r = app.make_response(jsonify(results))
         r.mimetype = "application/json"
@@ -144,6 +143,7 @@ def index():
 def login():
     # Declare the login form using FlaskForm library
     form = LoginForm(request.form)
+    print(form)
     # Flask message injected into the page, in case of any errors
     msg = None
     # check if both http method is POST and form is valid on submit

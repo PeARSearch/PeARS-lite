@@ -3,7 +3,10 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 
 import os
+from os.path import dirname, join, realpath
 import logging
+from pathlib import Path
+from codecarbon import EmissionsTracker
 
 # Import flask and template operators
 from flask import Flask, render_template
@@ -12,6 +15,15 @@ from flask_admin import Admin
 # Import SQLAlchemy
 from flask_sqlalchemy import SQLAlchemy
 
+# Initialise emission tracking
+CARBON_TRACKING = False
+CARBON_DIR = None
+tracker = None
+if CARBON_TRACKING:
+    dir_path = dirname(dirname(realpath(__file__)))
+    CARBON_DIR = join(dir_path,'emission_tracking')
+    Path(CARBON_DIR).mkdir(exist_ok=True, parents=True)
+    tracker = EmissionsTracker(output_dir=CARBON_DIR, project_name="PeARS Lite, OMD emission tracking")
 
 # Get paths to SentencePiece model and vocab
 LANG = 'en' # hardcoded for now
