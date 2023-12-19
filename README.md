@@ -9,7 +9,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 ## Important info
 
-*PeARS Lite* is a bare-bone version of PeARS which will allow you to index and search Web document in your language, locally and robustly. It is under active development, so please ensure to *git pull* often until we have a stable release!
+*PeARS Lite* is a bare-bone version of PeARS which will allow you to index and search Web document in your language, locally on your own computer. It is under active development, so please ensure to *git pull* often until we have a stable release!
 
 *PeARS Lite* is provided as-is and is meant for personal use. Before you use it, please check the rules of your country on crawling Web content and displaying snippets. And be a good netizen: do not overload people's servers while indexing!
 
