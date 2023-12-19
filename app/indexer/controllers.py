@@ -19,9 +19,10 @@ from app import VEC_SIZE, LANG, OWN_BRAND
 from app.api.models import Urls
 from app.indexer.neighbours import neighbour_urls
 from app.indexer import mk_page_vector, spider
-from app.utils import readDocs, readUrls, readBookmarks, parse_query, init_pod, init_podsum, request_url
+from app.utils import readDocs, readUrls, readBookmarks, parse_query, init_pod, init_podsum
 from app.utils_db import pod_from_file
 from app.indexer.htmlparser import extract_links
+from app.indexer.access import request_url
 from app.indexer.posix import posix_doc
 from os.path import dirname, join, realpath, isfile
 

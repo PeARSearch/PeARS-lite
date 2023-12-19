@@ -8,7 +8,7 @@ import justext
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from langdetect import detect
-from app.utils import request_url
+from app.indexer.access import request_url
 from app.indexer import detect_open
 from app.api.models import installed_languages
 from app import LANG, LANGUAGE_CODES
@@ -32,11 +32,20 @@ def remove_boilerplates(response, lang):
 
 def BS_parse(url):
     bs_obj = None
+    req = None
+    try:
+        req = requests.head(url, timeout=10)
+        if "text/html" not in req.headers["content-type"]:
+            print("\t>> ERROR: BS_parse: Not a HTML document...")
+            return bs_obj, req
+    except Exception:
+        print("\t>> ERROR: BS_parse: request.head failed trying to access", url, "...")
+        pass
     try:
         req = requests.get(url, allow_redirects=True, timeout=30)
         req.encoding = 'utf-8'
     except Exception:
-        print("ERROR accessing resource", url, "...")
+        print("\t>> ERROR: BS_parse: request failed trying to access", url, "...")
         return bs_obj, req
     bs_obj = BeautifulSoup(req.text, "lxml")
     return bs_obj, req
@@ -46,8 +55,11 @@ def extract_links(url):
     links = []
     try:
         req = requests.head(url, timeout=10)
+        if req.status_code >= 400:
+            print("\t>> ERROR: extract_links: status code is",req.status_code)
+            return links
         if "text/html" not in req.headers["content-type"]:
-            print("Not a HTML document...")
+            print("\t>> ERROR: Not a HTML document...")
             return links
     except Exception:
         return links
@@ -74,7 +86,7 @@ def extract_html(url):
     error = None
     bs_obj, req = BS_parse(url)
     if not bs_obj:
-        error = "ERROR extract_html: Failed to get BeautifulSoup object."
+        error = "\t>> ERROR: extract_html: Failed to get BeautifulSoup object."
         return title, body_str, snippet, cc, error
     if hasattr(bs_obj.title, 'string'):
         if url.startswith('http'):
@@ -84,14 +96,14 @@ def extract_html(url):
             body_str = remove_boilerplates(req, LANG)
             try:
                 language = detect(title + " " + body_str)
-                print("Language for", url, ":", language)
+                print("\t>> INFO: Language for", url, ":", language)
             except Exception:
                 title = ""
-                error = "ERROR extract_html: Couldn't detect page language."
+                error = "\t>> ERROR: extract_html: Couldn't detect page language."
                 return title, body_str, snippet, cc, error
             print(body_str)
             if language not in installed_languages:
-                error = "ERROR extract_html: language is not supported."
+                error = "\t>> ERROR: extract_html: language is not supported."
                 title = ""
                 return title, body_str, snippet, cc, error
             snippet = body_str[:300].replace(',', '-')

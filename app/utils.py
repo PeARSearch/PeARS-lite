@@ -19,19 +19,23 @@ from app import VEC_SIZE, LANG, vocab
 
 dir_path = dirname(realpath(__file__))
 
+def read_language_codes():
+    dir_path = dirname(dirname(realpath(__file__)))
+    ling_dir = join(dir_path,'app','static','ling')
+    LANGUAGE_CODES = {}
+    with open(join(ling_dir,'language_codes.txt'),'r') as f:
+        for l in f:
+            fields = l.rstrip('\n').split(';')
+            LANGUAGE_CODES[fields[0]] = fields[1]
+    return LANGUAGE_CODES
 
-def request_url(url):
-    req = None
-    try:
-        req = requests.head(url, allow_redirects=True, timeout=30)
-    except Exception:
-        print("ERROR: Request failed when trying to access", url, "...")
-        return False, req
-    if req.status_code != 200:
-        print("Warning: " + str(req.url) + ' has a status code of: ' +str(req.status_code)+'.\n')
-        return False, req
-    else:
-        return True, req
+def read_stopwords(lang):
+    dir_path = dirname(dirname(realpath(__file__)))
+    ling_dir = join(dir_path,'app','static','ling','stopwords')
+    STOPWORDS = []
+    with open(join(ling_dir,lang),'r') as f:
+        STOPWORDS = f.read().splitlines()
+    return STOPWORDS
 
 
 def _extract_url_and_kwd(line):
