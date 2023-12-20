@@ -53,6 +53,10 @@ From the PeARS-lite directory, run:
     pip install -r requirements.txt
 
 
+##### 4. Set your authentification token
+
+The PeARS authentification token is set in the *app/static/conf/pears.ini* file. Just replace '<your auth token>' with the string of your choice.
+
 
 ##### 5. Run your pear!
 
