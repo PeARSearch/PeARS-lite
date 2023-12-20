@@ -55,7 +55,7 @@ From the PeARS-lite directory, run:
 
 ##### 4. Set your authentification token
 
-The PeARS authentification token is set in the *app/static/conf/pears.ini* file. Just replace '<your auth token>' with the string of your choice.
+The PeARS authentification token is set in the *app/static/conf/pears.ini* file. Just replace *&lt;your auth token&gt;* with the string of your choice.
 
 
 ##### 5. Run your pear!
