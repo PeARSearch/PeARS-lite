@@ -3,10 +3,12 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 
 import os
-from os.path import dirname, join, realpath
+import sys
 import logging
 from pathlib import Path
+from os.path import dirname, join, realpath
 from codecarbon import EmissionsTracker
+from decouple import Config, RepositoryEnv
 
 # Import flask and template operators
 from flask import Flask, render_template
@@ -42,6 +44,14 @@ VEC_SIZE = len(vocab)
 # Assess whether the code is run locally or on the On My Disk server
 LOCAL_RUN = os.environ.get("LOCAL_RUN", "false").lower() == "true"
 
+# Read tokens
+try:
+    DOTENV_FILE = 'app/static/conf/pears.ini'
+    env_config = Config(RepositoryEnv(DOTENV_FILE))
+    AUTH_TOKEN = env_config.get('AUTH_TOKEN')
+except:
+    print(">>\tERROR: __init__.py: the pears.ini file is not present in the app/static/conf directory or incorrectly configured")
+    sys.exit()
 
 def configure_logging():
     # register root logging

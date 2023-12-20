@@ -7,7 +7,7 @@ import requests
 from urllib.parse import urljoin
 from langdetect import detect
 from app.api.models import installed_languages
-from app import LANG
+from app import LANG, AUTH_TOKEN
 
 
 def extract_from_url(url):
@@ -17,7 +17,7 @@ def extract_from_url(url):
     cc = False
     language = LANG
     try:
-        req = requests.get(url, timeout=10, headers={'Authorization': 'TOK:1234'})
+        req = requests.get(url, timeout=10, headers={'Authorization': AUTH_TOKEN})
     except Exception:
         return title, body_str, snippet, cc
     body_str = req.text

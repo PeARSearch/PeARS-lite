@@ -115,4 +115,4 @@ app/static/pods/
 urls_to_index.txt
 pods_to_index.txt
 
-app/static/webmap/
+app/static/conf/pears.ini

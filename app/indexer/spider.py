@@ -6,8 +6,8 @@ import xmltodict
 import requests
 from collections import OrderedDict
 from os.path import join, dirname, realpath
-from app.indexer.htmlparser import extract_html, auth_token
-from app import LOCAL_RUN
+from app.indexer.htmlparser import extract_html
+from app import LOCAL_RUN, AUTH_TOKEN
 
 dir_path = dirname(dirname(realpath(__file__)))
 
@@ -17,7 +17,7 @@ def omd_parse(current_url):
     links = []
     fout = open(join(dir_path,'docs_to_index.txt'),'a')
     try:
-        xml = requests.get(current_url, timeout=10, headers={'Authorization': auth_token}, stream =True).raw
+        xml = requests.get(current_url, timeout=10, headers={'Authorization': AUTH_TOKEN}, stream =True).raw
         parse = xmltodict.parse(xml.read())
     except:
         print("Request failed. Moving on.")
