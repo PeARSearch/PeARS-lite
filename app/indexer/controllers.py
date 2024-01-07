@@ -10,11 +10,8 @@ import numpy as np
 from scipy import sparse
 from pandas import read_csv
 from math import ceil, isnan
-from flask import (Blueprint,
-                   flash,
-                   request,
-                   render_template,
-                   Response)
+from flask import (Blueprint, flash, request, render_template, Response)
+from flask_login import login_required, current_user
 from app import VEC_SIZE, LANG, OWN_BRAND
 from app.api.models import Urls
 from app.indexer.neighbours import neighbour_urls
@@ -38,6 +35,7 @@ def inject_brand():
 
 # Set the route and accepted methods
 @indexer.route("/", methods=["GET", "POST"])
+@login_required
 def index():
     num_db_entries = len(Urls.query.all())
     if request.method == "GET":
@@ -52,6 +50,7 @@ def index():
 
 
 @indexer.route("/from_docs", methods=["POST"])
+@login_required
 def from_docs():
     if Urls.query.count() == 0:
         init_podsum()
@@ -76,6 +75,7 @@ def from_docs():
 
 
 @indexer.route("/from_csv", methods=["POST"])
+@login_required
 def from_csv():
     if Urls.query.count() == 0:
         init_podsum()
@@ -100,6 +100,7 @@ def from_csv():
 
 
 @indexer.route("/from_file", methods=["POST"])
+@login_required
 def from_file():
     if Urls.query.count() == 0:
         init_podsum()
@@ -113,6 +114,7 @@ def from_file():
 
 
 @indexer.route("/from_bookmarks", methods=["POST"])
+@login_required
 def from_bookmarks():
     if Urls.query.count() == 0:
         init_podsum()
@@ -133,6 +135,7 @@ def from_bookmarks():
 
 
 @indexer.route("/from_url", methods=["POST"])
+@login_required
 def from_url():
     if Urls.query.count() == 0:
         init_podsum()
@@ -157,6 +160,7 @@ The URL indexing uses same progress as file.
 
 
 @indexer.route("/progress_file")
+@login_required
 def progress_file():
     print("Running progress file")
     def generate():
@@ -184,6 +188,7 @@ def progress_file():
     return Response(generate(), mimetype='text/event-stream')
 
 @indexer.route("/progress_docs")
+@login_required
 def progress_docs():
     logging.debug("Running progress local file")
     def generate():
@@ -222,6 +227,7 @@ def progress_docs():
 
 
 @indexer.route("/progress_csv")
+@login_required
 def progress_csv():
     logging.debug("Running progress local csv")
     def generate():

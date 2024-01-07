@@ -4,6 +4,7 @@
 
 # Import flask dependencies
 from flask import Blueprint, request, render_template
+from flask_login import login_required
 from app.api.models import Urls
 from app import db, OWN_BRAND
 from app.orchard.mk_urls_file import make_shareable_pod
@@ -18,6 +19,7 @@ def inject_brand():
 
 @orchard.route('/')
 @orchard.route('/index', methods=['GET', 'POST'])
+@login_required
 def index():
     query = db.session.query(Urls.pod.distinct().label("pod"))
     keywords = [row.pod for row in query.all()]
@@ -36,6 +38,7 @@ def index():
 
 
 @orchard.route('/get-a-pod', methods=['POST', 'GET'])
+@login_required
 def get_a_pod():
     query = request.args.get('pod')
     hfile = make_shareable_pod(query)

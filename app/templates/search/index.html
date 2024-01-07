@@ -10,11 +10,11 @@ SPDX-License-Identifier: AGPL-3.0-only
     <div class="col-lg-2"></div>
     <div class="col-lg-8 text-center mt-5">
       {% if own_brand %}
-      <a href="{{ url_for('.index')}}"><img width=350px; src="{{ url_for('static', filename='assets/logo.png')}}"></a>
+      <a href="{{ url_for('search.index')}}"><img width=350px; src="{{ url_for('static', filename='assets/logo.png')}}"></a>
       {% else %}
-      <a href="{{ url_for('.index')}}"><img width=350px; src="{{ url_for('static', filename='pears-logo.png')}}"></a>
+      <a href="{{ url_for('search.index')}}"><img width=350px; src="{{ url_for('static', filename='pears-logo.png')}}"></a>
       {% endif %}
-      <form  action="{{url_for('.index')}}" id='searchform'>
+      <form  action="{{url_for('search.index')}}" id='searchform'>
         <div class="input-group group mt-4" >
           <input class="form-control" title="Enter your Search Query." placeholder="Enter your Search Query" type="search" name='q' required>
           <button class="btn btn-lg btn-success" type="submit" id='searchbutton'>Search</button>

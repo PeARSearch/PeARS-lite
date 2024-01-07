@@ -27,3 +27,4 @@ def inject_brand():
 def index():
     return render_template("settings/index.html")
 
+

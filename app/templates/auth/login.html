@@ -1,0 +1,46 @@
+{% extends "base/base.html" %}
+
+{% block body %}
+<div class="container">
+  <div class="row p-3">
+    <div class="card-group">
+    <div class="card">
+      <div class="card-header text-center"><b>Login</b></div>
+      <div class="card-body">
+	{% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="notification is-danger">
+            {{ messages[0] }}
+            </div>
+        {% endif %}
+        {% endwith %}
+        <form method="POST" action="/auth/login">
+            <div class="input-group p-2">
+              <span class="input-group-text">Email   </span>
+              <input class="input is-large" type="email" name="email" placeholder="Your Email" autofocus="">
+            </div>
+            <div class="input-group p-2">
+              <span class="input-group-text">Password</span>
+              <input class="input is-large" type="password" name="password" placeholder="Your Password">
+            </div>
+            <div class="card-footer clearfix">
+              <span class="input-group-btn">
+              <input id="submit_button" type="submit" class="btn btn-success" value="Login">
+            </div>
+        </form>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header text-center"><b>No account yet?</b></div>
+        <div class="card-body">
+	  Signing up gives you access...
+        </div>
+        <div class="card-footer clearfix">
+          <span class="input-group-btn">
+          <input id="submit_button" type="submit" class="btn btn-success" value="Signup">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -17,6 +17,27 @@ SPDX-License-Identifier: AGPL-3.0-only
     <link href="{{ url_for('static', filename='css/bootstrap/bootstrap.min.css')}}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/styles.css')}}" rel="stylesheet">
     {% endblock %}
+
+  <meta name="theme-color" content="#317EFB"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="{{url_for('static', filename='pears-logo.png')}}" type="image/png">
+  <link rel="icon" href="{{url_for('static', filename='pears-logo.png')}}" type="image/png">
+  <link rel="icon" href="{{url_for('static', filename='pears-logo.png')}}" type="image/png">
+  <link rel="apple-touch-icon" href="{{url_for('static', filename='pears-logo.png')}}" type="image/png">
+  <link rel="apple-touch-icon" href="{{url_for('static', filename='pears-logo.png')}}" type="image/png">
+  <link rel="apple-touch-icon" href="{{url_for('static', filename='pears-logo.png')}}" type="image/png">
+  <link rel="manifest" href="/manifest.json">
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register("/sw.js").then(function(registration) {
+          console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        }, function(err) {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+      });
+    }
+  </script>
 </head>
 
 <body>
@@ -24,9 +45,9 @@ SPDX-License-Identifier: AGPL-3.0-only
 <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container">
 	{% if own_brand %}
-        <a class="navbar-brand mx-auto" href="{{url_for('search.index')}}"><img src="{{ url_for('static', filename='assets/logo.png')}}" height="50px"></a>
+        <a class="navbar-brand mx-2" href="{{url_for('search.index')}}"><img src="{{ url_for('static', filename='assets/logo.png')}}" height="50px"></a>
 	{% else %}
-        <a class="navbar-brand mx-auto" href="{{url_for('search.index')}}"><img src="{{ url_for('static', filename='pears_round.png')}}" height="50px"> PeARS</a>
+        <a class="navbar-brand mx-2" href="{{url_for('search.index')}}"><img src="{{ url_for('static', filename='pears_round.png')}}" height="50px"> PeARS</a>
 	{% endif %}
         {% block navbar_toggler %}
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
@@ -47,9 +68,17 @@ SPDX-License-Identifier: AGPL-3.0-only
                 <li class="nav-item"><a class="nav-link" href="{{url_for('search.index')}}">Search</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{url_for('indexer.index')}}">Indexer</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{url_for('orchard.index')}}">My orchard</a></li>
+		{% if current_user.is_authenticated %}
                 <li class="nav-item"><a class="nav-link" href="{{url_for('admin.index')}}">DB admin</a></li>          
+		{% endif %}
             </ul>
             <ul class="nav navbar-nav navbar-right">
+		{% if not current_user.is_authenticated %}
+                <li class="nav-item"><a class="nav-link" href="{{url_for('auth.login')}}">Login</a></li>
+		{% endif %}
+		{% if current_user.is_authenticated %}
+                <li class="nav-item"><a class="nav-link" href="{{url_for('auth.logout')}}">Logout</a></li>
+		{% endif %}
                 <li class="nav-item"><a class="nav-link" href="{{url_for('settings.index')}}">Settings</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{url_for('pages.return_faq')}}">F.A.Q.</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{url_for('pages.return_acknowledgements')}}">Acknowledgments</a>
