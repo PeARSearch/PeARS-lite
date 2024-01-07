@@ -21,6 +21,7 @@ from app.utils_db import pod_from_file
 from app.indexer.htmlparser import extract_links
 from app.indexer.access import request_url
 from app.indexer.posix import posix_doc
+from app.auth.decorators import check_is_confirmed
 from os.path import dirname, join, realpath, isfile
 
 dir_path = dirname(dirname(realpath(__file__)))
@@ -36,6 +37,7 @@ def inject_brand():
 # Set the route and accepted methods
 @indexer.route("/", methods=["GET", "POST"])
 @login_required
+@check_is_confirmed
 def index():
     num_db_entries = len(Urls.query.all())
     if request.method == "GET":
@@ -51,6 +53,7 @@ def index():
 
 @indexer.route("/from_docs", methods=["POST"])
 @login_required
+@check_is_confirmed
 def from_docs():
     if Urls.query.count() == 0:
         init_podsum()
@@ -76,6 +79,7 @@ def from_docs():
 
 @indexer.route("/from_csv", methods=["POST"])
 @login_required
+@check_is_confirmed
 def from_csv():
     if Urls.query.count() == 0:
         init_podsum()
@@ -101,6 +105,7 @@ def from_csv():
 
 @indexer.route("/from_file", methods=["POST"])
 @login_required
+@check_is_confirmed
 def from_file():
     if Urls.query.count() == 0:
         init_podsum()
@@ -115,6 +120,7 @@ def from_file():
 
 @indexer.route("/from_bookmarks", methods=["POST"])
 @login_required
+@check_is_confirmed
 def from_bookmarks():
     if Urls.query.count() == 0:
         init_podsum()
@@ -136,6 +142,7 @@ def from_bookmarks():
 
 @indexer.route("/from_url", methods=["POST"])
 @login_required
+@check_is_confirmed
 def from_url():
     if Urls.query.count() == 0:
         init_podsum()
@@ -161,6 +168,7 @@ The URL indexing uses same progress as file.
 
 @indexer.route("/progress_file")
 @login_required
+@check_is_confirmed
 def progress_file():
     print("Running progress file")
     def generate():
@@ -189,6 +197,7 @@ def progress_file():
 
 @indexer.route("/progress_docs")
 @login_required
+@check_is_confirmed
 def progress_docs():
     logging.debug("Running progress local file")
     def generate():
@@ -228,6 +237,7 @@ def progress_docs():
 
 @indexer.route("/progress_csv")
 @login_required
+@check_is_confirmed
 def progress_csv():
     logging.debug("Running progress local csv")
     def generate():

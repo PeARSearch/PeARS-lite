@@ -9,6 +9,7 @@ import logging
 # Import flask and template operators
 from flask import Flask, render_template, send_file
 from flask_admin import Admin, AdminIndexView
+from flask_mail import Mail
 
 # Import SQLAlchemy and LoginManager
 from flask_sqlalchemy import SQLAlchemy
@@ -50,6 +51,9 @@ app = Flask(__name__)
 # Configurations
 app.config.from_object('config')
 
+# Mail
+mail = Mail(app)
+
 # Define the database object which is imported
 # by modules and controllers
 db = SQLAlchemy(app)
@@ -89,7 +93,7 @@ with app.app_context():
     db.create_all()
 
 from flask_admin.contrib.sqla import ModelView
-from app.api.models import Pods, Urls
+from app.api.models import Pods, Urls, User
 from app.api.controllers import return_url_delete, return_pod_delete
 
 from flask_admin import expose
@@ -208,9 +212,31 @@ class PodsModelView(ModelView):
 
         return True
 
+class UsersModelView(ModelView):
+    list_template = 'admin/pears_list.html'
+    column_exclude_list = ['password']
+    column_searchable_list = ['email', 'username']
+    can_edit = False
+    page_size = 50
+    form_widget_args = {
+        'email': {
+            'readonly': True
+        },
+        'username': {
+            'readonly': True
+        },
+        'is_confirmed': {
+            'readonly': True
+        },
+        'confirmed_on': {
+            'readonly': True
+        },
+    }
+
 
 admin.add_view(PodsModelView(Pods, db.session))
 admin.add_view(UrlsModelView(Urls, db.session))
+admin.add_view(UsersModelView(User, db.session))
 
 @app.route('/manifest.json')
 def serve_manifest():

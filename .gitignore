@@ -4,3 +4,4 @@ app/static/pods
 app/static/toindex
 __pycache__/
 app.db
+.env

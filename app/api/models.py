@@ -127,4 +127,32 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True) # primary keys are required by SQLAlchemy
     email = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(100))
-    name = db.Column(db.String(1000))
+    username = db.Column(db.String(1000))
+    is_admin = db.Column(db.Boolean, nullable=False, default=False)
+    is_confirmed = db.Column(db.Boolean, nullable=False, default=False)
+    confirmed_on = db.Column(db.DateTime, nullable=True)
+    
+    def __init__(self,
+                 email=None,
+                 password=None,
+                 username=None,
+                 is_admin=False,
+                 is_confirmed=False,
+                 confirmed_on=None):
+        self.email = email
+        self.password = password
+        self.username = username
+        self.is_admin = is_admin
+        self.is_confirmed = is_confirmed
+        self.confirmed_on = confirmed_on
+
+    @property
+    def serialize(self):
+        return {
+            'email': self.email,
+            'password': self.password,
+            'username': self.username,
+            'is_admin': self.is_admin,
+            'is_confirmed': self.is_confirmed,
+            'confirmed_on': self.confirmed_on
+        }

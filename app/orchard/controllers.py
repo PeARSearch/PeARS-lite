@@ -8,6 +8,7 @@ from flask_login import login_required
 from app.api.models import Urls
 from app import db, OWN_BRAND
 from app.orchard.mk_urls_file import make_shareable_pod
+from app.auth.decorators import check_is_confirmed
 
 # Define the blueprint:
 orchard = Blueprint('orchard', __name__, url_prefix='/my-orchard')
