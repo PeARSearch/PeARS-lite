@@ -4,6 +4,7 @@
 <div class="container">
   <div class="row p-3">
     <div class="card-group">
+  
     <div class="card">
       <div class="card-header text-center"><b>Login</b></div>
       <div class="card-body">
@@ -14,33 +15,35 @@
             </div>
         {% endif %}
         {% endwith %}
-        <form method="POST" action="/auth/login">
+      <form method="POST" action="/auth/login" enctype="multipart/form-data">
             <div class="input-group p-2">
               <span class="input-group-text">Email   </span>
-              <input class="input is-large" type="email" name="email" placeholder="Your Email" autofocus="">
+              <input class="form-control input-s" type="email" name="email" placeholder="Your Email" autofocus="">
             </div>
             <div class="input-group p-2">
               <span class="input-group-text">Password</span>
-              <input class="input is-large" type="password" name="password" placeholder="Your Password">
+              <input class="form-control input-s" type="password" name="password" placeholder="Your Password">
             </div>
-            <div class="card-footer clearfix">
-              <span class="input-group-btn">
-              <input id="submit_button" type="submit" class="btn btn-success" value="Login">
-            </div>
-        </form>
       </div>
+      <div class="card-footer clearfix">
+        <span class="input-group-btn">
+        <input id="submit_button" type="submit" class="btn btn-success" value="Login">
+      </div>
+      </form>
     </div>
+
     <div class="card">
       <div class="card-header text-center"><b>No account yet?</b></div>
         <div class="card-body">
-	  Signing up gives you access...
+	  You can freely search this PeARS installation without signing up. However, having an account allows you to contribute new content to the search engine and grow the information that people can find here. So join the community and contribute by signing up!
         </div>
         <div class="card-footer clearfix">
           <span class="input-group-btn">
-          <input id="submit_button" type="submit" class="btn btn-success" value="Signup">
+          <a href={{url_for('auth.signup')}} class="btn btn-success" role="button">Signup</a>
         </div>
       </div>
     </div>
+
   </div>
 </div>
 {% endblock %}
