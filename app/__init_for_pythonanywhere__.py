@@ -49,12 +49,24 @@ configure_logging()
 # Define the WSGI application object
 app = Flask(__name__)
 
+# Configurations
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////home/<your_username>/PeARS-lite/app.db'
+app.config['MAIL_DEFAULT_SENDER'] = "<your_email_address>"
+app.config['MAIL_SERVER'] = "<your_mail_server>"
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_DEBUG'] = False
+app.config['MAIL_USERNAME'] = os.getenv("EMAIL_USER")      # set in .env file
+app.config['MAIL_PASSWORD'] = os.getenv("EMAIL_PASSWORD")  # set in .env file
+
+# Secrets
+app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")                         # set in .env file
+app.config['SECURITY_PASSWORD_SALT'] = os.getenv("SECURITY_PASSWORD_SALT") # set in .env file
+
 # Mail
 mail = Mail(app)
 
-# Configurations
-#app.config.from_object('config')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////home/<your_username>/PeARS-lite/app.db'
 
 # Define the database object which is imported
 # by modules and controllers
@@ -236,7 +248,7 @@ class UsersModelView(ModelView):
 
 admin.add_view(PodsModelView(Pods, db.session))
 admin.add_view(UrlsModelView(Urls, db.session))
-admin.add_view(UsersModelView(Urls, db.session))
+admin.add_view(UsersModelView(User, db.session))
 
 
 

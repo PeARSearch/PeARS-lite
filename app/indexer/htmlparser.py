@@ -33,8 +33,9 @@ def remove_boilerplates(response, lang):
 def BS_parse(url):
     bs_obj = None
     req = None
+    headers = {'User-Agent': 'PeARS User Agent'}
     try:
-        req = requests.head(url, timeout=10)
+        req = requests.head(url, timeout=10, headers=headers)
         if "text/html" not in req.headers["content-type"]:
             print("\t>> ERROR: BS_parse: Not a HTML document...")
             return bs_obj, req
@@ -42,7 +43,8 @@ def BS_parse(url):
         print("\t>> ERROR: BS_parse: request.head failed trying to access", url, "...")
         pass
     try:
-        req = requests.get(url, allow_redirects=True, timeout=30)
+        #headers = {'User-Agent': 'Customer User Agent'}
+        req = requests.get(url, allow_redirects=True, timeout=30, headers=headers)
         req.encoding = 'utf-8'
     except Exception:
         print("\t>> ERROR: BS_parse: request failed trying to access", url, "...")
@@ -90,21 +92,36 @@ def extract_html(url):
         return title, body_str, snippet, cc, error
     if hasattr(bs_obj.title, 'string'):
         if url.startswith('http'):
-            title = bs_obj.title.string
-            if title is None:
-                title = ""
-            body_str = remove_boilerplates(req, LANG)
-            try:
-                language = detect(title + " " + body_str)
-                print("\t>> INFO: Language for", url, ":", language)
-            except Exception:
-                title = ""
-                error = "\t>> ERROR: extract_html: Couldn't detect page language."
-                return title, body_str, snippet, cc, error
-            print(body_str)
-            if language not in installed_languages:
-                error = "\t>> ERROR: extract_html: language is not supported."
-                title = ""
-                return title, body_str, snippet, cc, error
-            snippet = body_str[:300].replace(',', '-')
+            og_title = bs_obj.find("meta", property="og:title")
+            og_description = bs_obj.find("meta", property="og:description")
+            print("OG TITLE",og_title)
+            print("OG DESC",og_description)
+
+            # Process title
+            if not og_title:
+                title = bs_obj.title.string
+                if title is None:
+                    title = ""
+            else:
+                title = og_title['content']
+            title = title[:90]
+
+            # Process snippet
+            if og_description:
+                snippet = og_description['content']
+            else:
+                body_str = remove_boilerplates(req, LANG)
+                try:
+                    language = detect(title + " " + body_str)
+                    print("\t>> INFO: Language for", url, ":", language)
+                except Exception:
+                    title = ""
+                    error = "\t>> ERROR: extract_html: Couldn't detect page language."
+                    return title, body_str, snippet, cc, error
+                print(body_str)
+                if language not in installed_languages:
+                    error = "\t>> ERROR: extract_html: language is not supported."
+                    title = ""
+                    return title, body_str, snippet, cc, error
+                snippet = body_str[:90].replace(',', '-')
     return title, body_str, snippet, cc, error

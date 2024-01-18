@@ -9,14 +9,17 @@ import numpy as np
 import configparser
 import joblib
 from glob import glob
-from os.path import isdir, exists
+from os.path import join, isdir, exists, dirname, realpath
 import sentencepiece as spm
 
 sp = spm.SentencePieceProcessor()
 
 def get_installed_languages():
+    dir_path = dirname(dirname(realpath(__file__)))
+    print('PATH',dir_path)
     installed_languages = []
-    language_paths = glob('./app/api/models/*/')
+    spm_dir = ''
+    language_paths = glob(join(dir_path,'api/models/*/'))
     for p in language_paths:
         lang = p[:-1].split('/')[-1]
         installed_languages.append(lang)

@@ -1,18 +1,18 @@
 from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Message
 from app import app, mail
-
+import os
 
 def generate_token(email):
-    serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
-    return serializer.dumps(email, salt=app.config["SECURITY_PASSWORD_SALT"])
+    serializer = URLSafeTimedSerializer(os.getenv("SECRET_KEY"))
+    return serializer.dumps(email, salt=os.getenv("SECURITY_PASSWORD_SALT"))
 
 
 def confirm_token(token, expiration=3600):
-    serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
+    serializer = URLSafeTimedSerializer(os.getenv("SECRET_KEY"))
     try:
         email = serializer.loads(
-            token, salt=app.config["SECURITY_PASSWORD_SALT"], max_age=expiration
+            token, salt=os.getenv("SECURITY_PASSWORD_SALT"), max_age=expiration
         )
         return email
     except Exception:

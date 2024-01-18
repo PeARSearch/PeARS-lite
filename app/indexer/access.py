@@ -30,21 +30,21 @@ def robotcheck(url):
                         u = u[1:]
                     disallowed.append(join(domain,u))
 
+    getpage = True
     for u in disallowed:
         m = re.search(u.replace('*','.*'),url)
         if m:
             print("\t>> ERROR: robotcheck:",url,"is disallowed because of ",u)
-    if len(disallowed) > 0:
-        return False
-    else:
-        return True
+            getpage = False
+    return getpage
 
 def request_url(url):
     print("\n> CHECKING URL CAN BE REQUESTED")
     access = None
     req = None
+    headers = {'User-Agent': 'PeARS User Agent'}
     try:
-        req = requests.head(url, timeout=10)
+        req = requests.head(url, timeout=10, headers=headers)
         if req.status_code >= 400:
             print("\t>> ERROR: request_url: status code is",req.status_code)
             return access, req
