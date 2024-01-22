@@ -189,6 +189,22 @@ This is easier to test from the PeARS interface. Make sure you are logged in (us
 ```
 
 
+### Moving and deleting files
+
+When logged in, it is possible to move and delete files. Moving a file involves the *api/urls/move* endpoint, and should be given the arguments *src* and *target*, referring to the source and destination paths of the file to be moved.
+
+
+```
+curl http://localhost:9090/api/urls/move?src=http://localhost:9090/static/testdocs/tester/localhost.localdomain/Downloads/sample3.txt\&target=http://localhost:9090/static/testdocs/shared/shared_sample5.txt
+```
+
+Deleting a file uses the *api/urls/delete* endpoint and takes a *path* argument referring to the path of the file to be deleted.
+
+```
+curl http://localhost:9090/api/urls/delete?path=http://localhost:9090/static/testdocs/tester/localhost.localdomain/Downloads/sample4.txt
+```
+
+
 ## Adding your own data
 
 To test PeARS-lite with your own data, you will have to set up a new user in the static/testdocs folder. The following illustrates this process with a toy example, to be run from the base directory.

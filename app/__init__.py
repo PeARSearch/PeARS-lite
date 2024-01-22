@@ -132,7 +132,7 @@ class UrlsModelView(ModelView):
             self.on_model_delete(model)
             print("DELETING",model.url,model.vector)
             # Add your custom logic here and don't forget to commit any changes e.g.
-            print(return_delete(model.vector))
+            print(return_delete(idx=model.vector))
             self.session.commit()
         except Exception as ex:
             if not self.handle_view_exception(ex):

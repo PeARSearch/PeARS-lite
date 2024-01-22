@@ -38,10 +38,16 @@ def return_urls():
 
 
 @api.route('/urls/delete', methods=["GET","POST"])
-def return_delete():
-    path = request.args.get('path')
+def return_delete(idx=None):
+    if idx is None:
+        path = request.args.get('path')
+    else:
+        path = None
     try:
-        u = db.session.query(Urls).filter_by(url=path).first()
+        if not path:
+            u = db.session.query(Urls).filter_by(vector=idx).first()
+        else:
+            u = db.session.query(Urls).filter_by(url=path).first()
         pod = u.pod
         vid = int(u.vector)
 
@@ -68,7 +74,7 @@ def return_delete():
         db.session.commit()
     except:
         return "Deletion failed"
-    return "Deleted document with vector id"+str(vid)
+    return "Deleted document with vector id"+str(vid)+'\n'
 
 
 @api.route('/urls/move', methods=["GET","POST"])
@@ -80,7 +86,11 @@ def return_rename():
 
         #Rename in DB
         src_name = basename(src)
+        print(src_name)
+        if target[-1] == '/':
+            target = join(target,src_name)
         target_name = basename(target)
+        print(target_name)
         u.url = target
         if u.title == src_name:
             u.title = target_name
@@ -89,4 +99,4 @@ def return_rename():
         db.session.commit()
     except:
         return "Moving failed"
-    return "Moved file "+src+" to "+target
+    return "Moved file "+src+" to "+target+'\n'
