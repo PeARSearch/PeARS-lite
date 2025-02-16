@@ -6,6 +6,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 # PeARS Lite
 
+**THIS REPOSITORY IS NOW ARCHIVED.**
+**PeARS Federated can be used for both private and public purposes, so use Federated even if you only want a local search solution.**
 
 ## Important info
 
